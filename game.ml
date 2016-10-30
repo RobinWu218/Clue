@@ -1,9 +1,8 @@
 type prof = Bracy | Clarkson | Fan | Gries | Halpern | White
-type building = ...
-type language = …
+type building = unit
+type language = unit
 type card = prof | building | language
-type case_file = {who:prof; where:building; with:language}
-
+type case_file = {who:prof; where:building; with_what:language}
 
 (*
 6 Professors:       
@@ -13,26 +12,21 @@ Baker Hall 6, Carpenter Hall 7, Duffield Hall 8, Gates Hall 9, Klarman Hall 10, 
 6 Languages:       
 Bash 15, C 16, Java 17, MATLAB 18, OCaml 19, Python 20
 *)
-let card_of_int (n:int) : card = 
-let int_of_card (c:card) : int =
-
+let card_of_int (n:int) : card = failwith "TODO"
+let int_of_card (c:card) : int = failwith "TODO"
 
 (***** helpers for init *****)
 
-
 (* [generate_case_file ()] is the case file containing the answers to the questions: Who? Where? What language? *)
-let generate_case_file () : case_file =
-
+let generate_case_file () : case_file = failwith "TODO"
 
 (* [assign_characters n] is an n-tuple of non-repeating profs.
  * Requires: [n] is an integer between 3 and 6 inclusive. *)
-let assign_characters (n:int) =
-
+let assign_characters (n:int) = failwith "TODO"
 
 (* [deal_card n] is an n-tuple of non-repeating card lists. 
  * Requires: [n] is an integer between 3 and 6 inclusive. *)
-let deal_card (n:int) =
-
+let deal_card (n:int) = failwith "TODO"
 
 (* [init n d] is the initial game state with [n] AI bots and a difficulty level of [d]. It prints out which character each player plays, and the cards in the user’s hands.
  * Requires: [n] is an integer between 2 and 5 inclusive, [d] is an integer between 1 and 3 inclusive. *)
@@ -40,25 +34,28 @@ let init_state (n:int) (d:int) : state =
     if n = 2 then 
         let (char1,char2,char3) = assign_characters n in
         let (cards1,cards2,cards3) = deal_cards n in 
-        {map = ...; n = n; players = (char1,char2,char3); user = {character = char1; turn = int_of_card char1; ...}; AI1 = Some ...; AI2 = Some ...; AI3 = None, ...}
+        {map = ...; 
+         n = n; 
+         players = (char1,char2,char3); 
+         user = {character = char1; turn = int_of_card char1; ...}; 
+         AI1 = Some ...; 
+         AI2 = Some ...; 
+         AI3 = None, ...}
     else if n = 3 then ...
     else if n = 4 then ...
     else if n = 5 then ...
-    else failwith “This should not happen in init_state”
-
+    else failwith "This should not happen in init_state"
 
 (***** helpers for repl *****)
-
 
 (* [roll_two_dice ()] is the sum of two random integers between 1 and 6 inclusive. It also prints the two integers and the sum. *)
 let roll_two_dice () =
     let d1 = 1 + Random.int 5 in
     let d2 = 1 + Random.int 5 in
     let sum = d1 + d2 in
-    print_endline “Die 1: ” ^ (string_of_int d1);
-    print_endline “Die 2: ” ^ (string_of_int d2);
-    print_endline “# of movements: ” ^ (string_of_int sum);
-
+    print_endline "Die 1: " ^ (string_of_int d1);
+    print_endline "Die 2: " ^ (string_of_int d2);
+    print_endline "# of movements: " ^ (string_of_int sum);
 
 (* [repl turn s] is . *)
 let rec repl (turn:int) (s:state) : unit = 
@@ -66,11 +63,9 @@ let rec repl (turn:int) (s:state) : unit =
     else if (turn mod s.n) = 1 then ...
     else if (turn mod s.n) = 2 then ...
     ...
-    repl (turn + 1) s’
-
+    repl (turn + 1) s'
 
 (***** main *****)
-
 
 (* [main n d] is the main entry point from outside this module to initialize a game with [n] AI bots and a difficulty level of [d] and start playing it. *)
 let main n d =
