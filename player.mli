@@ -28,7 +28,7 @@ to the player in order to disprove it and the function will return Some card.
 TODOL implement*)
   val suggestion: hand-> option
 
-(*[endturn s] takes the currents state and outputs a state when the current player
+(*[endturn s] takes the currents state andoutputs a state when the current player
 has changed.*)
   val endturn: state-> state
 
