@@ -60,24 +60,3 @@ TODO: implement*)
   val disprove: hand-> deck-> option
 
 
-(*Attempted functor stuff...will re-evaluate*)
-(*)
-(* A [DictionaryMaker] is a functor that makes a [Dictionary]
- * out of a [Comparable]. *)
-module type DictionaryMaker =
-  functor (C : Comparable) -> Dictionary with type Key.t = C.t
-
-(* [MakeListDictionary] makes a [Dictionary] implemented
- * with association lists. All the operations must be
- * tail recursive. *)
-module MakeListDictionary : DictionaryMaker
-
-(* [MakeTreeDictionary] makes a [Dictionary] implemented
- * with 2-3 trees. *)
-module MakeTreeDictionary : DictionaryMaker
-
-(*A [DictionaryMaker] is a functor that makes a [Player]
-out of a *)
-module type PlayerMaker =
-  functor -> Player with type state = something
-module AIPlayer = *)

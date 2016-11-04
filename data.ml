@@ -5,7 +5,7 @@ open Map
 type prof = Bracy | Clarkson | Fan | Gries | Halpern | White
 
 (* building in where the virus started*)
-type building = Baker | Carpenter | Duffield | Gates | Klarman | 
+type building = Baker | Carpenter | Duffield | Gates | Klarman |
 				Olin Library | Phillips | Rhodes | Statler
 
 (* language that the perpetrator used*)
@@ -13,8 +13,8 @@ type language = Bash | C | Java | MATLAB | OCaml | Python
 
 (* card is the type that player can show to prove others' suggestions.
  * It can be a card describing a prof or a building or a language.*)
-type card = 
-  | Prof of prof 
+type card =
+  | Prof of prof
   | Building of building
   | Language of language
 
@@ -26,20 +26,20 @@ type case_file = {who: prof; where: building; with_what: language}
  * specific location and the language that he uses.*)
 type player = {
 
-    character: prof; 
-    turn: int; 
+    character: prof;
+    turn: int;
     location: building; (*maybe specific location on the map?*)
     language: language
 }
 
-(* ai and player are almost the same except for that ai also has a list of 
+(* ai and player are almost the same except for that ai also has a list of
  * case_file that he obtains*)
 type ai = {
 	character : prof;
 	turn: int;
 	location: building; (*same as above*)
 	language: language;
-	known_cases: case_file list 
+	known_cases: case_file list
 }
 
 (* state is the type specifying the currect map situation and player's and ais' information.
@@ -50,7 +50,7 @@ type state = {
     player: player;
     ais: character list;
     fact_file: case_file
-    
+
 }
 
 
