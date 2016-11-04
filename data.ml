@@ -25,11 +25,10 @@ type case_file = {who: prof; where: building; with_what: language}
 (* player stores the information about the player's character, number of turns,
  * specific location and the language that he uses.*)
 type player = {
-
     character: prof;
     turn: int;
-    location: building; (*maybe specific location on the map?*)
-    language: language
+    location: int*int ; (*maybe specific location on the map?*)
+
 }
 
 (* ai and player are almost the same except for that ai also has a list of
@@ -37,8 +36,7 @@ type player = {
 type ai = {
 	character : prof;
 	turn: int;
-	location: building; (*same as above*)
-	language: language;
+	location: int*int ; (*same as above*)
 	known_cases: case_file list
 }
 
