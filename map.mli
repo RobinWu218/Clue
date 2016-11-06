@@ -86,9 +86,16 @@ module type Map = sig
    * is currently not in a room. *)
   val get_current_room: t -> string -> string option
 
+  (* [get_current_location map p]
+   * Returns: [(x,y)], the coordinate where player [p] is on the [map]. 
+   * Raises: InvalidLocation exception if the player is in a room 
+   *)
+  val get_current_location: t -> string -> int * int
+
   (* [closest_rooms map p] 
    * Returns: a list of room ids of each room in order of closeness to player [p]
    *)
   val closest_rooms: t -> string -> string list
+
 
 end
