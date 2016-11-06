@@ -1,3 +1,7 @@
+open Data
+open Reader
+
+(* [Map] is the module to handle interaction with the map object in the game. *)
 module type Map = sig
 
   (* [t] is the data structure that will store the state of the map *)
