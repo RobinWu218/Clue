@@ -1,3 +1,8 @@
+open Data
+open Map
+open Ai
+open User
+
 type prof = Bracy | Clarkson | Fan | Gries | Halpern | White
 type building = unit
 type language = unit

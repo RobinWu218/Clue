@@ -1,4 +1,11 @@
-open Map
+(* [InvalidLocation] is an exception raised by methods in the Map module *)
+exception InvalidLocation
+
+(* [Difficulty] are variants describing the different levels of AI play. *)
+type Difficulty = Easy | Medium | Expert
+
+(**************************************************************************************)
+
 
 (* types for the game*)
 (* professor who started the virus*)
@@ -44,7 +51,7 @@ type ai = {
  * Also, it includes a fact_file which was initiated at the init phase of the game.*)
 type state = {
     current_player: character;
-	map: map; (*need to be designed*)
+	  map: map; (*need to be designed*)
     player: player;
     ais: character list;
     fact_file: case_file
