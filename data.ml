@@ -2,7 +2,7 @@
 exception InvalidLocation
 
 (* [Difficulty] are variants describing the different levels of AI play. *)
-type Difficulty = Easy | Medium | Expert
+type difficulty = Easy | Medium | Expert
 
 (**************************************************************************************)
 
@@ -25,13 +25,27 @@ type card =
   | Building of building
   | Language of language
 
+(*
+6 Professors:       
+Anne Bracy 0, Michael Clarkson 1, Daisy Fan 2, David Gries 3, Joe Halpern 4, Walker White 5
+9 Buildings:         
+Baker Hall 6, Carpenter Hall 7, Duffield Hall 8, Gates Hall 9, Klarman Hall 10, Olin Library 11, Phillips Hall 12, Rhodes Hall 13, Statler Hall 14
+6 Languages:       
+Bash 15, C 16, Java 17, MATLAB 18, OCaml 19, Python 20
+*)
+(* [card_of_int i] is the card representation of an integer from 0 to 20 *)
+let card_of_int  = failwith "TODO"
+
+(* [int_of_card c] is the integer representation of a card *)
+let int_of_card  = failwith "TODO"
+
 (* case_file is the type defining who made the virus in which building with what kind
  * of programming language.*)
 type case_file = {who: prof; where: building; with_what: language}
 
-(* player stores the information about the player's character, number of turns,
- * specific location and the language that he uses.*)
-type player = {
+(* user stores the information about the user's character, number of turns,
+ * specific location and the language that s/he uses.*)
+type user = {
     character: prof;
     turn: int;
     location: int*int ; (*maybe specific location on the map?*)
@@ -52,8 +66,8 @@ type ai = {
 type state = {
     current_player: character;
 	  map: map; (*need to be designed*)
-    player: player;
-    ais: character list;
+    user: user;
+    ais: ai list;
     fact_file: case_file
 
 }
