@@ -3,28 +3,32 @@
 exception InvalidLocation
 
 (* [difficulty] are variants describing the different levels of AI play. *)
-type difficulty 
+type difficulty
 
 (* types for the game*)
 (* professor who started the virus*)
-type prof 
+type prof
 
 (* building in where the virus started*)
-type building 
+type building
 
 (* language that the perpetrator used*)
-type language 
+type language
+
 
 (* card is the type that player can show to prove others' suggestions.
  * It can be a card describing a prof or a building or a language.*)
-type card 
+type card
+
+(*The hand of what cards a person currently possesses.*)
+type hand
 
 (*
-6 Professors:       
+6 Professors:
 Anne Bracy 0, Michael Clarkson 1, Daisy Fan 2, David Gries 3, Joe Halpern 4, Walker White 5
-9 Buildings:         
+9 Buildings:
 Baker Hall 6, Carpenter Hall 7, Duffield Hall 8, Gates Hall 9, Klarman Hall 10, Olin Library 11, Phillips Hall 12, Rhodes Hall 13, Statler Hall 14
-6 Languages:       
+6 Languages:
 Bash 15, C 16, Java 17, MATLAB 18, OCaml 19, Python 20
 *)
 
@@ -36,7 +40,7 @@ val int_of_card : card -> int
 
 (* case_file is the type defining who made the virus in which building with what kind
  * of programming language.*)
-type case_file 
+type case_file
 
 (* integer pair representing a (row, column) on the map. *)
 type coord
@@ -46,12 +50,12 @@ type map
 
 (* player stores the information about the player's character, number of turns,
  * specific location and the language that he uses.*)
-type user 
+type user
 
 (* ai and player are almost the same except for that ai also has a list of
  * case_file that he obtains*)
-type ai 
+type ai
 
 (* state is the type specifying the currect map situation and player's and ais' information.
  * Also, it includes a fact_file which was initiated at the init phase of the game.*)
-type state 
+type state
