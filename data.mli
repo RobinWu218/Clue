@@ -38,6 +38,12 @@ val int_of_card : card -> int
  * of programming language.*)
 type case_file 
 
+(* integer pair representing a (row, column) on the map. *)
+type coord
+
+(* map is the data structure that holds all data about the map and people locations *)
+type map
+
 (* player stores the information about the player's character, number of turns,
  * specific location and the language that he uses.*)
 type user 

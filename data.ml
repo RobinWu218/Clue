@@ -43,30 +43,45 @@ let int_of_card  = failwith "TODO"
  * of programming language.*)
 type case_file = {who: prof; where: building; with_what: language}
 
+(* integer pair representing a (row, column) on the map. *)
+type coord = int * int
+
+(* map is the type that holds information about the map. *)
+type map = {
+    num_rows: int;
+    num_cols: int;
+    text_display: string list;
+    players: prof list;
+    exits: building * coord list;
+    rooms: room list;
+    in_room: prof list;
+    location: prof * coord list;
+}
+
+
 (* user stores the information about the user's character, number of turns,
  * specific location and the language that s/he uses.*)
 type user = {
     character: prof;
     turn: int;
-    location: int*int ; (*maybe specific location on the map?*)
-
+    location: coord; (*maybe specific location on the map?*)
 }
 
 (* ai and player are almost the same except for that ai also has a list of
  * case_file that he obtains*)
 type ai = {
-	character : prof;
-	turn: int;
-	location: int*int ; (*same as above*)
-  difficulty: difficulty;
-	known_cases: case_file list
+    character : prof;
+    turn: int;
+    location: coord;
+    difficulty: difficulty;
+    known_cases: case_file list
 }
 
 (* state is the type specifying the currect map situation and player's and ais' information.
  * Also, it includes a fact_file which was initiated at the init phase of the game.*)
 type state = {
     current_player: character;
-	  map: map; (*need to be designed*)
+	  map: map;
     user: user;
     ais: ai list;
     fact_file: case_file

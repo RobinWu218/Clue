@@ -23,7 +23,7 @@ val print_map: t -> unit
 (* [get_exits map] 
  * Returns: a list of room exits on the map. 
  *)
-val get_exits: t -> string * (int * int) list
+val get_exits: t -> string * coord list
 
 (* [get_players map]
  * Returns: a list of characters in current game. 
@@ -43,14 +43,14 @@ val get_players: t -> string list
  *)
 val move: t -> string -> string -> int -> int * t
 
-(* [move_towards_coord map p (x,y) n] tries to move player [p] on the [map] 
- * [n] steps towards the coordinate [(x,y)]. 
+(* [move_towards_coord map p c n] tries to move player [p] on the [map] 
+ * [n] steps towards the coordinate [c]. 
  * Returns: the pair [(b, map2)], where 
- *   [b]    is [true] iff [p] succesfully made it to [(x,y)]
+ *   [b]    is [true] iff [p] succesfully made it to [c]
  *   [map2] is the updated map.
- * Raises: InvalidLocation if [(x,y)] is off the map or inside a room. 
+ * Raises: InvalidLocation if [c] is off the map or inside a room. 
  *)
-val move_toward_coord: t -> string -> int * int -> int -> bool * t
+val move_toward_coord: t -> string -> coord -> int -> bool * t
 
 (* [move_towards_room map p r n] tries to move player [p] on the [map] [n] 
  * steps towards the room with id [r].
@@ -84,10 +84,10 @@ val is_in_room: t -> string -> bool
 val get_current_room: t -> string -> string option
 
 (* [get_current_location map p]
- * Returns: [(x,y)], the coordinate where player [p] is on the [map]. 
+ * Returns: the coordinate where player [p] is on the [map]. 
  * Raises: InvalidLocation exception if the player is in a room 
  *)
-val get_current_location: t -> string -> int * int
+val get_current_location: t -> string -> coord
 
 (* [closest_rooms map p] 
  * Returns: a list of room ids of each room in order of closeness to player [p]
