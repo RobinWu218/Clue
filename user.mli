@@ -2,49 +2,38 @@ open Game
 open Data
 open Map
 
-(*[move s] takes in a state s and outputs the new state that the player
-will be in after s/he makes the move. The state will include the map, location,
-etc.
+(* [move s] takes in a state [s] and outputs the new state that the user
+ * will be in after s/he makes the move. *)
+val move: state -> state
 
-TODO: implement*)
-  val move: state -> state
+(* [suggestion h] takes in a case that the user wants to suggest to the 
+ * group. This then is passed around to the other players in clockwise 
+ * fashion and each other player must attempt to disprove it. If no player 
+ * can disprove it, this function will return None. If a player can, then 
+ * s/he reveals the card to the user in order to disprove it and the 
+ * function will return Some card. *)
+val suggestion: case_file -> option
 
-(*[suggestion h] takes in a hand that the player wants to suggest to the group.
-* This then is passed around to the other players in clockwise fashion and each
-* other player must attempt to disprove it. If no players can disprove it, this
-* function will return None. If a player can, then they reveal the card they possess
-* to the player in order to disprove it and the function will return Some card.
+(* [endturn s] takes in the current state and outputs a state when the current 
+ * player has changed. *)
+val endturn: state -> state
 
-* TODO: implement*)
-  val suggestion: case -> option
+(* [accusation h] takes in a hand and compares it to the culprits. If they are
+ * the same, then returns true. Else, it returns false. *)
+val accusation: case -> bool
 
-(*[endturn s] takes the currents state andoutputs a state when the current player
-* has changed.*)
-  val endturn: state -> state
+(* [secret_possage s] is only possible when the user is on a square where it 
+ * is possible to move to a secret passage. Takes the state that the game was 
+ * in orginally and returns a state where the user has been moved to the 
+ * other end of the secret passage. *)
+val secret_passage: state -> state
 
-(*[accusation h] takes in a hand and compares it to the culprits. If they are
-* the same, then returns true. Else, it returns false.
+(* [quit s] takes current state and returns a state where the player has quit.
+ * That state should also tell the player the true culprits. *)
+val quit: state -> state
 
-TODO: implement.*)
-  val accusation: case -> bool
-
-(*[secretpossage s] Only possible when the player is on a square where it is
-* possible to move to a secret passage. Takes the state that the game was in orginally
-* and returns a state where the player has been moved to the other end of the
-* secret passage.
-
-TODO: implement*)
-  val secretpassage: state-> state
-
-(*[quit s] takes current state and returns a state where the player has quit.
-* That state should also tell the player the true culprits.
-
-TODO: implement.*)
-  val quit: state -> state
-
-(*[disprove h d] takes in a hand and a deck. h is the suggestion and d is the
-* deck of the player that is trying to disprove it. If the hand cannot be disproved,
-* this function returns None. If it can, it returns the disproving card - Some card.
-
-TODO: implement*)
-  val disprove: case -> hand -> card option
+(* [disprove h d] takes in a hand and a deck. h is the suggestion and d is the
+ * deck of the player that is trying to disprove it. If the hand cannot be 
+ * disproved, this function returns None. If it can, it returns the disproving 
+ * card - Some card. *)
+val disprove: case -> hand -> card option

@@ -61,15 +61,15 @@ type user = {
 (* ai and player are almost the same except for that ai also has a list of
  * case_file that he obtains*)
 type ai = {
-    character : prof;
-    turn: int;
-    location: coord;
-    destination: coord;
-    difficulty: difficulty;
-    known_cards: card list;
-    possible_cards: card list;
-    past_guesses: case_file list;
-    hand: hand
+  character : prof;
+  turn: int;
+  location: coord;
+  destination: coord;
+  difficulty: difficulty;
+  known_cards: card list;
+  possible_cards: card list;
+  past_guesses: case_file list;
+  hand: hand
 }
 
 (* state is the type specifying the currect map situation and player's and 

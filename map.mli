@@ -94,4 +94,3 @@ val get_current_location: t -> prof -> coord
  * Returns: a list of buildings n order of closeness to player [p]
  *)
 val closest_buildings: t -> prof -> building list
-
