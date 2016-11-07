@@ -65,8 +65,11 @@ type ai = {
     character : prof;
     turn: int;
     location: coord;
+    destination: coord;
     difficulty: difficulty;
-    known_cases: case_file list;
+    known_cards: card list;
+    possible_cards: card list;
+    past_guesses: case_file list;
     hand: hand
 }
 

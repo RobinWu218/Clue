@@ -13,7 +13,7 @@ type t
  * for the user. The rest are AI. 
  * Returns: the starting map
  *)
-val construct_map: string list -> t
+val construct_map: prof list -> t
 
 (* [print_map map] prints out an ascii representation of the map and where all
  * characters are on it to the console window. 
@@ -21,14 +21,14 @@ val construct_map: string list -> t
 val print_map: t -> unit
 
 (* [get_exits map] 
- * Returns: a list of room exits on the map. 
+ * Returns: a list of building exits on the map. 
  *)
-val get_exits: t -> string * coord list
+val get_exits: t -> building * coord list
 
 (* [get_players map]
  * Returns: a list of characters in current game. 
  *)
-val get_players: t -> string list
+val get_players: t -> prof list
 
 
 (*******************************************
@@ -41,56 +41,56 @@ val get_players: t -> string list
  *   [i]    is the steps remaining after going in [dir] direction, and 
  *   [map2] is the updated map. 
  *)
-val move: t -> string -> string -> int -> int * t
+val move: t -> prof -> string -> int -> int * t
 
 (* [move_towards_coord map p c n] tries to move player [p] on the [map] 
  * [n] steps towards the coordinate [c]. 
  * Returns: the pair [(b, map2)], where 
  *   [b]    is [true] iff [p] succesfully made it to [c]
  *   [map2] is the updated map.
- * Raises: InvalidLocation if [c] is off the map or inside a room. 
+ * Raises: InvalidLocation if [c] is off the map or inside a building. 
  *)
-val move_toward_coord: t -> string -> coord -> int -> bool * t
+val move_toward_coord: t -> prof -> coord -> int -> bool * t
 
-(* [move_towards_room map p r n] tries to move player [p] on the [map] [n] 
- * steps towards the room with id [r].
- * Returns: the pair [(b, map2)], where 
- *   [b]    is [true] iff [p] succesfully made it to room with id [r]
+(* [move_towards_building map p b n] tries to move player [p] on the [map] [n] 
+ * steps towards the building [b].
+ * Returns: the pair [(tf, map2)], where 
+ *   [tf]   is [true] iff [p] succesfully made it to building [b]
  *   [map2] is the updated map.
- * Raises: InvalidLocation if [r] is not a valid room id.
+ * Raises: InvalidLocation if [b] is not a valid building id.
  *)
-val move_towards_room: t -> string -> string -> int -> bool * t
+val move_towards_building: t -> prof -> string -> int -> bool * t
 
-(* [teleport_player map p r] moves a person [p] on the [map] to room with room 
- * id [r]. This event occurs whenever a suggestion or accusation is made; the
+(* [teleport_player map p r] moves a person [p] on the [map] to building with building 
+ * id [b]. This event occurs whenever a suggestion or accusation is made; the
  * suspect is moved to the "scene of the crime."
  * Returns: the updated map.
  *)
-val teleport_player: t -> string -> string -> t
+val teleport_player: t -> prof -> string -> t
 
 
 (*******************************************
  * Methods for player queries 
  *******************************************)
 
-(* [is_in_room map p] checks if player [p] is currently in a room on the [map]
- * Returns: [true] iff player[p] is in a room.
+(* [is_in_building map p] checks if player [p] is currently in a building on the [map]
+ * Returns: [true] iff player[p] is in a building.
  *)
-val is_in_room: t -> string -> bool
+val is_in_building: t -> prof -> bool
 
-(* [get_current_room map p]
- * Returns: [some r] if player [p] is in room with id [r] or [None] if the [p]
- * is currently not in a room. *)
-val get_current_room: t -> string -> string option
+(* [get_current_building map p]
+ * Returns: [some r] if player [p] is in building with id [b] or [None] if the [p]
+ * is currently not in a building. *)
+val get_current_building: t -> prof -> string option
 
 (* [get_current_location map p]
  * Returns: the coordinate where player [p] is on the [map]. 
- * Raises: InvalidLocation exception if the player is in a room 
+ * Raises: InvalidLocation exception if the player is in a building 
  *)
-val get_current_location: t -> string -> coord
+val get_current_location: t -> prof -> coord
 
-(* [closest_rooms map p] 
- * Returns: a list of room ids of each room in order of closeness to player [p]
+(* [closest_buildings map p] 
+ * Returns: a list of building ids of each building in order of closeness to player [p]
  *)
-val closest_rooms: t -> string -> string list
+val closest_buildings: t -> prof -> building list
 

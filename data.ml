@@ -76,7 +76,10 @@ type ai = {
     turn: int;
     location: coord;
     difficulty: difficulty;
-    known_cases: case_file list;
+    destination: coord;
+    known_cards: card list;
+    possible_cards: card list;
+    past_guesses: case_file list;
     hand: hand
 }
 

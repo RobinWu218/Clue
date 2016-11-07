@@ -1,5 +1,4 @@
 open Yojson.Basic.Util
-
 open Data
 
 (* The type of source file*)
@@ -26,4 +25,8 @@ val make_case_file : j -> case_file
  * ais' information*)
 val make_state : j -> state
 
-
+(* [make_map] parses the json file storing information about the map and
+ * converts it into a [map].
+ * Returns: a [map] with only the information about the map (no player info)
+ *)
+val make_map: unit -> map
