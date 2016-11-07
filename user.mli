@@ -1,6 +1,6 @@
-import Game
-
-
+open Game
+open Data
+open Map
 
 (*[move s] takes in a state s and outputs the new state that the player
 will be in after s/he makes the move. The state will include the map, location,
