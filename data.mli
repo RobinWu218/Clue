@@ -15,11 +15,11 @@ type building
 (* language that the perpetrator used*)
 type language
 
-(*A hand is a combination of three of the twenty-one possible cards that
+(*A case is a combination of three of the twenty-one possible cards that
 exist. This must include one person, one weapon, and one location*)
 type case
 
-(*The deck of what cards a person currently possesses.*)
+(*The hand of what cards a person currently possesses.*)
 type hand
 
 (* card is the type that player can show to prove others' suggestions.

@@ -6,13 +6,6 @@ type difficulty = Easy | Medium | Expert
 
 (**************************************************************************************)
 
-(*A hand is a combination of three of the twenty-one possible cards that
-exist. This must include one person, one weapon, and one location*)
-type case
-
-(*The deck of what cards a person currently possesses.*)
-type hand
-
 (* types for the game*)
 (* professor who started the virus*)
 type prof = Bracy | Clarkson | Fan | Gries | Halpern | White
@@ -30,6 +23,13 @@ type card =
   | Prof of prof
   | Building of building
   | Language of language
+
+(*The hand of what cards a person currently possesses.*)
+type hand = card list
+
+(*A case is a combination of three of the twenty-one possible cards that
+exist. This must include one person, one weapon, and one location*)
+type case = card list
 
 (*
 6 Professors:
