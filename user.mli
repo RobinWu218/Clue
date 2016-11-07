@@ -1,6 +1,4 @@
-import Game
-
-
+open Game
 
 (*[move s] takes in a state s and outputs the new state that the player
 will be in after s/he makes the move. The state will include the map, location,
@@ -48,5 +46,3 @@ TODO: implement.*)
 
 TODO: implement*)
   val disprove: case -> hand -> card option
-
-

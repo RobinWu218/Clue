@@ -44,7 +44,7 @@ val still_in_game: t -> bool
 val step: state -> string -> state
 
 (* [reveal_card ai guess] figures out which card to reveal in response
- * to a suggestion/accusation [guess].
+ * to a suggestion [guess].
  * Returns: [Some c] where [c] is a card that [ai] can reveal. Or, if [ai] has
  * none of the cards in [guess], then it will return [None]. 
  *)
