@@ -88,7 +88,6 @@ type state = {
     user: user;
     ais: ai list;
     fact_file: case_file
-
 }
 
 
