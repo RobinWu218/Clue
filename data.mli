@@ -2,8 +2,8 @@
 (* [InvalidLocation] is an exception raised by methods in the Map module *)
 exception InvalidLocation
 
-(* [Difficulty] are variants describing the different levels of AI play. *)
-type Difficulty 
+(* [difficulty] are variants describing the different levels of AI play. *)
+type difficulty 
 
 (* types for the game*)
 (* professor who started the virus*)

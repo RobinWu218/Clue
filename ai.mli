@@ -11,7 +11,7 @@ type t
  * AI playing character [p] on difficulty [d], with starting hand [hand].
  * Returns: the initialized setup for an AI.
  *)
-val init: string -> Difficulty -> hand -> t
+val init: string -> difficulty -> hand -> t
 
 (* [get_ai state p] 
  * Returns: the AI data structure for the AI playing character [p] 
@@ -21,7 +21,7 @@ val get_ai: state -> string -> t
 (* [get_difficulty ai] 
  * Returns: the difficulty of the AI [ai]. 
  *)
-val get_difficulty: t -> Difficulty
+val get_difficulty: t -> difficulty
 
 (* [still_in_game ai]
  * Returns: [true] iff the AI [ai] is still in the game. (If you're out you 
