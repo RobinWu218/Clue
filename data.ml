@@ -8,14 +8,13 @@ type difficulty = Easy | Medium | Expert
 
 (* types for the game*)
 (* professor who started the virus*)
-type prof = Bracy | Clarkson | Fan | Gries | Halpern | White
+type prof = string
 
 (* building in where the virus started*)
-type building = Baker | Carpenter | Duffield | Gates | Klarman |
-				Olin Library | Phillips | Rhodes | Statler
+type building = string
 
 (* language that the perpetrator used*)
-type language = Bash | C | Java | MATLAB | OCaml | Python
+type language = string
 
 (* card is the type that player can show to prove others' suggestions.
  * It can be a card describing a prof or a building or a language.*)
@@ -26,10 +25,6 @@ type card =
 
 (*The hand of what cards a person currently possesses.*)
 type hand = card list
-
-(*A case is a combination of three of the twenty-one possible cards that
-exist. This must include one person, one weapon, and one location*)
-type case = card list
 
 (*
 6 Professors:
@@ -54,7 +49,8 @@ type case_file = {who: prof; where: building; with_what: language}
 type user = {
     character: prof;
     turn: int;
-    location: int*int ; (*maybe specific location on the map?*)
+    location: int*int; (*maybe specific location on the map?*)
+    hand: hand
 
 }
 
@@ -65,7 +61,8 @@ type ai = {
 	turn: int;
 	location: int*int ; (*same as above*)
   difficulty: difficulty;
-	known_cases: case_file list
+	known_cases: case_file list;
+  hand: hand
 }
 
 (* state is the type specifying the currect map situation and player's and ais' information.

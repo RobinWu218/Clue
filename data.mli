@@ -15,16 +15,13 @@ type building
 (* language that the perpetrator used*)
 type language
 
-(*A case is a combination of three of the twenty-one possible cards that
-exist. This must include one person, one weapon, and one location*)
-type case
-
-(*The hand of what cards a person currently possesses.*)
-type hand
 
 (* card is the type that player can show to prove others' suggestions.
  * It can be a card describing a prof or a building or a language.*)
 type card
+
+(*The hand of what cards a person currently possesses.*)
+type hand
 
 (*
 6 Professors:
