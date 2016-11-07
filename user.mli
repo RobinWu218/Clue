@@ -1,16 +1,6 @@
-module type User = sig
+import Game
 
-  (*The state will include all the current and relevent information about the
-  state of the game. This includes the current player, map, the hands of the player,
-  the hands of the other players, the true culprits, etc,*)
-  type state
-  (*A hand is a combination of three of the twenty-one possible cards that
-   exist. This must include one person, one weapon, and one location*)
-  type hand
-  (*One card is one of the twenty one possible cards that exist.*)
-  type card
-  (*The deck of what cards a person currently possesses.*)
-  type deck
+
 
 (*[move s] takes in a state s and outputs the new state that the player
 will be in after s/he makes the move. The state will include the map, location,
