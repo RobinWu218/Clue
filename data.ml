@@ -6,6 +6,12 @@ type difficulty = Easy | Medium | Expert
 
 (**************************************************************************************)
 
+(*A hand is a combination of three of the twenty-one possible cards that
+exist. This must include one person, one weapon, and one location*)
+type case
+
+(*The deck of what cards a person currently possesses.*)
+type hand
 
 (* types for the game*)
 (* professor who started the virus*)
@@ -26,11 +32,11 @@ type card =
   | Language of language
 
 (*
-6 Professors:       
+6 Professors:
 Anne Bracy 0, Michael Clarkson 1, Daisy Fan 2, David Gries 3, Joe Halpern 4, Walker White 5
-9 Buildings:         
+9 Buildings:
 Baker Hall 6, Carpenter Hall 7, Duffield Hall 8, Gates Hall 9, Klarman Hall 10, Olin Library 11, Phillips Hall 12, Rhodes Hall 13, Statler Hall 14
-6 Languages:       
+6 Languages:
 Bash 15, C 16, Java 17, MATLAB 18, OCaml 19, Python 20
 *)
 (* [card_of_int i] is the card representation of an integer from 0 to 20 *)
