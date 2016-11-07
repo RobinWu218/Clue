@@ -58,6 +58,7 @@ type ai = {
 	character : prof;
 	turn: int;
 	location: int*int ; (*same as above*)
+  difficulty: difficulty;
 	known_cases: case_file list
 }
 
