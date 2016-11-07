@@ -24,15 +24,14 @@ type card =
 (*The hand of what cards a person currently possesses.*)
 type hand = card list
 
-
-(* [card_of_int i] is the card representation of an integer from 0 to 20 *)
+(* [card_of_int i] is the card representation of an integer from 0 to 20. *)
 val card_of_int : int -> card
 
-(* [int_of_card c] is the integer representation of a card *)
+(* [int_of_card c] is the integer representation of a card. *)
 val int_of_card : card -> int
 
-(* case_file is the type defining who made the virus in which building with what kind
- * of programming language.*)
+(* case_file is the type defining who made the virus in which building with 
+ * what kind of programming language.*)
 type case_file = {who: prof; where: building; with_what: language}
 
 (* integer pair representing a (row, column) on the map. *)
@@ -40,23 +39,23 @@ type coord = int * int
 
 (* map is the type that holds information about the map. *)
 type map = {
-    num_rows: int;
-    num_cols: int;
-    text_display: string list;
-    players: prof list;
-    exits: building * coord list;
-    rooms: room list;
-    in_room: prof list;
-    location: prof * coord list;
+  num_rows: int;
+  num_cols: int;
+  text_display: string list;
+  players: prof list;
+  exits: building * coord list;
+  rooms: room list;
+  in_room: prof list;
+  location: prof * coord list;
 }
 
 (* user stores the information about the user's character, number of turns,
  * specific location and the language that s/he uses.*)
 type user = {
-    character: prof;
-    turn: int;
-    location: coord;
-    hand: hand
+  character: prof;
+  turn: int;
+  location: coord;
+  hand: hand
 }
 
 (* ai and player are almost the same except for that ai also has a list of
@@ -73,14 +72,13 @@ type ai = {
     hand: hand
 }
 
-(* state is the type specifying the currect map situation and player's and ais' information.
- * Also, it includes a fact_file which was initiated at the init phase of the game.*)
+(* state is the type specifying the currect map situation and player's and 
+ * ais' information. It also includes a case_file which was initiated at 
+ * the init phase of the game. *)
 type state = {
-    current_player: character;
-    map: map;
-    user: user;
-    ais: ai list;
-    fact_file: case_file
+  current_player: character;
+  map: map;
+  user: user;
+  ais: ai list;
+  case_file: case_file
 }
-
-

@@ -45,8 +45,8 @@ val move: t -> prof -> string -> int -> int * t
 
 (* [move_towards_coord map p c n] tries to move player [p] on the [map] 
  * [n] steps towards the coordinate [c]. 
- * Returns: the pair [(b, map2)], where 
- *   [b]    is [true] iff [p] succesfully made it to [c]
+ * Returns: the pair [(tf, map2)], where 
+ *   [tf]   is [true] iff [p] succesfully made it to [c]
  *   [map2] is the updated map.
  * Raises: InvalidLocation if [c] is off the map or inside a building. 
  *)
@@ -61,8 +61,8 @@ val move_toward_coord: t -> prof -> coord -> int -> bool * t
  *)
 val move_towards_building: t -> prof -> string -> int -> bool * t
 
-(* [teleport_player map p r] moves a person [p] on the [map] to building with building 
- * id [b]. This event occurs whenever a suggestion or accusation is made; the
+(* [teleport_player map p r] moves a person [p] on the [map] to building [b]
+ * This event occurs whenever a suggestion or accusation is made; the
  * suspect is moved to the "scene of the crime."
  * Returns: the updated map.
  *)
@@ -74,13 +74,14 @@ val teleport_player: t -> prof -> string -> t
  *******************************************)
 
 (* [is_in_building map p] checks if player [p] is currently in a building on the [map]
- * Returns: [true] iff player[p] is in a building.
+ * Returns: [true] iff player [p] is in a building.
  *)
 val is_in_building: t -> prof -> bool
 
 (* [get_current_building map p]
- * Returns: [some r] if player [p] is in building with id [b] or [None] if the [p]
- * is currently not in a building. *)
+ * Returns: [some r] if player [p] is in building [b] or [None] if player [p]
+ * is currently not in a building. 
+ *)
 val get_current_building: t -> prof -> string option
 
 (* [get_current_location map p]
@@ -90,7 +91,7 @@ val get_current_building: t -> prof -> string option
 val get_current_location: t -> prof -> coord
 
 (* [closest_buildings map p] 
- * Returns: a list of building ids of each building in order of closeness to player [p]
+ * Returns: a list of buildings n order of closeness to player [p]
  *)
 val closest_buildings: t -> prof -> building list
 
