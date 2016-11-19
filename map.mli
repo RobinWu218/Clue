@@ -13,7 +13,7 @@ type t
  * for the user. The rest are AI. 
  * Returns: the starting map
  *)
-val construct_map: prof list -> t
+val construct_map: unit -> t
 
 (* [print_map map] prints out an ascii representation of the map and where all
  * characters are on it to the console window. 
@@ -24,12 +24,6 @@ val print_map: t -> unit
  * Returns: a list of building exits on the map. 
  *)
 val get_exits: t -> building * coord list
-
-(* [get_players map]
- * Returns: a list of characters in current game. 
- *)
-val get_players: t -> prof list
-
 
 (*******************************************
  * methods for moving around on the map 

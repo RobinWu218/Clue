@@ -130,6 +130,7 @@ type ai = {
     possible_cards: card list;
     past_guesses: case_file list;
     hand: hand;
+    is_in_game: bool;
 }
 
 (* state is the type specifying the currect map situation and player's and ais' information.

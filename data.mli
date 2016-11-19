@@ -39,16 +39,16 @@ type coord = int * int
 
 (* map is the type that holds information about the map. *)
 type map = {
-  num_rows: int;
-  num_cols: int;
-  text_display: string list;
-  players: prof list;
-  exits: building * coord list;
-  rooms: room list;
-  in_room: prof list;
-  location: prof * coord list;
+    num_rows: int;
+    num_cols: int;
+    map_values: string option array array;
+    exits: building * (int * coord list);
+    buildings: building list;
+    in_buildling: (prof * building)list;
+    location: prof * coord list;
+    waiting_spots: build * coord list;
+    secrets: (string*string) list;
 }
-
 (* user stores the information about the user's character, number of turns,
  * specific location and the language that s/he uses.*)
 type user = {

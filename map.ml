@@ -1,19 +1,13 @@
 open Data
 open Reader
 
-(* [t] is the data structure that will store the state of the map *)
-type t = unit (*temp*)
-
 (*******************************************
  * utility methods
  *******************************************)
 
-(* [constuct_map players] creates a map data structure with the character names
- * listed in [players]. The first name in [players] is taken as the character
- * for the user. The rest are AI.
- * Returns: the starting map
+(* [constuct_map] creates a map data structure.
  *)
-let construct_map players =
+let construct_map =
   failwith "unimplemented"
 
 (* [print_map map] prints out an ascii representation of the map and where all
@@ -26,12 +20,6 @@ let print_map map =
  * Returns: a list of building exits on the map.
  *)
 let get_exits map =
-  failwith "unimplemented"
-
-(* [get_players map]
- * Returns: a list of characters in current game.
- *)
-let get_players map =
   failwith "unimplemented"
 
 (*******************************************
