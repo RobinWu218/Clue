@@ -1,4 +1,5 @@
 open Data
+open Map
 
 (* [t] is the data type representing the Ai's state and goals *)
 type t = unit
@@ -11,26 +12,26 @@ type t = unit
  * AI playing character [p] on difficulty [d], with starting hand [hand].
  * Returns: the initialized setup for an AI.
  *)
-let init p d hand = 
+let init p d hand =
   failwith "unimplemented"
 
-(* [get_ai state p] 
- * Returns: the AI data structure for the AI playing character [p] 
+(* [get_ai state p]
+ * Returns: the AI data structure for the AI playing character [p]
  *)
-let get_ai state p = 
+let get_ai state p =
   failwith "unimplemented"
 
-(* [get_difficulty ai] 
- * Returns: the difficulty of the AI [ai]. 
+(* [get_difficulty ai]
+ * Returns: the difficulty of the AI [ai].
  *)
 let get_difficulty ai =
   failwith "unimplemented"
 
 (* [still_in_game ai]
- * Returns: [true] iff the AI [ai] is still in the game. (If you're out you 
- * can still prove suggestions wrong) 
+ * Returns: [true] iff the AI [ai] is still in the game. (If you're out you
+ * can still prove suggestions wrong)
  *)
-let still_in_game ai = 
+let still_in_game ai =
   failwith "unimplemented"
 
 
@@ -40,10 +41,10 @@ let still_in_game ai =
 
 (* not visible outside module *)
 
-let make_suggestion ai = 
+let make_suggestion ai =
   failwith "unimplemented"
 
-let make_accusation ai = 
+let make_accusation ai =
   failwith "unimplemented"
 
 (* [step state p] peforms a turn for player [p] (an AI player). This involves:
@@ -54,13 +55,13 @@ let make_accusation ai =
  * Returns: an updated game state.
  *)
 
-let step state p = 
+let step state p =
   failwith "unimplemented"
 
 (* [reveal_card ai guess] figures out which card to reveal in response
  * to a suggestion [guess].
  * Returns: [Some c] where [c] is a card that [ai] can reveal. Or, if [ai] has
- * none of the cards in [guess], then it will return [None]. 
+ * none of the cards in [guess], then it will return [None].
  *)
-let reveal_card ai guess = 
+let reveal_card ai guess =
   failwith "unimplemented"
