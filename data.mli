@@ -39,37 +39,38 @@ type coord = int * int
 
 (* map is the type that holds information about the map. *)
 type map = {
-    num_rows: int;
-    num_cols: int;
-    map_values: string option array array;
-    exits: building * (int * coord list);
-    buildings: building list;
-    in_buildling: (prof * building)list;
-    location: prof * coord list;
-    waiting_spots: build * coord list;
-    secrets: (string*string) list;
+  num_rows: int;
+  num_cols: int;
+  map_values: string option array array;
+  exits: building * (int * coord list);
+  buildings: building list;
+  in_buildling: (prof * building)list;
+  location: prof * coord list;
+  waiting_spots: build * coord list;
+  secrets: (string*string) list;
 }
 (* user stores the information about the user's character, number of turns,
  * specific location and the language that s/he uses.*)
 type user = {
   character: prof;
-  turn: int;
   location: coord;
-  hand: hand
+  hand: hand;
+  was_moved: bool;
 }
 
 (* ai and player are almost the same except for that ai also has a list of
  * case_file that he obtains*)
 type ai = {
   character : prof;
-  turn: int;
   location: coord;
-  destination: coord;
-  difficulty: difficulty;
+  hand: hand;
+  was_moved: bool;
+  is_in_game: bool;
+  difficulty: int;
+  destination: coord option;
   known_cards: card list;
   possible_cards: card list;
-  past_guesses: case_file list;
-  hand: hand
+  past_guesses: (case_file*bool) list;
 }
 
 (* state is the type specifying the currect map situation and player's and 
@@ -80,5 +81,5 @@ type state = {
   map: map;
   user: user;
   ais: ai list;
-  case_file: case_file
+  case_file: case_file;
 }

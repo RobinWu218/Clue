@@ -98,49 +98,49 @@ type dir = Up of int | Down of int | Left of int | Right of int
 
 (* map is the type that holds information about the map. *)
 type map = {
-    num_rows: int;
-    num_cols: int;
-    map_values: string option array array;
-    exits: building * (int * coord list); (* ("Gates", [ (1, (0,0)); (2,(5,5))] *)
-    buildings: building list;
-    in_buildling: (prof * building)list;
-    location: prof * coord list;
-    waiting_spots: build * coord list;
-    secrets: (string*string) list;
+  num_rows: int;
+  num_cols: int;
+  map_values: string option array array;
+  exits: building * (int * coord list); (* ("Gates", [ (1, (0,0)); (2,(5,5))] *)
+  buildings: building list;
+  in_buildling: (prof * building)list;
+  location: prof * coord list;
+  waiting_spots: build * coord list;
+  secrets: (string*string) list;
 }
 
 (* user stores the information about the user's character, number of turns,
  * specific location and the language that s/he uses.*)
 type user = {
-    character: prof;
-    turn: int;
-    location: coord;
-    hand: hand
+  character: prof;
+  location: coord;
+  hand: hand;
+  was_moved: bool;
 }
 
 (* ai and player are almost the same except for that ai also has a list of
  * case_file that he obtains*)
 type ai = {
-    character : prof;
-    turn: int;
-    location: coord;
-    difficulty: difficulty;
-    destination: coord;
-    known_cards: card list;
-    possible_cards: card list;
-    past_guesses: case_file list;
-    hand: hand;
-    is_in_game: bool;
+  character : prof;
+  location: coord;
+  hand: hand;
+  was_moved: bool;
+  is_in_game: bool;
+  difficulty: int;
+  destination: coord option;
+  known_cards: card list;
+  possible_cards: card list;
+  past_guesses: (case_file*bool) list;
 }
 
 (* state is the type specifying the currect map situation and player's and ais' information.
  * Also, it includes a fact_file which was initiated at the init phase of the game.*)
 type state = {
-    current_player: character;
-    map: map;
-    user: user;
-    ais: ai list;
-    fact_file: case_file
+  current_player: character;
+  map: map;
+  user: user;
+  ais: ai list;
+  fact_file: case_file;
 }
 
 
