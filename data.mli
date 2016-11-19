@@ -53,7 +53,6 @@ type map = {
  * specific location and the language that s/he uses.*)
 type user = {
   character: prof;
-  location: coord;
   hand: hand;
   was_moved: bool;
 }
@@ -62,7 +61,6 @@ type user = {
  * case_file that he obtains*)
 type ai = {
   character : prof;
-  location: coord;
   hand: hand;
   was_moved: bool;
   is_in_game: bool;
@@ -70,16 +68,17 @@ type ai = {
   destination: coord option;
   known_cards: card list;
   possible_cards: card list;
-  past_guesses: (case_file*bool) list;
+  past_guesses: (case_file * prof * (prof option)) list;
 }
 
 (* state is the type specifying the currect map situation and player's and 
  * ais' information. It also includes a case_file which was initiated at 
  * the init phase of the game. *)
 type state = {
-  current_player: character;
+  counter: int;
   map: map;
   user: user;
   ais: ai list;
-  case_file: case_file;
+  fact_file: case_file;
+  dictionary: prof * [ `AI | `User | `No ];
 }
