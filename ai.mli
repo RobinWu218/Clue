@@ -34,6 +34,10 @@ val still_in_game: t -> bool
  * Methods for interacting with game state
  ************************************************)
 
+ (* [update_ai ai player guess player2] updates the knowledge of [ai] when 
+ * [player] makes a [guess] that got disproved by [player2]. *)
+ val update_ai: t -> string -> card list -> string -> t
+
 (* [step state p] peforms a turn for player [p] (an AI player). This involves:
  *   - defining and setting goals by processing knowledge from suggestions and
  *     making deductions about other players' turns.

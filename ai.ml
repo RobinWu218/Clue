@@ -38,13 +38,17 @@ let still_in_game ai =
  * Methods for interacting with game state
  ************************************************)
 
-(* not visible outside module *)
+(* [update_ai ai player guess player2] updates the knowledge of [ai] when 
+ * [player] makes a [guess] that got disproved by [player2]. *)
+let update_ai ai player guess player2 =
+  failwith "unimplemented"
 
 let make_suggestion ai = 
   failwith "unimplemented"
 
 let make_accusation ai = 
   failwith "unimplemented"
+
 
 (* [step state p] peforms a turn for player [p] (an AI player). This involves:
  *   - defining and setting goals by processing knowledge from suggestions and
