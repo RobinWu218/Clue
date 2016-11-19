@@ -1,0 +1,29 @@
+{
+  "rooms": [
+    {
+      "name": "Gates",
+      "nickname": "GATE",
+      "name_location": { "x": 3, "y": 1 },
+      "doors": [
+        { "x": 10, "y": 10 }],
+      "passage_exits": false,
+      "passage_to": "",
+      "spots": [
+        { "x": 5, "y": 3 },
+        { "x": 5, "y": 4 },
+        { "x": 5, "y": 5 }]
+    }
+  ],
+  "starting_locations": [
+    {"player": "red", "x": 0, "y":0 },
+    {"player": "yellow", "x": 100, "y": 100}],
+  "num_rows": 27,
+  "num_cols": 26,
+  "map_diag" : "******"
+}
+
+
+String option array array
+* = Some *
+? = None
+p1 = Some "player name"
