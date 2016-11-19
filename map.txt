@@ -1,0 +1,38 @@
++------+---+-+------------+
+|    +-+  ++.|     s      |
+|   ++.|  |..|    ...     |
+|   |..|  ++.|    ..      |
+|  ++..v   |.v    ..v     |
+|  |...|   |.     ..      |
+++-v...+-hh+..  h ...     |
+++...................     |
+|s....................    |
++----+.....+---+......hh  |
+|    +-h...|   |.........s|
+|      |...|   |.........++
+|      |...|   |......+--+
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
++-------------------------+
+
+h horizontal door like this -
+v vertical door like this |
++ corner wall
+- horizontal wall
+| vertical wall
+i inaccessible
+. accessible
+  in-building (s secret passage way; name of building)
+d door
+s starting place; should be replaced by prof initials
