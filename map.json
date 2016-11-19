@@ -1,29 +1,180 @@
 {
   "rooms": [
     {
-      "name": "Gates",
-      "nickname": "GATE",
-      "name_location": { "x": 3, "y": 1 },
+      "name": "Baker",
+      "nickname": "BAKR",
+      "name_location": { "r": 3, "c": 2},
       "doors": [
-        { "x": 10, "y": 10 }],
+        { "r": 7, "c": 5 }],
+      "passage_exits": true,
+      "passage_to": "Rhodes",
+      "spots": [
+        { "r": 4, "c": 2 },
+        { "r": 4, "c": 3 },
+        { "r": 4, "c": 4 },
+        { "r": 5, "c": 2 },
+        { "r": 5, "c": 3 },
+        { "r": 5, "c": 4 }]
+    }, {
+      "name": "Klarman",
+      "nickname": "KLRN",
+      "name_location": { "r": 4, "c": 11},
+      "doors": [
+        { "r": 5, "c":  9 },
+        { "r": 8, "c": 10 },
+        { "r": 8, "c":  5 },
+        { "r": 5, "c": 16 }],
       "passage_exits": false,
       "passage_to": "",
       "spots": [
-        { "x": 5, "y": 3 },
-        { "x": 5, "y": 4 },
-        { "x": 5, "y": 5 }]
-    }
+        { "r": 5, "c": 12 },
+        { "r": 5, "c": 13 },
+        { "r": 6, "c": 12 },
+        { "r": 6, "c": 13 },
+        { "r": 7, "c": 12 },
+        { "r": 7, "c": 13 }]
+    }, {
+      "name": "Olin",
+      "nickname": "OLIN",
+      "name_location": { "r": 2, "c": 21},
+      "doors": [
+        { "r": 6, "c": 20 }],
+      "passage_exits": true,
+      "passage_to": "Duffield",
+      "spots": [
+        { "r": 3, "c": 21 },
+        { "r": 3, "c": 22 },
+        { "r": 3, "c": 23 },
+        { "r": 4, "c": 21 },
+        { "r": 4, "c": 22 },
+        { "r": 4, "c": 23 }]
+    }, {
+      "name": "Statler",
+      "nickname": "STAT",
+      "name_location": { "r": 12, "c": 2},
+      "doors": [
+        { "r": 13, "c": 8 },
+        { "r": 16, "c": 7 }],
+      "passage_exits": false,
+      "passage_to": "",
+      "spots": [
+        { "r": 13, "c": 2 },
+        { "r": 13, "c": 3 },
+        { "r": 13, "c": 4 },
+        { "r": 13, "c": 5 },
+        { "r": 14, "c": 3 },
+        { "r": 14, "c": 4 }]
+    }, {
+      "name": "Carpenter",
+      "nickname": "CARP",
+      "name_location": { "r": 10, "c": 21},
+      "doors": [
+        { "r": 10, "c": 19 }],
+      "passage_exits": false,
+      "passage_to": "",
+      "spots": [
+        { "r": 11, "c": 21 },
+        { "r": 11, "c": 22 },
+        { "r": 11, "c": 23 },
+        { "r": 12, "c": 21 },
+        { "r": 12, "c": 22 },
+        { "r": 12, "c": 23 }]
+    }, {
+      "name": "Phillips",
+      "nickname": "Phil",
+      "name_location": { "r": 16, "c": 20},
+      "doors": [
+        { "r": 17, "c": 18 }],
+      "passage_exits": false,
+      "passage_to": "",
+      "spots": [
+        { "r": 17, "c": 20 },
+        { "r": 17, "c": 21 },
+        { "r": 17, "c": 22 },
+        { "r": 17, "c": 23 },
+        { "r": 18, "c": 21 },
+        { "r": 18, "c": 22 }]
+    }, {
+      "name": "Duffield",
+      "nickname": "DUFF",
+      "name_location": { "r": 22, "c": 2},
+      "doors": [
+        { "r": 10, "c": 10 }],
+      "passage_exits": true,
+      "passage_to": "Olin",
+      "spots": [
+        { "r": 23, "c": 2 },
+        { "r": 23, "c": 3 },
+        { "r": 23, "c": 4 },
+        { "r": 23, "c": 5 },
+        { "r": 24, "c": 3 },
+        { "r": 24, "c": 4 }]
+    }, {
+      "name": "Gates",
+      "nickname": "GATE",
+      "name_location": { "r": 21, "c": 11},
+      "doors": [
+        { "r": 19, "c": 13 }],
+      "passage_exits": false,
+      "passage_to": "",
+      "spots": [
+        { "r": 22, "c": 12 },
+        { "r": 22, "c": 13 },
+        { "r": 23, "c": 12 },
+        { "r": 23, "c": 13 },
+        { "r": 24, "c": 12 },
+        { "r": 24, "c": 13 }]
+    }, {
+      "name": "Rhodes",
+      "nickname": "RHODE",
+      "name_location": { "r": 23, "c": 20},
+      "doors": [
+        { "r": 22, "c": 18 }],
+      "passage_exits": true,
+      "passage_to": "Baker",
+      "spots": [
+        { "r": 24, "c": 20 },
+        { "r": 24, "c": 21 },
+        { "r": 24, "c": 22 },
+        { "r": 24, "c": 23 },
+        { "r": 25, "c": 21 },
+        { "r": 25, "c": 22 }]
+    },
   ],
   "starting_locations": [
-    {"player": "red", "x": 0, "y":0 },
-    {"player": "yellow", "x": 100, "y": 100}],
+    {"player": "Bracy",    "r": 25, "c":  8},
+    {"player": "Clarkson", "r": 18, "c":  1},
+    {"player": "Fan",      "r":  1, "c": 10},
+    {"player": "Gries",    "r":  1, "c": 15},
+    {"player": "Halpern",  "r":  7, "c": 24},
+    {"player": "White",    "r": 20, "c": 24}],
   "num_rows": 27,
   "num_cols": 26,
-  "map_diag" : "******"
+  "map_diag" : "**************************
+*s    ****W****G****    s*
+*     **...****...** OLIN*
+* BAKR*..***  ***..* ??? *
+* ??? *..* KLRN *..* ??? *
+* ??? *..D  ??  D..*     *
+*     *..*  ??  *...D*****
+*****D*..*  ??  *.......B*
+*........*D****D*.......**
+**.................*******
+*********..........D CARP*
+*       *..*****...* ??? *
+* STAT  *..**C**...* ??? *
+* ????  D..**L**...*******
+*  ??   *..**U**........**
+*       *..**E**...*******
+*******D*..*****..* PHIL *
+**.........*****..D ???? *
+*Y................*  ??  *
+**........***D**...*******
+*******D..*    *........P*
+*      *..*GATE*........**
+* DUFF *..* ?? *..D*******
+* ???? *..* ?? *..* RHOD *
+*  ??  *..* ?? *..* ???? *
+*s    **R**    **.*  ?? s*
+**************************"
 }
-
-
-String option array array
-* = Some *
-? = None
-p1 = Some "player name"
