@@ -3,27 +3,85 @@ open Map
 open Ai
 open User
 
+
 (******************************)
 (* init_state and its helpers *)
 (******************************)
+let int_to_prof i = 
+    match i with 
+    | 0 -> "Bracy"
+    | 1 -> "Clarkson"
+    | 2 -> "Fan"
+    | 3 -> "Gries"
+    | 4 -> "Halpern"
+    | 5 -> "White"
+    | _ -> "illegal int"
+
+let int_to_building i = 
+    match i with 
+    | 0 -> "Baker"
+    | 1 -> "Carpenter"
+    | 2 -> "Duffield"
+    | 3 -> "Gates"
+    | 4 -> "Klarman"
+    | 5 ->"Olin"
+    | 6 -> "Phillips"
+    | 7 -> "Rhodes"
+    | 8 -> "Statler"
+    | _ -> "illegal int"
+
+let int_to_lang i = 
+    match i with 
+    | 0 -> "Bash"
+    | 1 -> "C"
+    | 2 -> "Java"
+    | 3 -> "MATLAB"
+    | 4 -> "OCaml"
+    | 5 -> "Python"
+    | _ -> "illegal int"
 
 (* [generate_case_file ()] is the case file containing the answers to the questions: Who? Where? What language? *)
-let generate_case_file () : case_file = failwith "TODO"
+let generate_case_file () : case_file = 
+    let r_prof = int_to_prof(Random.int 6) in 
+    let r_building = int_to_building(Random.int 9) in 
+    let r_lang = int_to_lang(Random.int 6) in 
+    {who = r_prof; where = r_building; with_what = r_lang}
 
-(* [assign_characters n] is an n-tuple of non-repeating profs.
- * Requires: [n] is an integer between 3 and 6 inclusive. *)
-let assign_characters (n:int) = failwith "TODO"
+(**)
+let select_non_repeat_lst lst size bound = 
+     
+    while (List.length !lst < size) do (
+        let r =  Random.int bound in 
+        if (List.mem r !lst) then
+          lst:= !lst 
+        else 
+          lst:= (r::!lst)
+    )done
 
-(* [deal_card n] is an n-tuple of non-repeating card lists. 
+let rec lst_to_prof_lst lst = 
+    match lst with 
+    | [] -> []
+    | h::t -> (int_to_prof h)::(lst_to_prof_lst t)
+
+(* [assign_characters n] is a list of non-repeating profs.
  * Requires: [n] is an integer between 3 and 6 inclusive. *)
-let deal_card (n:int) = failwith "TODO"
+let assign_characters (n:int) = 
+    let char_lst = ref [] in
+    select_non_repeat_lst char_lst n 6;
+    lst_to_prof_lst !lst
+
+(* [deal_card n] is an list of non-repeating cards. 
+ * Requires: [n] is an integer between 3 and 6 inclusive. *)
+let deal_card (n:int) = 
+    let card_lst = ref [] in
+    select_non_repeat_lst card_lst n 
 
 (* [init n d] is the initial game state with [n] AI bots and a difficulty level of [d]. It prints out which character each player plays, and the cards in the user’s hands.
  * Requires: [n] is an integer between 2 and 5 inclusive, [d] is an integer between 1 and 3 inclusive. *)
 let init_state (n:int) (d:int) : state = 
     if n = 2 then 
-        let (char1,char2,char3) = assign_characters n in
-        let (cards1,cards2,cards3) = deal_cards n in 
+        let character_lst = assign_characters n in
+        let card_lst = deal_cards n in 
         {map = ...; 
          n = n; 
          players = (char1,char2,char3); 
