@@ -100,14 +100,14 @@ type dir = Up of int | Down of int | Left of int | Right of int
 type map = {
     num_rows: int;
     num_cols: int;
-    text_display: string list;
-    players: prof list;
-    exits: building * coord list;
-    rooms: room list;
-    in_room: prof list;
+    map_values: string option array array;
+    exits: building * (int * coord list); (* ("Gates", [ (1, (0,0)); (2,(5,5))] *)
+    buildings: building list;
+    in_buildling: (prof * building)list;
     location: prof * coord list;
+    waiting_spots: build * coord list;
+    secrets: (string*string) list;
 }
-
 
 (* user stores the information about the user's character, number of turns,
  * specific location and the language that s/he uses.*)
@@ -129,7 +129,7 @@ type ai = {
     known_cards: card list;
     possible_cards: card list;
     past_guesses: case_file list;
-    hand: hand
+    hand: hand;
 }
 
 (* state is the type specifying the currect map situation and player's and ais' information.
