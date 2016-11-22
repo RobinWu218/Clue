@@ -1,0 +1,40 @@
+### Starting build.
+# Target: game_test.ml.depends, tags: { extension:ml, file:game_test.ml, ocaml, ocamldep, quiet }
+/home/dzhao/.opam/4.03.0/bin/ocamldep.opt -modules game_test.ml > game_test.ml.depends # cached
+# Target: main.ml.depends, tags: { extension:ml, file:main.ml, ocaml, ocamldep, quiet }
+/home/dzhao/.opam/4.03.0/bin/ocamldep.opt -modules main.ml > main.ml.depends # cached
+# Target: game.mli.depends, tags: { extension:mli, file:game.mli, ocaml, ocamldep, quiet }
+/home/dzhao/.opam/4.03.0/bin/ocamldep.opt -modules game.mli > game.mli.depends
+# Target: ai.mli.depends, tags: { extension:mli, file:ai.mli, ocaml, ocamldep, quiet }
+/home/dzhao/.opam/4.03.0/bin/ocamldep.opt -modules ai.mli > ai.mli.depends
+# Target: data.mli.depends, tags: { extension:mli, file:data.mli, ocaml, ocamldep, quiet }
+/home/dzhao/.opam/4.03.0/bin/ocamldep.opt -modules data.mli > data.mli.depends # cached
+# Target: data.cmi, tags: { byte, compile, extension:mli, file:data.mli, interf, ocaml, quiet }
+/home/dzhao/.opam/4.03.0/bin/ocamlc.opt -c -I /home/dzhao/.opam/4.03.0/lib/ANSITerminal -I /home/dzhao/.opam/4.03.0/lib/biniou -I /home/dzhao/.opam/4.03.0/lib/bytes -I /home/dzhao/.opam/4.03.0/lib/easy-format -I /home/dzhao/.opam/4.03.0/lib/oUnit -I /home/dzhao/.opam/4.03.0/lib/ocaml -I /home/dzhao/.opam/4.03.0/lib/yojson -o data.cmi data.mli # cached
+# Target: gmap.ml.depends, tags: { extension:ml, file:gmap.ml, ocaml, ocamldep, quiet }
+/home/dzhao/.opam/4.03.0/bin/ocamldep.opt -modules gmap.ml > gmap.ml.depends
+# Target: reader.mli.depends, tags: { extension:mli, file:reader.mli, ocaml, ocamldep, quiet }
+/home/dzhao/.opam/4.03.0/bin/ocamldep.opt -modules reader.mli > reader.mli.depends # cached
+# Target: reader.cmi, tags: { byte, compile, extension:mli, file:reader.mli, interf, ocaml, quiet }
+/home/dzhao/.opam/4.03.0/bin/ocamlc.opt -c -I /home/dzhao/.opam/4.03.0/lib/ANSITerminal -I /home/dzhao/.opam/4.03.0/lib/biniou -I /home/dzhao/.opam/4.03.0/lib/bytes -I /home/dzhao/.opam/4.03.0/lib/easy-format -I /home/dzhao/.opam/4.03.0/lib/oUnit -I /home/dzhao/.opam/4.03.0/lib/ocaml -I /home/dzhao/.opam/4.03.0/lib/yojson -o reader.cmi reader.mli # cached
+# Target: gmap.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:gmap.cmo, file:gmap.ml, implem, ocaml, quiet }
+/home/dzhao/.opam/4.03.0/bin/ocamlc.opt -c -I /home/dzhao/.opam/4.03.0/lib/ANSITerminal -I /home/dzhao/.opam/4.03.0/lib/biniou -I /home/dzhao/.opam/4.03.0/lib/bytes -I /home/dzhao/.opam/4.03.0/lib/easy-format -I /home/dzhao/.opam/4.03.0/lib/oUnit -I /home/dzhao/.opam/4.03.0/lib/ocaml -I /home/dzhao/.opam/4.03.0/lib/yojson -o gmap.cmo gmap.ml
+# Target: user.mli.depends, tags: { extension:mli, file:user.mli, ocaml, ocamldep, quiet }
+/home/dzhao/.opam/4.03.0/bin/ocamldep.opt -modules user.mli > user.mli.depends
+# Target: ai.cmi, tags: { byte, compile, extension:mli, file:ai.mli, interf, ocaml, quiet }
+/home/dzhao/.opam/4.03.0/bin/ocamlc.opt -c -I /home/dzhao/.opam/4.03.0/lib/ANSITerminal -I /home/dzhao/.opam/4.03.0/lib/biniou -I /home/dzhao/.opam/4.03.0/lib/bytes -I /home/dzhao/.opam/4.03.0/lib/easy-format -I /home/dzhao/.opam/4.03.0/lib/oUnit -I /home/dzhao/.opam/4.03.0/lib/ocaml -I /home/dzhao/.opam/4.03.0/lib/yojson -o ai.cmi ai.mli
+# Target: user.cmi, tags: { byte, compile, extension:mli, file:user.mli, interf, ocaml, quiet }
+/home/dzhao/.opam/4.03.0/bin/ocamlc.opt -c -I /home/dzhao/.opam/4.03.0/lib/ANSITerminal -I /home/dzhao/.opam/4.03.0/lib/biniou -I /home/dzhao/.opam/4.03.0/lib/bytes -I /home/dzhao/.opam/4.03.0/lib/easy-format -I /home/dzhao/.opam/4.03.0/lib/oUnit -I /home/dzhao/.opam/4.03.0/lib/ocaml -I /home/dzhao/.opam/4.03.0/lib/yojson -o user.cmi user.mli
+# Target: game.cmi, tags: { byte, compile, extension:mli, file:game.mli, interf, ocaml, quiet }
+/home/dzhao/.opam/4.03.0/bin/ocamlc.opt -c -I /home/dzhao/.opam/4.03.0/lib/ANSITerminal -I /home/dzhao/.opam/4.03.0/lib/biniou -I /home/dzhao/.opam/4.03.0/lib/bytes -I /home/dzhao/.opam/4.03.0/lib/easy-format -I /home/dzhao/.opam/4.03.0/lib/oUnit -I /home/dzhao/.opam/4.03.0/lib/ocaml -I /home/dzhao/.opam/4.03.0/lib/yojson -o game.cmi game.mli
+# Target: main.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:main.cmo, file:main.ml, implem, ocaml, quiet }
+/home/dzhao/.opam/4.03.0/bin/ocamlc.opt -c -I /home/dzhao/.opam/4.03.0/lib/ANSITerminal -I /home/dzhao/.opam/4.03.0/lib/biniou -I /home/dzhao/.opam/4.03.0/lib/bytes -I /home/dzhao/.opam/4.03.0/lib/easy-format -I /home/dzhao/.opam/4.03.0/lib/oUnit -I /home/dzhao/.opam/4.03.0/lib/ocaml -I /home/dzhao/.opam/4.03.0/lib/yojson -o main.cmo main.ml
+# Target: game_test.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:game_test.cmo, file:game_test.ml, implem, ocaml, quiet }
+/home/dzhao/.opam/4.03.0/bin/ocamlc.opt -c -I /home/dzhao/.opam/4.03.0/lib/ANSITerminal -I /home/dzhao/.opam/4.03.0/lib/biniou -I /home/dzhao/.opam/4.03.0/lib/bytes -I /home/dzhao/.opam/4.03.0/lib/easy-format -I /home/dzhao/.opam/4.03.0/lib/oUnit -I /home/dzhao/.opam/4.03.0/lib/ocaml -I /home/dzhao/.opam/4.03.0/lib/yojson -o game_test.cmo game_test.ml
+# Target: game.ml.depends, tags: { extension:ml, file:game.ml, ocaml, ocamldep, quiet }
+/home/dzhao/.opam/4.03.0/bin/ocamldep.opt -modules game.ml > game.ml.depends
++ /home/dzhao/.opam/4.03.0/bin/ocamldep.opt -modules game.ml > game.ml.depends
+File "game.ml", line 89, characters 15-17:
+Error: Syntax error
+Command exited with code 2.
+# Compilation unsuccessful.

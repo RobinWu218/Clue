@@ -105,7 +105,7 @@ type map = {
   buildings: building list;
   in_buildling: (prof * building)list;
   location: prof * coord list;
-  waiting_spots: build * coord list;
+  waiting_spots: building * coord list;
   secrets: (string*string) list;
 }
 
