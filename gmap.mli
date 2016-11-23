@@ -25,13 +25,24 @@ val print_map: t -> unit
  *)
 val get_exits: t ->  coord * building list
 
+(* [is_exit_blocked map coord] returns true if the exit at location [coord] is 
+ * blocked in by another player. Does not check that [coord] is a valid exit. 
+ *)
+val is_exit_blocked: t -> coord -> bool
+
+(* [is_building_blocked map b] returns true if all exits out of building [b] is
+ * blocked. 
+ * requires: [b] is a valid building.
+ *)
+val is_building_blocked: t -> building -> bool
 
 
 (*******************************************
  * Methods for player queries 
  *******************************************)
 
-(* [is_in_building map p] checks if player [p] is currently in a building on the [map]
+(* [is_in_building map p] checks if player [p] is currently in a building on 
+ * the [map].
  * Returns: [true] iff player [p] is in a building.
  *)
 val is_in_building: t -> prof -> bool
@@ -57,6 +68,12 @@ val closest_buildings: t -> prof -> building list
 (*******************************************
  * methods for moving around on the map 
  *******************************************)
+
+(* [leave_building map p n] moves player [p] to exit [n] of the current
+ * building [p] is in, and performs all changes necessary to update the [map].
+ * Raises: InvalidOperation if the player p is not in a room.
+ *)
+val leave_building: t -> prof -> int -> t
 
 (* [move map p dir n] tries to move player [p] on the [map] [n] steps in [dir]
  * direction. 

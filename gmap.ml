@@ -19,22 +19,32 @@ let print_map map =
 (* [get_exits map] returns an association list of exit coordinates to their
  * respective buildings.
  *)
-let get_exits (map:map) =
+let get_exits map =
   List.fold_left (fun acc (b, el) -> 
     acc@(List.fold_left (fun acc (n, (x,y)) ->
       ((x,y), b)::acc) [] el)
     ) [] map.exits
 
-
+(* [is_exit_blocked map coord] returns true if the exit at location [coord] is 
+ * blocked in by another player. Does not check that [coord] is a valid exit. 
+ *)
 let is_exit_blocked map coord =
-  false
+  failwith "unimplemented"
+
+(* [is_building_blocked map b] returns true if all exits out of building [b] is
+ * blocked. 
+ * requires: [b] is a valid building.
+ *)
+let is_building_blocked map b =
+  failwith "unimplemented"
 
 
 (*******************************************
  * Methods for player queries
  *******************************************)
 
-(* [is_in_building map p] checks if player [p] is currently in a building on the [map]
+(* [is_in_building map p] checks if player [p] is currently in a building on 
+ * the [map].
  * Returns: [true] iff player [p] is in a building.
  *)
 let is_in_building map p =
@@ -44,7 +54,6 @@ let is_in_building map p =
  * Returns: [some r] if player [p] is in building [b] or [None] if player [p]
  * is currently not in a building.
  *)
-
 let get_current_building map p =
   try
     let b = List.assoc p map.in_building in
@@ -54,11 +63,9 @@ let get_current_building map p =
 
 (* [get_current_location map p]
  * Returns: the coordinate where player [p] is on the [map].
- * Raises: InvalidLocation exception if the player is in a building
  *)
 let get_current_location map p =
-  if is_in_building map p then raise InvalidLocation
-  else List.assoc p map.location
+  List.assoc p map.location
 
 
 (* [closest_buildings map p]
@@ -118,6 +125,17 @@ and get_closest_exit_coords exits (x,y) =
  * methods for moving around on the map
  *******************************************)
 
+
+(* [leave_building map p n] moves player [p] to exit [n] of the current
+ * building [p] is in, and performs all changes necessary to update the [map].
+ * Raises: InvalidOperation if the player p is not in a room.
+ *)
+let leave_building map p n =
+  match get_current_building map p with
+  | None   -> raise InvalidOperation
+  | Some b -> failwith "unimplemented" 
+
+
 (* [move map p dir n] tries to move player [p] on the [map] [n] steps in [dir]
  * direction.
  * Returns: the pair [(i, map2)], where
@@ -150,11 +168,25 @@ let move map p dir n =
  let move_towards_building map p b n =
   failwith "unimplemented"
 
-(* [teleport_player map p r] moves a person [p] on the [map] to building [b]
+(* [teleport_player map p b] moves a person [p] on the [map] to building [b]
  * This event occurs whenever a suggestion or accusation is made; the
  * suspect is moved to the "scene of the crime."
  * Returns: the updated map.
  *)
- let teleport_player map p r =
-  failwith "unimplemented"
+ let teleport_player map p b =
+  if is_in_building map p then
+  (*
+    - check if it is the same room -> do nothing
+    - remove entry from in_building
+    - set map location to None
+    - add new entry for in_building 
+    - *)
+    failwith "unimplemented"
+  else 
+    (* 
+    - set current location to Some .
+    - add name to in_building list of map 
+    - find spot in room to update
+    *)
+    failwith "unimplemented"
 
