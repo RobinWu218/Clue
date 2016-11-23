@@ -1,5 +1,5 @@
 open Data
-open GMap
+open Gmap
 
 (* [t] is the data type representing the Ai's state and goals *)
 type t = unit

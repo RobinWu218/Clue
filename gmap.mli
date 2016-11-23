@@ -23,7 +23,36 @@ val print_map: t -> unit
 (* [get_exits map] 
  * Returns: a list of building exits on the map. 
  *)
-val get_exits: t -> building * coord list
+val get_exits: t ->  coord * building list
+
+
+
+(*******************************************
+ * Methods for player queries 
+ *******************************************)
+
+(* [is_in_building map p] checks if player [p] is currently in a building on the [map]
+ * Returns: [true] iff player [p] is in a building.
+ *)
+val is_in_building: t -> prof -> bool
+
+(* [get_current_building map p]
+ * Returns: [some r] if player [p] is in building [b] or [None] if player [p]
+ * is currently not in a building. 
+ *)
+val get_current_building: t -> prof -> string option
+
+(* [get_current_location map p]
+ * Returns: the coordinate where player [p] is on the [map]. 
+ * Raises: InvalidLocation exception if the player is in a building 
+ *)
+val get_current_location: t -> prof -> coord
+
+(* [closest_buildings map p] 
+ * Returns: a list of buildings n order of closeness to player [p]
+ *)
+val closest_buildings: t -> prof -> building list
+
 
 (*******************************************
  * methods for moving around on the map 
@@ -61,30 +90,3 @@ val move_towards_building: t -> prof -> string -> int -> bool * t
  * Returns: the updated map.
  *)
 val teleport_player: t -> prof -> string -> t
-
-
-(*******************************************
- * Methods for player queries 
- *******************************************)
-
-(* [is_in_building map p] checks if player [p] is currently in a building on the [map]
- * Returns: [true] iff player [p] is in a building.
- *)
-val is_in_building: t -> prof -> bool
-
-(* [get_current_building map p]
- * Returns: [some r] if player [p] is in building [b] or [None] if player [p]
- * is currently not in a building. 
- *)
-val get_current_building: t -> prof -> string option
-
-(* [get_current_location map p]
- * Returns: the coordinate where player [p] is on the [map]. 
- * Raises: InvalidLocation exception if the player is in a building 
- *)
-val get_current_location: t -> prof -> coord
-
-(* [closest_buildings map p] 
- * Returns: a list of buildings n order of closeness to player [p]
- *)
-val closest_buildings: t -> prof -> building list

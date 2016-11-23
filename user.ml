@@ -1,5 +1,5 @@
 open Data
-open GMap
+open Gmap
 
 let parse_card (s:string) : card =
   failwith "TODO"
