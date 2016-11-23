@@ -28,15 +28,26 @@ let get_exits map =
 (* [is_exit_blocked map coord] returns true if the exit at location [coord] is 
  * blocked in by another player. Does not check that [coord] is a valid exit. 
  *)
-let is_exit_blocked map coord =
-  failwith "unimplemented"
+let is_exit_blocked map (r,c) =
+  let res = ref true in
+  let m = map.map_values in
+    for cur_r = r -1 to r + 1 do
+      for cur_c = c -1 to c + 1 do
+        if cur_r <> r && cur_c <> c then
+          if m.(cur_r).(cur_c) = Some "." then
+            res := false
+      done;
+    done;
+    !res
 
 (* [is_building_blocked map b] returns true if all exits out of building [b] is
  * blocked. 
  * requires: [b] is a valid building.
  *)
 let is_building_blocked map b =
-  failwith "unimplemented"
+  List.fold_left (fun acc (n, c) ->
+    acc && (is_exit_blocked map c) 
+    true (List.assoc b map.exits)
 
 
 (*******************************************
@@ -184,7 +195,7 @@ let move map p dir n =
     failwith "unimplemented"
   else 
     (* 
-    - set current location to Some .
+    - set current location to Some "."
     - add name to in_building list of map 
     - find spot in room to update
     *)
