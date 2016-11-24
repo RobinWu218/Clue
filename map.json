@@ -81,7 +81,7 @@
         { "r": 12, "c": 23 }]
     }, {
       "name": "Phillips",
-      "nickname": "Phil",
+      "nickname": "PHIL",
       "name_location": { "r": 16, "c": 20},
       "exits": [
         { "id": 1, "r": 17, "c": 18 }],
