@@ -1,9 +1,6 @@
 open Yojson.Basic
 open Yojson.Basic.Util
- 
 open Data
-
-
 
 (* [extract_info field f] is a function applied onto json objects to get the 
  * members of a specific [field] and then performs [f] on them.
@@ -64,7 +61,7 @@ and extract_coord j =
  * requires: [String.length nickname = 4]
  *)
 and write_name_to_map m j nickname =
-  let loc = member "name_location" json in
+  let loc = member "name_location" j in
   let (r,c) = extract_coord loc in
     for i = 0 to 3 do
       m.(r).(c+i) <- Some (String.make 1 nickname.[i])
@@ -92,7 +89,6 @@ and extract_waiting_spots jsonlst =
     (extract_coord j)::acc
   ) [] jsonlst
 
-
 (* [extract_starting_locations json] parses [json] to returns a list of pairs 
  * where the first element is the player, and the second element is their 
  * starting coordinate on the map. 
@@ -104,7 +100,6 @@ let extract_starting_locations json =
       let r = extract_info "r" to_int j in
       let c = extract_info "c" to_int j in
         (p, (r,c))::acc ) [] sl
-
 
 (* [make_map] parses the json file storing information about the map and
  * converts it into a [map].

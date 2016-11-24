@@ -102,9 +102,9 @@ type map = {
   num_rows: int;
   num_cols: int;
   map_values: string option array array;
-  exits: building * (int * coord list); (* ("Gates", [ (1, (0,0)); (2,(5,5))] *)
+  exits: (building * (int * coord list)) list; (* ("Gates", [ (1, (0,0)); (2,(5,5))] *)
   buildings: building list;
-  in_buildling: (prof * building)list;
+  in_building: (prof * building)list;
   location: prof * coord list;
   waiting_spots: building * coord list;
   secrets: (string*string) list;
