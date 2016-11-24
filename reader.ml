@@ -82,13 +82,13 @@ and extract_waiting_spots jsonlst =
   ) [] jsonlst
 
 (* [extract_starting_locations json] parses [json] to returns a list of pairs 
- * where the first element is the player, and the second element is their 
+ * where the first element is the professor, and the second element is their 
  * starting coordinate on the map. 
  *)
 let extract_starting_locations m json=
   let sl = extract_info "starting_locations" to_list json in
     List.fold_left (fun acc j ->
-      let p = extract_info "player" to_string j in
+      let p = extract_info "professor" to_string j in
       let r = extract_info "r" to_int j in
       let c = extract_info "c" to_int j in
         m.(r).(c) <- Some p;
@@ -96,7 +96,7 @@ let extract_starting_locations m json=
 
 (* [make_map] parses the json file storing information about the map and
  * converts it into a [map].
- * Returns: a [map] with only information about the map (no player info) *)
+ * Returns: a [map] with only information about the map (no professor info) *)
 let make_map () = 
   let json = from_file "map.json" in
   let n_r = (extract_info "num_rows" to_int) json in

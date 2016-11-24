@@ -142,12 +142,12 @@
     }
   ],
   "starting_locations": [
-    {"player": "Bracy",    "r": 25, "c":  8},
-    {"player": "Clarkson", "r": 18, "c":  1},
-    {"player": "Fan",      "r":  1, "c": 10},
-    {"player": "Gries",    "r":  1, "c": 15},
-    {"player": "Halpern",  "r":  7, "c": 24},
-    {"player": "White",    "r": 20, "c": 24}],
+    {"professor": "Bracy",    "r": 25, "c":  8},
+    {"professor": "Clarkson", "r": 18, "c":  1},
+    {"professor": "Fan",      "r":  1, "c": 10},
+    {"professor": "Gries",    "r":  1, "c": 15},
+    {"professor": "Halpern",  "r":  7, "c": 24},
+    {"professor": "White",    "r": 20, "c": 24}],
   "num_rows": 27,
   "num_cols": 26,
   "map_diag" : "**************************
