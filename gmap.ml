@@ -95,18 +95,18 @@ let closest_buildings map p =
         (0,0) building_exits in 
         (sumr/len, sumc/len)
     else get_current_location map p in
-    (* find closest exit for each building *)
-    let exits = List.map (fun (b, el) -> 
-      (get_closest_exit el (my_r,my_c), b)) map.exits in
-      (* list of (distance to exit, building name) *)
+      (* find closest exit for each building *)
+      let exits = List.map (fun (b, el) -> 
+        (get_closest_exit el (my_r,my_c), b)) map.exits in
+        (* list of (distance to exit, building name) *)
       let dists = List.map( fun ((r,c), b) ->
         (abs (r - my_r) + abs (c - my_c), b)) exits in
         List.sort_uniq (Pervasives.compare) dists
 and get_closest_exit lst (r,c) =
   let dists = List.map (fun (_, (r',c')) ->
     (abs (r - r') + abs (c - c'), (r',c')) ) lst in
-    let sorted = List.sort (Pervasives.compare) dists in
-      let (d, p) = List.hd sorted in p
+  let sorted = List.sort (Pervasives.compare) dists in
+  let (d, p) = List.hd sorted in p
 
 
 (*

@@ -1,11 +1,11 @@
 {
-  "rooms": [
+  "buildings": [
     {
       "name": "Baker",
       "nickname": "BAKR",
       "name_location": { "r": 3, "c": 2},
-      "doors": [
-        { "r": 7, "c": 5 }],
+      "exits": [
+        { "id": 1, "r": 7, "c": 5 }],
       "passage_exits": true,
       "passage_to": "Rhodes",
       "spots": [
@@ -19,11 +19,11 @@
       "name": "Klarman",
       "nickname": "KLRN",
       "name_location": { "r": 4, "c": 11},
-      "doors": [
-        { "r": 5, "c":  9 },
-        { "r": 8, "c": 10 },
-        { "r": 8, "c":  5 },
-        { "r": 5, "c": 16 }],
+      "exits": [
+        { "id": 1, "r": 5, "c":  9 },
+        { "id": 2, "r": 8, "c": 10 },
+        { "id": 3, "r": 8, "c":  5 },
+        { "id": 4, "r": 5, "c": 16 }],
       "passage_exits": false,
       "passage_to": "",
       "spots": [
@@ -37,8 +37,8 @@
       "name": "Olin",
       "nickname": "OLIN",
       "name_location": { "r": 2, "c": 21},
-      "doors": [
-        { "r": 6, "c": 20 }],
+      "exits": [
+        { "id": 1, "r": 6, "c": 20 }],
       "passage_exits": true,
       "passage_to": "Duffield",
       "spots": [
@@ -52,9 +52,9 @@
       "name": "Statler",
       "nickname": "STAT",
       "name_location": { "r": 12, "c": 2},
-      "doors": [
-        { "r": 13, "c": 8 },
-        { "r": 16, "c": 7 }],
+      "exits": [
+        { "id": 1, "r": 13, "c": 8 },
+        { "id": 2, "r": 16, "c": 7 }],
       "passage_exits": false,
       "passage_to": "",
       "spots": [
@@ -68,8 +68,8 @@
       "name": "Carpenter",
       "nickname": "CARP",
       "name_location": { "r": 10, "c": 21},
-      "doors": [
-        { "r": 10, "c": 19 }],
+      "exits": [
+        { "id": 1, "r": 10, "c": 19 }],
       "passage_exits": false,
       "passage_to": "",
       "spots": [
@@ -83,8 +83,8 @@
       "name": "Phillips",
       "nickname": "Phil",
       "name_location": { "r": 16, "c": 20},
-      "doors": [
-        { "r": 17, "c": 18 }],
+      "exits": [
+        { "id": 1, "r": 17, "c": 18 }],
       "passage_exits": false,
       "passage_to": "",
       "spots": [
@@ -98,8 +98,8 @@
       "name": "Duffield",
       "nickname": "DUFF",
       "name_location": { "r": 22, "c": 2},
-      "doors": [
-        { "r": 10, "c": 10 }],
+      "exits": [
+        { "id": 1, "r": 10, "c": 10 }],
       "passage_exits": true,
       "passage_to": "Olin",
       "spots": [
@@ -113,8 +113,8 @@
       "name": "Gates",
       "nickname": "GATE",
       "name_location": { "r": 21, "c": 11},
-      "doors": [
-        { "r": 19, "c": 13 }],
+      "exits": [
+        { "id": 1, "r": 19, "c": 13 }],
       "passage_exits": false,
       "passage_to": "",
       "spots": [
@@ -128,8 +128,8 @@
       "name": "Rhodes",
       "nickname": "RHODE",
       "name_location": { "r": 23, "c": 20},
-      "doors": [
-        { "r": 22, "c": 18 }],
+      "exits": [
+        { "id": 1, "r": 22, "c": 18 }],
       "passage_exits": true,
       "passage_to": "Baker",
       "spots": [
@@ -139,7 +139,7 @@
         { "r": 24, "c": 23 },
         { "r": 25, "c": 21 },
         { "r": 25, "c": 22 }]
-    },
+    }
   ],
   "starting_locations": [
     {"player": "Bracy",    "r": 25, "c":  8},
