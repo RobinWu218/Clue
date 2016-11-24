@@ -51,7 +51,18 @@ val is_in_building: map -> prof -> bool
  * Returns: [some r] if professor [p] is in building [b] or [None] if professor [p]
  * is currently not in a building. 
  *)
-val get_current_building: map -> prof -> string option
+val get_current_building: map -> prof -> building option
+
+(*[has_secret_passage map b] returns [true] iff there is a secret passage in
+ * building [b].
+ *)
+val has_secret_passage: map -> building -> bool
+
+(*[get_secret_passage map b] returns a building option for which building [b] 
+ * has a secret passage to. If [b] does not have a secret passage, [None] is
+ * returned.
+ *)
+val get_secret_passage: map -> building -> building option
 
 (* [get_current_location map p]
  * Returns: the coordinate where professor [p] is on the [map]. 

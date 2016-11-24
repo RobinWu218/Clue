@@ -107,7 +107,7 @@ type map = {
   in_building: (prof * building)list;
   location: (prof * coord) list;
   waiting_spots: (building * (coord list)) list;
-  secrets: (string*string) list;
+  secrets: (building * building) list;
 }
 
 (* user stores the information about the user's character, number of turns,
