@@ -20,7 +20,9 @@ let extract_map json nr nc =
     for r = 0 to nr - 1 do 
       for c = 0 to nc - 1 do
         let ch = strmap.[r*(nc+1) + c] in
-          if ch <>'?' then
+          if ch = 'd' then 
+            m.(r).(c) <- Some "DOOR" 
+          else if ch <>'?' then
             m.(r).(c) <- Some (String.make 1 ch)
       done;
     done; 

@@ -33,10 +33,10 @@ and display n =
 and style_of_str i =
   let open ANSITerminal in
     match i with
-      | "." -> white (* ground *)
-      | "*" -> yellow (* wall   *)
-      | "D" -> green (* exit   *)
-      | "s" -> green (* secret passage *)
+      | "."    -> white (* ground *)
+      | "*"    -> yellow (* wall   *)
+      | "DOOR" -> green (* exit   *)
+      | "s"    -> green (* secret passage *)
       | c ->
           let len = String.length c in
             if      len = 1 then yellow  (* part of clue header *)
@@ -147,18 +147,31 @@ and get_closest_exit lst (r,c) =
  *******************************************)
 
 
-(* [leave_building map p n] moves professor [p] to exit [n] of the current
+(* [leave_building map p n] moves professor [p] to exit number [n] of the current
  * building [p] is in, and performs all changes necessary to update the [map].
  * Raises: InvalidOperation if the professor p is not in a room.
  *)
 let leave_building map p n =
   match get_current_building map p with
   | None   -> raise InvalidOperation
-  | Some b -> failwith "unimplemented" 
+  | Some b -> 
+    try
+      let exitL = List.assoc b map.exits in
+      let (er,ec) = List.assoc n exitL in
+      let (r,c) = get_current_location map p in
+      let m = map.map_values in
+        m.(r).(c)   <- None;
+        m.(er).(ec) <- Some (p^"DOOR");
+        let locL  = List.remove_assoc p map.location in
+        let nloc  = (p,(er,ec))::locL in
+        {map with location = nloc }
+    with
+    | Not_found -> raise InvalidOperation
 
 
-(* [move map p dir n] tries to move professor [p] on the [map] [n] steps in [dir]
- * direction.
+
+(* [move map p dir n] tries to move professor [p] on the [map] [n] steps in 
+ * [dir] direction.
  * Returns: the pair [(i, map2)], where
  *   [i]    is the steps remaining after going in [dir] direction, and
  *   [map2] is the updated map.
@@ -195,21 +208,25 @@ let move map p dir n =
  * Returns: the updated map.
  *)
  let teleport_professor map p b =
-  if is_in_building map p then
-  (*
-    - check if it is the same room -> do nothing
-    - remove entry from in_building
-    - set map location to None
-    - add new entry for in_building 
-    - update was_moved
-    - *)
-    failwith "unimplemented"
-  else 
-    (* 
-    - set current location to Some "."
-    - add name to in_building list of map 
-    - find spot in room to update
-    - update was_moved
-    *)
-    failwith "unimplemented"
+  let umap = 
+    match get_current_building map p with
+    | Some curB ->
+        if curB <> b 
+        then leave_building map b 1
+        else map
+    | None -> map in
+    let (curr, curc) = get_current_location umap p in
+      match umap.map_values.(curr).(curc) with
+      | None     -> failwith "Unexpected None value in teleport_professor"
+      | Some str ->
+        if (String.length str) <> (String.length p) then
+          umap.map_values.(curr).(curc) <- Some "DOOR"
+        else
+          umap.map_values.(curr).(curc) <- Some ".";
+      (* 
+      - add name to in_building list of map 
+      - find spot in room to update
+      - update was_moved
+      *)
+      failwith "unimplemented"
 
