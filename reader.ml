@@ -16,20 +16,12 @@ let extract_info field f =
  *)
 let extract_map json nr nc =
   let strmap = (extract_info "map_diag" to_string) json in
-  let m = Array.make_matrix nr nc (Some "*") in
+  let m = Array.make_matrix nr nc None in
     for r = 0 to nr - 1 do 
       for c = 0 to nc - 1 do
         let ch = strmap.[r*(nc+1) + c] in
-          if ch = '?' then
-            m.(r).(c) <- None
-          else if ch = ' ' then
-            m.(r).(c) <- Some " "
-          else if ch = 'D' then
-            m.(r).(c) <- Some "D"
-          else if ch = 's' then
-            m.(r).(c) <- Some "s"
-          else
-            m.(r).(c) <- Some "."
+          if ch <>'?' then
+            m.(r).(c) <- Some (String.make 1 ch)
       done;
     done; 
     m
@@ -64,7 +56,7 @@ and write_name_to_map m j nickname =
   let loc = member "name_location" j in
   let (r,c) = extract_coord loc in
     for i = 0 to 3 do
-      m.(r).(c+i) <- Some (String.make 1 nickname.[i])
+      m.(r).(c+i) <- Some ((String.make 1 nickname.[i])^"-")
     done
 (* [extract_exits jsonlst] parses [jsonlist] for all exits and returns them
  * as a (door id, coord) list. *)
@@ -93,12 +85,13 @@ and extract_waiting_spots jsonlst =
  * where the first element is the player, and the second element is their 
  * starting coordinate on the map. 
  *)
-let extract_starting_locations json =
+let extract_starting_locations m json=
   let sl = extract_info "starting_locations" to_list json in
     List.fold_left (fun acc j ->
       let p = extract_info "player" to_string j in
       let r = extract_info "r" to_int j in
       let c = extract_info "c" to_int j in
+        m.(r).(c) <- Some p;
         (p, (r,c))::acc ) [] sl
 
 (* [make_map] parses the json file storing information about the map and
@@ -117,7 +110,7 @@ let make_map () =
     exits         = elist; 
     buildings     = blist;
     in_building   = [];    (* no one starts in a building *)
-    location      = extract_starting_locations json; 
+    location      = extract_starting_locations m json; 
     waiting_spots = wslist;
     secrets       = slist;
   }

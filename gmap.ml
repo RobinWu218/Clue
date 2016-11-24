@@ -7,14 +7,42 @@ open Reader
 
 (* [constuct_map] creates a map data structure.
  *)
-let construct_map () =
-  failwith "unimplemented"
+let construct_map () = make_map()
 
 (* [print_map map] prints out an ascii representation of the map and where all
  * characters are on it to the console window.
+ * 
+ * Code was taken from 2016F Prelim2-Part2 and modified to fit our needs.
  *)
-let print_map map =
-  failwith "unimplemented"
+let rec print_map map =
+  map.map_values |> string map.num_rows map.num_cols |> print_string
+and string nr nc w =
+  let buf = Buffer.create ((nr+1)*(nc+1)) in
+  for i = 0 to nr-1 do
+    for j = 0 to nc-1 do
+      Buffer.add_string buf (display w.(i).(j))
+    done;
+    Buffer.add_string buf "\n"
+  done;
+  Buffer.contents buf
+and display n =
+  match n with
+    | None   -> ANSITerminal.sprintf [ANSITerminal.on_black] "%s" " "
+    | Some i -> ANSITerminal.sprintf 
+                [ANSITerminal.on_black; style_of_str i] "%s" (String.make 1 i.[0])
+and style_of_str i =
+  let open ANSITerminal in
+    match i with
+      | "." -> white (* ground *)
+      | "*" -> yellow (* wall   *)
+      | "D" -> green (* exit   *)
+      | "s" -> green (* secret passageway *)
+      | c ->
+          let len = String.length c in
+            if      len = 1 then yellow  (* part of clue header *)
+            else if len = 2 then cyan    (* part of building name *)
+            else red                     (* player name *)
+
 
 (* [get_exits map] returns an association list of exit coordinates to their
  * respective buildings.
