@@ -77,6 +77,7 @@ type ai = {
  * the init phase of the game. *)
 type state = {
   counter: int;
+  game_complete: bool;
   map: map;
   user: user;
   ais: ai list;
