@@ -115,7 +115,7 @@ type map = {
 type user = {
   character: prof;
   hand: hand;
-  was_moved: bool;
+  mutable was_moved: bool;
 }
 
 (* ai and player are almost the same except for that ai also has a list of
@@ -123,7 +123,7 @@ type user = {
 type ai = {
   character : prof;
   hand: hand;
-  was_moved: bool;
+  mutable was_moved: bool;
   is_in_game: bool;
   difficulty: int;
   destination: coord option;
