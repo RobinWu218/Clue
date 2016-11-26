@@ -82,5 +82,5 @@ type state = {
   user: user;
   ais: ai list;
   fact_file: case_file;
-  dictionary: prof * [ `AI | `User | `No ];
+  dictionary: prof * [ `AI | `User | `No ] list;
 }

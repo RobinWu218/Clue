@@ -86,6 +86,12 @@ val closest_buildings: map -> prof -> building list
  *)
 val leave_building: map -> prof -> int -> map
 
+(*[enter_building map p b] handles professor [p] entering into building [b] by
+ * updating the necessary values in [map] and returning the newly updated map
+ * requires: [p] is a valid professor name, [b] is a valid building name.
+ *)
+val enter_building: map -> prof -> building -> map
+
 (* [move map p dir n] tries to move professor [p] on the [map] [n] steps in [dir]
  * direction. 
  * Returns: the pair [(i, map2)], where 
