@@ -235,14 +235,14 @@ let move map p dir n =
         else map
     (* not in a building: *)
     | None -> map in
-    let (curr, curc) = get_current_location umap p in
-      (* replace current spot w/ the original terrain: *)
-      match umap.map_values.(curr).(curc) with
-      | None     -> failwith "Unexpected None value in teleport_professor"
-      | Some str ->
-        if (String.length str) <> (String.length p) then
-          umap.map_values.(curr).(curc) <- Some "DOOR"
-        else
-          umap.map_values.(curr).(curc) <- Some ".";
-      enter_building map p b
+  let (curr, curc) = get_current_location umap p in
+  (* replace current spot w/ the original terrain: *)
+  match umap.map_values.(curr).(curc) with
+  | None     -> failwith "Unexpected None value in teleport_professor"
+  | Some str ->
+    if (String.length str) <> (String.length p) then
+      umap.map_values.(curr).(curc) <- Some "DOOR";
+    else
+      umap.map_values.(curr).(curc) <- Some ".";
+    enter_building map p b
 
