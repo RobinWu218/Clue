@@ -27,7 +27,7 @@ and string nr nc w =
   Buffer.contents buf
 and display n =
   match n with
-    | None   -> ANSITerminal.sprintf [ANSITerminal.on_black] "%s" " "
+    | None   -> ANSITerminal.sprintf [ANSITerminal.on_black] "%s" "-"
     | Some i -> ANSITerminal.sprintf 
                 [ANSITerminal.on_black; style_of_str i] "%s" (String.make 1 i.[0])
 and style_of_str i =
@@ -146,6 +146,19 @@ and get_closest_exit lst (r,c) =
  * methods for moving around on the map
  *******************************************)
 
+let replace_tile m p r c =
+  match m.(r).(c) with
+  | None     -> failwith "Unexpected None value"
+  | Some str ->
+    if (String.length str) <> (String.length p) then
+      m.(r).(c) <- Some "DOOR"
+    else
+      m.(r).(c) <- Some "."
+
+let update_location locs p c =
+  let locL = List.remove_assoc p locs in
+    (p, c)::locL
+
 
 (* [leave_building map p n] moves professor [p] to exit number [n] of the current
  * building [p] is in, and performs all changes necessary to update the [map].
@@ -162,9 +175,8 @@ let leave_building map p n =
       let m = map.map_values in
         m.(r).(c)   <- None;
         m.(er).(ec) <- Some (p^"DOOR");
-        let locL  = List.remove_assoc p map.location in
-        let nloc  = (p,(er,ec))::locL in
-        {map with location = nloc }
+        let nloc = update_location map.location p (er,ec) in
+          {map with location = nloc }
     with
     | Not_found -> raise InvalidOperation
 
@@ -179,9 +191,8 @@ let rec enter_building map p b =
   let (r,c) = get_open_spot m wl in
     m.(r).(c) <- Some p; 
     let newL = (p, b)::map.in_building in
-    let locL = List.remove_assoc p map.location in
-    let nloc = (p, (r,c))::locL in
-    {map with location = nloc; in_building = newL }
+    let nloc = update_location map.location p (r,c) in
+      {map with location = nloc; in_building = newL }
 and get_open_spot m lst = match lst with
   | (r,c)::t -> if m.(r).(c) = None 
     then (r,c) 
@@ -189,14 +200,8 @@ and get_open_spot m lst = match lst with
   | [] -> failwith "No open waiting spots!"
 
 
-let replace_tile m p r c =
-  match m.(r).(c) with
-  | None     -> failwith "Unexpected None value"
-  | Some str ->
-    if (String.length str) <> (String.length p) then
-      m.(r).(c) <- Some "DOOR"
-    else
-      m.(r).(c) <- Some ".";
+
+
 
 (* [move map p dir n] tries to move professor [p] on the [map] [n] steps in 
  * [dir] direction.
@@ -212,31 +217,31 @@ let move map p dir n =
     | "down"  -> ( 1, 0)
     | "left"  -> ( 0,-1)
     | "right" -> ( 0, 1)
-    | _ -> failwith ("Invalid direction to move: "^dir)
-  in
+    | _ -> failwith ("Invalid direction to move: "^dir) in
   let m = map.map_values in
   let (sr,sc) = get_current_location map p in
-    replace_tile m p sr sc;
+    replace_tile m p sr sc; (* clear out starting location *)
     let cr = ref sr in
     let cc = ref sc in
     let i  = ref 0  in
-    (* move in [dir] direction while you are able to *)
-    while (!i < n) && ((m.(!cr + rd).(!cc + cd) = Some ".") || 
-      (m.(!cr + rd).(!cc + cd) = Some "DOOR")) do
-      incr i;
-      cr := !cr + rd;
-      cc := !cc + cd;
-    done;
-    (* if you end up a door, automatically enter the building *)
-    let nmap = 
-      if m.(!cr).(!cc) = Some "DOOR" then
-        let b = List.assoc (!cr,!cc) (get_exits map) in
-          enter_building map p b
-      else
-        begin
-          map
-        end in
-  (n-(!i), nmap)
+      (* move in [dir] direction while you are able to *)
+      while (!i < n) && ((m.(!cr + rd).(!cc + cd) = Some ".") || 
+        (m.(!cr + rd).(!cc + cd) = Some "DOOR")) do
+        incr i;
+        cr := !cr + rd;
+        cc := !cc + cd;
+      done;
+      (* if you end up a door, automatically enter the building *)
+      let nmap = 
+        if m.(!cr).(!cc) = Some "DOOR" then
+          let b = List.assoc (!cr,!cc) (get_exits map) in
+            i := n; (* no steps left after entering building *)
+            enter_building map p b
+        else
+          let nloc = update_location map.location p (!cr,!cc) in
+            m.(!cr).(!cc) <- Some p;
+            {map with location = nloc}
+        in (n-(!i), nmap)
 
 (* [move_towards_coord map p c n] tries to move professor [p] on the [map]
  * [n] steps towards the coordinate [c].
@@ -247,7 +252,7 @@ let move map p dir n =
  *)
 let move_towards_coord map p c n =
   let (r, c) = c in
-    if r < 0 || c < 0 || r >= map.num_rows || c >- map.num_cols
+    if r < 0 || c < 0 || r >= map.num_rows || c >= map.num_cols
     then raise InvalidLocation
     else failwith "unimplemented"
 
