@@ -141,7 +141,13 @@ type state = {
   user: user;
   ais: ai list;
   fact_file: case_file;
-  dictionary: prof * [ `AI | `User | `No ];
+  dictionary: prof * [ `AI | `User | `No ] list;
 }
 
+(*TODO
+let assign_was_moved s p b =
+  match List.assoc dictionary
+  if user then {s with s.user.was_moved = b}
+  else let the_ai = find_ai p 
+*)
 
