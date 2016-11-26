@@ -36,7 +36,7 @@ Baker Hall 6, Carpenter Hall 7, Duffield Hall 8, Gates Hall 9, Klarman Hall 10, 
 Bash 15, C 16, Java 17, MATLAB 18, OCaml 19, Python 20
 *)
 (* [card_of_int i] is the card representation of an integer from 0 to 20 *)
-let card_of_int (i:int) : card = 
+let card_of_int (i:int) : card =
   match i with
   | 0 -> Prof "Bracy"
   | 1 -> Prof "Clarkson"
@@ -62,8 +62,8 @@ let card_of_int (i:int) : card =
   | _ -> failwith "Illegal int representation of card"
 
 (* [int_of_card c] is the integer representation of a card *)
-let int_of_card (c:card) : int = 
-  match c with 
+let int_of_card (c:card) : int =
+  match c with
   | Prof "Bracy"          -> 0
   | Prof "Clarkson"       -> 1
   | Prof "Fan"            -> 2
@@ -125,7 +125,7 @@ type ai = {
   hand: hand;
   mutable was_moved: bool;
   is_in_game: bool;
-  difficulty: int;
+  difficulty: difficulty;
   destination: coord option;
   known_cards: card list;
   possible_cards: card list;

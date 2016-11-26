@@ -14,19 +14,19 @@ type t
  *)
 val init: string -> difficulty -> hand -> t
 
-(* [get_ai state p] 
- * Returns: the AI data structure for the AI playing character [p] 
+(* [get_ai state p]
+ * Returns: the AI data structure for the AI playing character [p]
  *)
 val get_ai: state -> string -> t
 
-(* [get_difficulty ai] 
- * Returns: the difficulty of the AI [ai]. 
+(* [get_difficulty ai]
+ * Returns: the difficulty of the AI [ai].
  *)
 val get_difficulty: t -> difficulty
 
 (* [still_in_game ai]
- * Returns: [true] iff the AI [ai] is still in the game. (If you're out you 
- * can still prove suggestions wrong) 
+ * Returns: [true] iff the AI [ai] is still in the game. (If you're out you
+ * can still prove suggestions wrong)
  *)
 val still_in_game: t -> bool
 
@@ -35,7 +35,7 @@ val still_in_game: t -> bool
  * Methods for interacting with game state
  ************************************************)
 
- (* [update_ai ai player guess player2] updates the knowledge of [ai] when 
+ (* [update_ai ai player guess player2] updates the knowledge of [ai] when
  * [player] makes a [guess] that got disproved by [player2]. *)
  val update_ai: t -> string -> card list -> string -> t
 
@@ -46,11 +46,11 @@ val still_in_game: t -> bool
  *   - forming and making suggestions/accusations
  * Returns: an updated game state.
  *)
-val step: state -> string -> state
+val step: state -> t -> state
 
-(* [reveal_card ai guess] figures out which card to reveal in response
+(* [disprove ai guess] figures out which card to reveal in response
  * to a suggestion [guess].
  * Returns: [Some c] where [c] is a card that [ai] can reveal. Or, if [ai] has
- * none of the cards in [guess], then it will return [None]. 
+ * none of the cards in [guess], then it will return [None].
  *)
-val reveal_card: t -> card list -> card option
+val disprove: t -> card list -> card option
