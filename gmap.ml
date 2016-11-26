@@ -74,7 +74,7 @@ let is_exit_blocked map (r,c) =
  *)
 let is_building_blocked map b =
   List.fold_left (fun acc (n, c) ->
-    acc && (is_exit_blocked map c) 
+    acc && (is_exit_blocked map c)) 
     true (List.assoc b map.exits)
 
 
@@ -127,7 +127,7 @@ let get_current_location map p =
  * If the professor is inside a building, the professor's waiting location is
  * used.
  *)
-let closest_buildings map p =
+let rec closest_buildings map p =
   let (my_r, my_c) = get_current_location map p in
       (* find closest exit for each building *)
       let exits = List.map (fun (b, el) -> 
@@ -168,6 +168,24 @@ let leave_building map p n =
     with
     | Not_found -> raise InvalidOperation
 
+
+(*[enter_building map p b] handles professor [p] entering into building [b] by
+ * updating the necessary values in [map] and returning the newly updated map
+ *)
+let rec enter_building map p b =
+  let m     = map.map_values in
+  let wl    = List.assoc b map.waiting_spots in
+  let (r,c) = get_open_spot m wl in
+    m.(r).(c) <- Some p; 
+    let newL = (p, b)::map.in_building in
+    let locL = List.remove_assoc p map.location in
+    let nloc = (p, (r,c))::locL in
+    {map with location = nloc; in_building = newL }
+and get_open_spot m lst = match lst with
+  | (r,c)::t -> if m.(r).(c) = None 
+    then (r,c) 
+    else get_open_spot m t
+  | [] -> failwith "No open waiting spots!"
 
 
 (* [move map p dir n] tries to move professor [p] on the [map] [n] steps in 
@@ -210,12 +228,15 @@ let move map p dir n =
  let teleport_professor map p b =
   let umap = 
     match get_current_building map p with
+    (* inside a building, [p] needs to leave first if not in building [b]  *)
     | Some curB ->
         if curB <> b 
-        then leave_building map b 1
+        then leave_building map p 1
         else map
+    (* not in a building: *)
     | None -> map in
     let (curr, curc) = get_current_location umap p in
+      (* replace current spot w/ the original terrain: *)
       match umap.map_values.(curr).(curc) with
       | None     -> failwith "Unexpected None value in teleport_professor"
       | Some str ->
@@ -223,10 +244,5 @@ let move map p dir n =
           umap.map_values.(curr).(curc) <- Some "DOOR"
         else
           umap.map_values.(curr).(curc) <- Some ".";
-      (* 
-      - add name to in_building list of map 
-      - find spot in room to update
-      - update was_moved
-      *)
-      failwith "unimplemented"
+      enter_building map p b
 
