@@ -59,13 +59,19 @@ let rec get_with_what () : string =
     | 'p' -> "Python"
     | _ -> print_endline "Invalid input; try again please."; get_with_what ()
 
-(* [user_accuse s] prompts the user for his/her accusation, determines whether the
- * user wins or not, and ends the game by returning the updated state. *)
+(* [user_accuse s] prompts the user for his/her accusation, determines whether 
+ * the user wins or not, and ends the game by returning the updated state.  
+ * Calls [teleport_professor] to move the suggested prof's corresponding ai 
+ * player to the suggested building and change that ai's was_moved field to 
+ * true if ai is not already in the building before being moved. *)
 let user_accuse (s:state) : state =
   let who = get_who () in
   let where = get_where () in
   let with_what = get_with_what () in
-  let map = teleport_professor s.map (Prof who) (Building where) in
+  let (moved_or_not, map) = 
+    if get_current_building s.map who <> (Some where)
+    then (true, (teleport_professor s.map who where))
+    else (false, s.map) in
   let accusation = 
     {who = Prof who; 
      where = Building where; 
@@ -74,7 +80,8 @@ let user_accuse (s:state) : state =
     print_endline "Awesome! You got the right accusation.";
     print_endline "YOU WIN!!!";
     print_endline "Clue will exit automatically. Do come again!";
-    {s with s.game_complete = true; s.map = map}
+    let news = {s with s.game_complete = true; s.map = map} in
+    assign_was_moved news who moved_or_not (*TODO*)
   else
     print_endline "Uh-oh, wrong accusation."
     print_endline "Unfortunately, you have just lost the game. :("
@@ -82,7 +89,8 @@ let user_accuse (s:state) : state =
     Printf.printf "Prof. %s created the virus with %s in %s Hall.\n" 
                   who with_what where;
     print_endline "Clue will exit automatically. Do come again!";
-    {s with s.game_complete = true; s.map = map}
+    let news = {s with s.game_complete = true; s.map = map} in
+    assign_was_moved news who moved_or_not (*TODO*)
 
 (* [accuse_or_not s] asks the user whether s/he wants to make an accusation or
  * not, and if so, updates the current state [s] by calling [accuse s]. *)
@@ -95,7 +103,9 @@ let rec accuse_or_not (s:state) : state =
   | _ -> print_endline "Invalid command; try again please."; accuse_or_not s
 
 (* [user_suggest s] prompts the user for his/her suggestion and calls 
- * ai_disprove until it is disproved or all passed TODO. *)
+ * ai_disprove until it is disproved or all passed. Calls [teleport_professor]
+ * to move the suggested prof's corresponding ai player to the suggested 
+ * building and change that ai's was_moved field to true. *)
 let user_suggest (s:state) : state =
   print_endline "Please make a suggestion about the current building now.";
   let who = get_who () in
@@ -103,7 +113,10 @@ let user_suggest (s:state) : state =
   let with_what = get_with_what () in
   match where_option with
   | Some where ->
-      let map = teleport_professor s.map (Prof who) (Building where) in
+      let (moved_or_not, map) = 
+        if get_current_building s.map who <> (Some where)
+        then (true, (teleport_professor s.map who where))
+        else (false, s.map) in
       let suggestion = 
         {who = Prof who; 
          where = Building where; 
@@ -117,6 +130,8 @@ If not disproved, user choose to make accusation or end turn
 update map
 AI past_guesses update?
       *)
+      let news = {s with s.game_complete = true; s.map = map} in
+      assign_was_moved news who moved_or_not (*TODO*)
   | None -> failwith "This should not happen in user_suggest"
 
 (* [int_option_of_string s] is [Some i] if [s] can be converted to int [i]
@@ -164,10 +179,10 @@ let rec user_move (n:int) (s:state) : state =
     let (y, map) = move s.map s.user.character dir x in
     user_move (n-x+y) {s with s.map = map}
 
-(* [use_secret b s] is the updated state after the user enters building [b]
- * via a secret passage. *)
-let use_secret (b:building) (s:state) : state =
-  let map = move_to_building s.map s.user.character b in (*TODO done in gmap.ml?*)
+(* [use_secret s] is the updated state after the user uses the secret passage
+ * in the current building. *)
+let use_secret (s:state) : state =
+  let map = use_secret_passage s.map s.user.character in
   user_suggest {s with s.map = map}
 
 (* [get_choice ()] is [true] if the user selects the first choice and [false]
@@ -182,9 +197,9 @@ let rec get_choice () : bool =
     | '1' -> true
     | '2' -> false
 
-(* [suggest_or_secret b s] prompts the user to choose between making a suggestion
- * and using the secret passage to enter building [b], and returns the updated 
- * state. *)
+(* [suggest_or_secret b s] prompts the user to choose between making a 
+ * suggestion and using the secret passage to enter building [b], and returns 
+ * the updated state. *)
 let suggest_or_secret (b:building) (s:state) : state =
   Printf.printf ("You can either 1 make a suggestion now or 2 use the " ^
                  "secret passage to get into %s Hall. [1/2]\n") b;
@@ -192,9 +207,9 @@ let suggest_or_secret (b:building) (s:state) : state =
   | true -> user_suggest s
   | false -> use_secret b s
 
-(* [secret_or_roll b s] prompts the user to choose between using the secret passage
- * to enter building [b] and rolling the dice to move out, and returns the updated 
- * state. *)
+(* [secret_or_roll b s] prompts the user to choose between using the secret 
+ * passage to enter building [b] and rolling the dice to move out, and returns 
+ * the updated state. *)
 let secret_or_roll (b:building) (s:state) : state =
   Printf.printf ("You can either 1 use the secret passage to get into %s " ^
                  "Hall or 2 roll the dice and move out. [1/2]\n") b;
@@ -216,44 +231,44 @@ let suggest_or_roll (s:state) : state =
  * determines what the user can do given that the user was moved to the 
  * building by someone else, and returns the updated state accordingly. *)
 let in_building_involuntarily (b:building) (s:state) : state =
-  let secret = get_secret s.map b in (*TODO done in gmap.ml?*)
+  let secret = has_secret s.map b in (*TODO done in gmap.ml?*)
   let blocked = is_building_blocked s.map b in
   match secret, blocked with
-  | Some b', true  -> 
+  | true,  true  -> 
       print_endline "There is a secret passage available.";
       print_endline "All exits to the current building are blocked."; 
-      suggest_or_secret b' s
-  | Some b', false -> 
+      suggest_or_secret s
+  | true,  false -> 
       print_endline "There is a secret passage available.";
-      secret_or_roll b' s
-  | None,    true  -> 
+      secret_or_roll s
+  | false, true  -> 
       print_endline "All exits to the current building are blocked."; 
       user_suggest s
-  | None,    false -> 
+  | false, false -> 
       suggest_or_roll s
 
 (* [in_building_voluntarily b s] checks whether there is a secrect passage
  * in user's current building [b] and whether exits to [b] are all blocked, 
  * determines what the user can do given that the user entered the building
  * on his/her own, and returns the updated state accordingly. *)
-let in_building_voluntarily (s:state) : state =
-  let secret = get_secret s.map b in (*TODO done in gmap.ml?*)
+let in_building_voluntarily (b:building) (s:state) : state =
+  let secret = has_secret s.map b in (*TODO done in gmap.ml?*)
   let blocked = is_building_blocked s.map b in
   match secret, blocked with
-  | Some b', true  -> 
+  | true,  true  -> 
       print_endline "There is a secret passage available.";
       print_endline "All exits to the current building are blocked."; 
       print_endline "You have to use the secret passage.";
-      use_secret b' s
-  | Some b', false -> 
+      use_secret s
+  | true,  false -> 
       print_endline "There is a secret passage available.";
-      secret_or_roll b' s
-  | None,    true  -> 
+      secret_or_roll s
+  | false, true  -> 
       print_endline "There is no secret passage available.";
       print_endline "All exits to the current building are blocked."; 
       print_endline "You have to wait until your next turn.";
       s
-  | None,    false -> 
+  | false, false -> 
       user_move (roll_two_dice ()) s
 
 (* [roll_two_dice ()] simulates rolling two dice, prints the results, and 
@@ -267,9 +282,9 @@ let roll_two_dice () : int =
   Printf.printf "Die 2: %d\n" d2;
   sum
 
-(* [user_turn s] is the new state after the user finishes his/her turn when
+(* [user_step s] is the new state after the user finishes his/her turn when
  * the current state is [s]. *)
-let user_turn (s:state) : state =
+let user_step (s:state) : state =
   let s1 = accuse_or_not s in
   if s1.game_complete then s1 else 
   match get_current_building s1.map s1.user.character with
@@ -279,3 +294,11 @@ let user_turn (s:state) : state =
       else in_building_voluntarily b s1
   | None ->
       user_move (roll_two_dice ()) s1
+
+(* [user_disprove s case_file] is the new state after the user disproves the  
+ * current suggestion (if possible). *)
+let user_disprove (s:state) (guess:case_file) : state =
+  let hand = s.user.hand in
+  failwith "TODO"
+
+
