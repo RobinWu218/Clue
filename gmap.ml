@@ -5,8 +5,7 @@ open Reader
  * utility methods
  *******************************************)
 
-(* [constuct_map] creates a map data structure.
- *)
+(* [constuct_map] creates a map data structure. *)
 let construct_map () = make_map()
 
 (* [print_map map] prints out an ascii representation of the map and where all
@@ -151,6 +150,10 @@ let closest_buildings map p =
  * methods for moving around on the map
  *******************************************)
 
+(*[replace_tile m p r c] resets the value of the tile professor [p] is or was 
+ * standing on in [m]. 
+ * requires: [p] is a valid professor name, [r] and [c] are in bounds on [m].
+ *)
 let replace_tile m p r c =
   match m.(r).(c) with
   | None        -> failwith "Unexpected None value"
@@ -162,6 +165,10 @@ let replace_tile m p r c =
     else
       m.(r).(c) <- Some "."
 
+(* [update_location locs p c] returns the list of locations [loc] with [p]'s
+ * location updated to [c]. 
+ * requires: [p] is a valid professor name.
+ *)
 let update_location locs p c =
   let locL = List.remove_assoc p locs in
     (p, c)::locL
@@ -194,7 +201,7 @@ let leave_building map p n =
  * requires: [p] is a valid professor name, [b] is a valid building name.
  *)
 let rec enter_building map p b =
-  print_endline ("entering building "^b);
+  print_endline ("Entering building "^b);
   let m     = map.map_values in
   let wl    = List.assoc b map.waiting_spots in
   let (r,c) = get_open_spot m wl in
@@ -409,3 +416,18 @@ let teleport_professor map p b =
       replace_tile umap.map_values p curr curc;
       enter_building map p b
 
+(* [use_secret_passage map p] returns the updated map when [p] takes the secret
+ * passage inside a room.
+ * requires: [p] is a valid professor name
+ * raises: InvalidOperation when [p] is not in a building. Also fails when the 
+ *         room has no secret passage.
+ *)
+let use_secret_passage map p =
+  match get_current_building map p with
+  | None   -> raise InvalidOperation
+  | Some b -> 
+    try
+      let toB = List.assoc b map.secrets in
+        teleport_professor map p toB
+    with
+    | _ -> failwith ("No secret passage to take in "^b)

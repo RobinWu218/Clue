@@ -1,27 +1,22 @@
 open Data
 open Reader
 
-(* [map] is the data structure that will store the state of the map *)
-type map
-
 (*******************************************
  * utility methods 
  *******************************************)
 
-(* [constuct_map professors] creates a map data structure with the character names
- * listed in [professors]. The first name in [professors] is taken as the character
- * for the user. The rest are AI. 
- * Returns: the starting map
- *)
+(* [constuct_map] creates a map data structure. *)
 val construct_map: unit -> map
 
 (* [print_map map] prints out an ascii representation of the map and where all
- * characters are on it to the console window. 
+ * characters are on it to the console window.
+ * 
+ * Code was taken from 2016F Prelim2-Part2 and modified to fit our needs.
  *)
 val print_map: map -> unit
 
-(* [get_exits map] 
- * Returns: a list of building exits on the map. 
+(* [get_exits map] returns an association list of exit coordinates to their
+ * respective buildings.
  *)
 val get_exits: map ->  coord * building list
 
@@ -125,3 +120,11 @@ val move_towards_building: map -> prof -> building -> int -> bool * map
  * Returns: the updated map.
  *)
 val teleport_professor: map -> prof -> building -> map
+
+(* [use_secret_passage map p] returns the updated map when [p] takes the secret
+ * passage inside a room.
+ * requires: [p] is a valid professor name
+ * raises: InvalidOperation when [p] is not in a building. Also fails when the 
+ *         room has no secret passage.
+ *)
+ val use_secret_passage: map -> prof -> map
