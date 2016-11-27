@@ -102,23 +102,24 @@ val move: map -> prof -> string -> int -> int * map
 
 (* [move_towards_coord map p c n] tries to move professor [p] on the [map] 
  * [n] steps towards the coordinate [c]. 
- * Returns: the pair [(tf, map2)], where 
- *   [tf]   is [true] iff [p] succesfully made it to [c]
+ * Returns: the pair [(i, map2)], where
+ *   [i]    is the steps remaining after going in [dir] direction, and
  *   [map2] is the updated map.
  * Raises: InvalidLocation if [c] is off the map or inside a building. 
  *)
 val move_toward_coord: map -> prof -> coord -> int -> bool * map
 
-(* [move_towards_building map p b n] tries to move professor [p] on the [map] [n] 
- * steps towards the building [b].
- * Returns: the pair [(tf, map2)], where 
- *   [tf]   is [true] iff [p] succesfully made it to building [b]
+(* [move_towards_building map p b n] tries to move professor [p] on the [map] 
+ * [n] steps towards the building [b].
+ * Requires: [n >= 0], [p] is not in a building already.
+ * Returns: the pair [(i, map2)], where
+ *   [i]    is the steps remaining after going in [dir] direction, and
  *   [map2] is the updated map.
  * Raises: InvalidLocation if [b] is not a valid building id.
  *)
 val move_towards_building: map -> prof -> building -> int -> bool * map
 
-(* [teleport_professor map p r] moves a professor [p] on the [map] to building [b]
+(* [teleport_professor map p b] moves a professor [p] on the [map] to building [b]
  * This event occurs whenever a suggestion or accusation is made; the
  * suspect is moved to the "scene of the crime."
  * Returns: the updated map.
