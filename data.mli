@@ -5,7 +5,6 @@ exception InvalidOperation
 (* [Difficulty] are variants describing the different levels of AI play. *)
 type difficulty = Easy | Medium | Expert
 
-(* types for the game*)
 (* professor who started the virus*)
 type prof = string
 
@@ -92,3 +91,8 @@ type state = {
  * whoever playing the character of prof [p] in state [s]. If no one plays that
  * character, then [s] is simply unchanged. *)
 val assign_was_moved : state -> prof -> bool -> state
+
+(* [roll_two_dice ()] simulates rolling two dice, prints the results, and 
+ * returns the sum. *)
+val roll_two_dice : unit -> int
+
