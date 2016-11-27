@@ -31,6 +31,9 @@ val card_of_int : int -> card
 (* [int_of_card c] is the integer representation of a card. *)
 val int_of_card : card -> int
 
+(* [string_of_card c] is the string representation of a card. *)
+val string_of_card : card -> string
+
 (* case_file is the type defining who made the virus in which building with 
  * what kind of programming language.*)
 type case_file = {who: prof; where: building; with_what: language}
@@ -84,3 +87,8 @@ type state = {
   fact_file: case_file;
   dictionary: prof * [ `AI | `User | `No ] list;
 }
+
+(* [assign_was_moved s p b] assigns bool [b] to the [was_moved] field of
+ * whoever playing the character of prof [p] in state [s]. If no one plays that
+ * character, then [s] is simply unchanged. *)
+val assign_was_moved : state -> prof -> bool -> state

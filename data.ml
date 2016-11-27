@@ -143,10 +143,19 @@ type state = {
   dictionary: prof * [ `AI | `User | `No ] list;
 }
 
-(*TODO
-let assign_was_moved s p b =
-  match List.assoc dictionary
-  if user then {s with s.user.was_moved = b}
-  else let the_ai = find_ai p 
-*)
-
+(* [assign_was_moved s p b] assigns bool [b] to the [was_moved] field of
+ * whoever playing the character of prof [p] in state [s]. If no one plays that
+ * character, then [s] is simply unchanged. *)
+let assign_was_moved (s:state) (p:prof) (b:bool) : state =
+  match List.assoc p dictionary with
+  | `AI -> 
+      let newais = List.map 
+                   (fun a -> if a.character = p 
+                             then {a with was_moved = b} 
+                             else a) s.ais in
+      {s with ais = newais}
+  | `User -> 
+      let newuser = {s.user with was_moved = b} in
+      {s with user = newuser}
+  | `No -> 
+      s

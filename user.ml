@@ -84,8 +84,8 @@ let user_accuse (s:state) : state =
     print_endline "Awesome! You got the right accusation.";
     print_endline "YOU WIN!!!";
     print_endline "Clue will exit automatically. Do come again!";
-    let news = {s with s.game_complete = true; s.map = map} in
-    assign_was_moved news who moved_or_not (*TODO*)
+    let news = {s with game_complete = true; map = map} in
+    assign_was_moved news who moved_or_not
   else
     print_endline "Uh-oh, wrong accusation."
     print_endline "Unfortunately, you have just lost the game. :("
@@ -93,8 +93,8 @@ let user_accuse (s:state) : state =
     Printf.printf "Prof. %s created the virus with %s in %s Hall.\n" 
                   who with_what where;
     print_endline "Clue will exit automatically. Do come again!";
-    let news = {s with s.game_complete = true; s.map = map} in
-    assign_was_moved news who moved_or_not (*TODO*)
+    let news = {s with game_complete = true; map = map} in
+    assign_was_moved news who moved_or_not
 
 (* [accuse_or_not s] asks the user whether s/he wants to make an accusation or
  * not, and if so, updates the current state [s] by calling [accuse s]. *)
@@ -135,7 +135,7 @@ update map
 AI past_guesses update?
       *)
       let news = {s with s.game_complete = true; s.map = map} in
-      assign_was_moved news who moved_or_not (*TODO*)
+      assign_was_moved news who moved_or_not
   | None -> failwith "This should not happen in user_suggest"
 
 (* [int_option_of_string s] is [Some i] if [s] can be converted to int [i]
@@ -181,13 +181,13 @@ let rec user_move (n:int) (s:state) : state =
   else
     let (dir, x) = get_movement n in
     let (y, map) = move s.map s.user.character dir x in
-    user_move (n-x+y) {s with s.map = map}
+    user_move (n-x+y) {s with map = map}
 
 (* [use_secret s] is the updated state after the user uses the secret passage
  * in the current building. *)
 let use_secret (s:state) : state =
   let map = use_secret_passage s.map s.user.character in
-  user_suggest {s with s.map = map}
+  user_suggest {s with map = map}
 
 (* [get_choice ()] is [true] if the user selects the first choice and [false]
  * if the user selects the second choice. *)
@@ -250,7 +250,7 @@ let suggest_or_roll (s:state) : state =
  * determines what the user can do given that the user was moved to the 
  * building by someone else, and returns the updated state accordingly. *)
 let in_building_involuntarily (b:building) (s:state) : state =
-  let secret = has_secret s.map b in (*TODO done in gmap.ml?*)
+  let secret = has_secret_passage s.map b in
   let blocked = is_building_blocked s.map b in
   match secret, blocked with
   | true,  true  -> 
@@ -271,7 +271,7 @@ let in_building_involuntarily (b:building) (s:state) : state =
  * determines what the user can do given that the user entered the building
  * on his/her own, and returns the updated state accordingly. *)
 let in_building_voluntarily (b:building) (s:state) : state =
-  let secret = has_secret s.map b in (*TODO done in gmap.ml?*)
+  let secret = has_secret_passage s.map b in
   let blocked = is_building_blocked s.map b in
   match secret, blocked with
   | true,  true  -> 
@@ -338,7 +338,7 @@ let user_step (s:state) : state =
   | None ->
       user_move (roll_two_dice ()) s1
 
-(* [user_disprove s case_file] is [None] if the user does not have any card
+(* [user_disprove s guess] is [None] if the user does not have any card
  * to disprove the suggestion [guess] and a card option if the user has the 
  * card(s) and wishes to disprove [guess] with that card. *)
 let user_disprove (s:state) (guess:case_file) : card option =
