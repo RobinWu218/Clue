@@ -5,37 +5,29 @@ exception InvalidOperation
 (* [Difficulty] are variants describing the different levels of AI play. *)
 type difficulty = Easy | Medium | Expert
 
-(**************************************************************************************)
+(*****************************************************************************)
 
-(* types for the game*)
-(* professor who started the virus*)
+(* types for the game *)
+(* professor who started the virus *)
 type prof = string
 
-(* building in where the virus started*)
+(* building in where the virus started *)
 type building = string
 
-(* language that the perpetrator used*)
+(* language that the perpetrator used *)
 type language = string
 
 (* card is the type that player can show to prove others' suggestions.
- * It can be a card describing a prof or a building or a language.*)
+ * It can be a card describing a prof or a building or a language. *)
 type card =
   | Prof of prof
   | Building of building
   | Language of language
 
-(*The hand of what cards a person currently possesses.*)
+(*The hand of what cards a person currently possesses. *)
 type hand = card list
 
-(*
-6 Professors:
-Anne Bracy 0, Michael Clarkson 1, Daisy Fan 2, David Gries 3, Joe Halpern 4, Walker White 5
-9 Buildings:
-Baker Hall 6, Carpenter Hall 7, Duffield Hall 8, Gates Hall 9, Klarman Hall 10, Olin Library 11, Phillips Hall 12, Rhodes Hall 13, Statler Hall 14
-6 Languages:
-Bash 15, C 16, Java 17, MATLAB 18, OCaml 19, Python 20
-*)
-(* [card_of_int i] is the card representation of an integer from 0 to 20 *)
+(* [card_of_int i] is the card representation of an integer from 0 to 20. *)
 let card_of_int (i:int) : card =
   match i with
   | 0 -> Prof "Bracy"
@@ -61,7 +53,7 @@ let card_of_int (i:int) : card =
   | 20 -> Language "Python"
   | _ -> failwith "Illegal int representation of card"
 
-(* [int_of_card c] is the integer representation of a card *)
+(* [int_of_card c] is the integer representation of a card. *)
 let int_of_card (c:card) : int =
   match c with
   | Prof "Bracy"          -> 0
@@ -87,8 +79,15 @@ let int_of_card (c:card) : int =
   | Language "Python"     -> 20
   | _ -> failwith "Illegal card"
 
-(* case_file is the type defining who made the virus in which building with what kind
- * of programming language.*)
+(* [string_of_card c] is the string representation of a card. *)
+let string_of_card (c:card) : string =
+  match c with
+  | Prof s -> "Prof. " ^ s
+  | Building s -> s ^ " Hall"
+  | Language s -> s
+
+(* case_file is the type defining who made the virus in which building with 
+ * which programming language. *)
 type case_file = {who: prof; where: building; with_what: language}
 
 (* integer pair representing a (row, column) on the map. *)
