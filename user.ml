@@ -1,6 +1,10 @@
 open Data
 open Gmap
 
+(********************)
+(* helper functions *)
+(********************)
+
 (* [get_who ()] prompts the user for the professor s/he wants to suggest
  * or accuse and returns the corresponding string. *)
 let rec get_who () : string =
@@ -196,6 +200,21 @@ let rec get_choice () : bool =
     match str'.[0] with 
     | '1' -> true
     | '2' -> false
+    | _ -> print_endline "Please type either 1 or 2!"; get_choice ()
+
+(* [get_choice_three ()] is [1] if the user selects the first choice, [2] if
+ * the user selects the second choice, and [3] if the third. *)
+let rec get_choice_three () : int =
+  let str = print_string  "> "; read_line () in
+  let str' = String.(str |> trim |> lowercase_ascii) in
+  if String.length str' = 0 then
+    print_endline "Please at least type something!"; get_choice ()
+  else 
+    match str'.[0] with 
+    | '1' -> 1
+    | '2' -> 2
+    | '1' -> 3
+    | _ -> print_endline "Please type 1 or 2 or 3!"; get_choice ()
 
 (* [suggest_or_secret b s] prompts the user to choose between making a 
  * suggestion and using the secret passage to enter building [b], and returns 
@@ -282,6 +301,30 @@ let roll_two_dice () : int =
   Printf.printf "Die 2: %d\n" d2;
   sum
 
+(* [choose_from_two c1 c2] is [Some c1] or [Some c2] as determined by user. *)
+let choose_from_two (c1:card) (c2:card) : card option =
+  Printf.printf "You can reveal either card 1: %s, or card 2: %s. [1/2]\n"
+                (string_of_card c1) (string_of_card c2);
+  match get_choice () with 
+  | true -> Some c1
+  | false -> Some c2
+
+(* [choose_from_three c1 c2 c3] is [Some c1] or [Some c2] or [Some c3] as 
+ * determined by user. *)
+let choose_from_three (c1:card) (c2:card) (c3:card) : card option =
+  Printf.printf ("You can reveal one of the three cards: \n" ^
+                 "card 1: %s, card 2: %s, or card 3: %s. [1/2/3]\n")
+                (string_of_card c1) (string_of_card c2) (string_of_card c3);
+  match get_choice_three () with 
+  | 1 -> Some c1
+  | 2 -> Some c2
+  | 3 -> Some c3
+  | _ -> failwith "This should not happen in choose_from_three in user.ml"
+
+(******************)
+(* main functions *)
+(******************)
+
 (* [user_step s] is the new state after the user finishes his/her turn when
  * the current state is [s]. *)
 let user_step (s:state) : state =
@@ -295,10 +338,46 @@ let user_step (s:state) : state =
   | None ->
       user_move (roll_two_dice ()) s1
 
-(* [user_disprove s case_file] is the new state after the user disproves the  
- * current suggestion (if possible). *)
-let user_disprove (s:state) (guess:case_file) : state =
+(* [user_disprove s case_file] is [None] if the user does not have any card
+ * to disprove the suggestion [guess] and a card option if the user has the 
+ * card(s) and wishes to disprove [guess] with that card. *)
+let user_disprove (s:state) (guess:case_file) : card option =
+  print_endline "It is your turn to disprove the suggstion:";
   let hand = s.user.hand in
-  failwith "TODO"
-
+  let {who; where; with_what} = guess in
+  let who_or_not = List.mem (Prof who) hand in
+  let where_or_not = List.mem (Building where) hand in
+  let with_what_or_not = List.mem (Language with_what) hand in
+  match who_or_not, where_or_not, with_what_or_not with
+  | true, true, true ->
+      print_endline ("You have three cards to disprove the suggestion" ^
+                     "and you have to reveal one of them.");
+      choose_from_three (Prof who) (Building where) (Language with_what)
+  | true, true, false ->
+      print_endline ("You have two cards to disprove the suggestion" ^
+                     "and you have to reveal one of them.");
+      choose_from_two (Prof who) (Building where)
+  | true, false, true ->
+      print_endline ("You have two cards to disprove the suggestion" ^
+                     "and you have to reveal one of them.");
+      choose_from_two (Prof who) (Language with_what)
+  | true, false, false ->
+      print_endline ("You have only one card to disprove the suggestion" ^
+                     "and you have to reveal the card.");
+      Some (Prof who)
+  | false, true, true ->
+      print_endline ("You have two cards to disprove the suggestion" ^
+                     "and you have to reveal one of them.");
+      choose_from_two (Building where) (Language with_what)
+  | false, true, false ->
+      print_endline ("You have only one card to disprove the suggestion" ^
+                     "and you have to reveal the card.");
+      Some (Building where)
+  | false, false, true ->
+      print_endline ("You have only one card to disprove the suggestion" ^
+                     "and you have to reveal the card.");
+      Some (Language with_what)
+  | false, false, false ->
+      print_endline "You do not have any cards to disprove the suggestion.";
+      None
 
