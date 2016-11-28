@@ -160,3 +160,14 @@ let assign_was_moved (s:state) (p:prof) (b:bool) : state =
   | `No ->
       s
 
+
+(* [roll_two_dice ()] simulates rolling two dice, prints the results, and
+ * returns the sum. *)
+let roll_two_dice () : int =
+  let d1 = 1 + Random.int 5 in
+  let d2 = 1 + Random.int 5 in
+  let sum = d1 + d2 in
+  print_endline "Rolling two dice...";
+  Printf.printf "Die 1: %d\n" d1;
+  Printf.printf "Die 2: %d\n" d2;
+  sum

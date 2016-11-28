@@ -5,6 +5,59 @@ open Gmap
 (* helper functions *)
 (********************)
 
+(* [int_option_of_string s] is [Some i] if [s] can be converted to int [i]
+ * using [int_of_string s], and [None] otherwise. *)
+let int_option_of_string (s:string) : int option =
+  try Some (int_of_string s)
+  with Failure _ -> None
+
+(* [get_choice ()] is [true] if the user selects the first choice and [false]
+ * if the user selects the second choice. *)
+let rec get_choice () : bool =
+  let str = print_string  "> "; read_line () in
+  let str' = String.(str |> trim |> lowercase_ascii) in
+  if String.length str' = 0 then
+    print_endline "Please at least type something!"; get_choice ()
+  else 
+    match str'.[0] with 
+    | '1' -> true
+    | '2' -> false
+    | _ -> print_endline "Please type either 1 or 2!"; get_choice ()
+
+(* [get_choice_three ()] is [1] if the user selects the first choice, [2] if
+ * the user selects the second choice, and [3] if the third. *)
+let rec get_choice_three () : int =
+  let str = print_string  "> "; read_line () in
+  let str' = String.(str |> trim |> lowercase_ascii) in
+  if String.length str' = 0 then
+    print_endline "Please at least type something!"; get_choice ()
+  else 
+    match str'.[0] with 
+    | '1' -> 1
+    | '2' -> 2
+    | '1' -> 3
+    | _ -> print_endline "Please type 1 or 2 or 3!"; get_choice ()
+
+(* [choose_from_two c1 c2] is [Some c1] or [Some c2] as determined by user. *)
+let choose_from_two (c1:card) (c2:card) : card option =
+  Printf.printf "You can reveal either card 1: %s, or card 2: %s. [1/2]\n"
+                (string_of_card c1) (string_of_card c2);
+  match get_choice () with 
+  | true -> Some c1
+  | false -> Some c2
+
+(* [choose_from_three c1 c2 c3] is [Some c1] or [Some c2] or [Some c3] as 
+ * determined by user. *)
+let choose_from_three (c1:card) (c2:card) (c3:card) : card option =
+  Printf.printf ("You can reveal one of the three cards: \n" ^
+                 "card 1: %s, card 2: %s, or card 3: %s. [1/2/3]\n")
+                (string_of_card c1) (string_of_card c2) (string_of_card c3);
+  match get_choice_three () with 
+  | 1 -> Some c1
+  | 2 -> Some c2
+  | 3 -> Some c3
+  | _ -> failwith "This should not happen in choose_from_three in user.ml"
+
 (* [get_who ()] prompts the user for the professor s/he wants to suggest
  * or accuse and returns the corresponding string. *)
 let rec get_who () : string =
@@ -138,12 +191,6 @@ AI past_guesses update?
       assign_was_moved news who moved_or_not
   | None -> failwith "This should not happen in user_suggest"
 
-(* [int_option_of_string s] is [Some i] if [s] can be converted to int [i]
- * using [int_of_string s], and [None] otherwise. *)
-let int_option_of_string (s:string) : int option =
-  try Some (int_of_string s)
-  with Failure _ -> None
-
 (* [get_movement n] prompts the user for the next steps s/he wants to take
  * and, if feasible, returns the corresponding tuple representation of the
  * desired movement. *)
@@ -188,33 +235,6 @@ let rec user_move (n:int) (s:state) : state =
 let use_secret (s:state) : state =
   let map = use_secret_passage s.map s.user.character in
   user_suggest {s with map = map}
-
-(* [get_choice ()] is [true] if the user selects the first choice and [false]
- * if the user selects the second choice. *)
-let rec get_choice () : bool =
-  let str = print_string  "> "; read_line () in
-  let str' = String.(str |> trim |> lowercase_ascii) in
-  if String.length str' = 0 then
-    print_endline "Please at least type something!"; get_choice ()
-  else 
-    match str'.[0] with 
-    | '1' -> true
-    | '2' -> false
-    | _ -> print_endline "Please type either 1 or 2!"; get_choice ()
-
-(* [get_choice_three ()] is [1] if the user selects the first choice, [2] if
- * the user selects the second choice, and [3] if the third. *)
-let rec get_choice_three () : int =
-  let str = print_string  "> "; read_line () in
-  let str' = String.(str |> trim |> lowercase_ascii) in
-  if String.length str' = 0 then
-    print_endline "Please at least type something!"; get_choice ()
-  else 
-    match str'.[0] with 
-    | '1' -> 1
-    | '2' -> 2
-    | '1' -> 3
-    | _ -> print_endline "Please type 1 or 2 or 3!"; get_choice ()
 
 (* [suggest_or_secret b s] prompts the user to choose between making a 
  * suggestion and using the secret passage to enter building [b], and returns 
@@ -289,37 +309,6 @@ let in_building_voluntarily (b:building) (s:state) : state =
       s
   | false, false -> 
       user_move (roll_two_dice ()) s
-
-(* [roll_two_dice ()] simulates rolling two dice, prints the results, and 
- * returns the sum. *)
-let roll_two_dice () : int =
-  let d1 = 1 + Random.int 5 in
-  let d2 = 1 + Random.int 5 in
-  let sum = d1 + d2 in
-  print_endline "Rolling two dice...";
-  Printf.printf "Die 1: %d\n" d1;
-  Printf.printf "Die 2: %d\n" d2;
-  sum
-
-(* [choose_from_two c1 c2] is [Some c1] or [Some c2] as determined by user. *)
-let choose_from_two (c1:card) (c2:card) : card option =
-  Printf.printf "You can reveal either card 1: %s, or card 2: %s. [1/2]\n"
-                (string_of_card c1) (string_of_card c2);
-  match get_choice () with 
-  | true -> Some c1
-  | false -> Some c2
-
-(* [choose_from_three c1 c2 c3] is [Some c1] or [Some c2] or [Some c3] as 
- * determined by user. *)
-let choose_from_three (c1:card) (c2:card) (c3:card) : card option =
-  Printf.printf ("You can reveal one of the three cards: \n" ^
-                 "card 1: %s, card 2: %s, or card 3: %s. [1/2/3]\n")
-                (string_of_card c1) (string_of_card c2) (string_of_card c3);
-  match get_choice_three () with 
-  | 1 -> Some c1
-  | 2 -> Some c2
-  | 3 -> Some c3
-  | _ -> failwith "This should not happen in choose_from_three in user.ml"
 
 (******************)
 (* main functions *)
