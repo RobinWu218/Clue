@@ -27,7 +27,6 @@ let init p d hand =
       destination = None;
       known_cards = hand;
       possible_cards = possible;
-      past_guesses   = [];
     }
 
 let rec help_get_ai ais p=
@@ -58,21 +57,13 @@ let still_in_game ai =
  * Methods for interacting with game state
  ************************************************)
 
-(* [update_ai ai player guess player2] updates the knowledge of [ai] when
+(* [update_ai state player guess player2] updates the knowledge of [state] when
  * [player] makes a [guess] that got disproved by [player2]. *)
-let update_ai ai prof1 guess prof2 =
+let update_state_guess state prof1 guess prof2 =
   (*TODO: if the ai has two of the three cards in its hand and the guess is
    * disproved by someone else, then that third card also becomes a known card.*)
-  {
-    character   = ai.character;
-    hand        = ai.hand;
-    was_moved   = ai.was_moved;
-    is_in_game  = ai.is_in_game;
-    difficulty  = ai.difficulty;
-    destination = ai.destination;
-    known_cards = ai.known_cards;
-    possible_cards=ai.possible_cards;
-    past_guesses=(guess, prof1, prof2)::ai.past_guesses
+  {state with
+    past_guesses=(guess, prof1, prof2)::state.past_guesses
   }
 
 (**)
@@ -254,8 +245,7 @@ let update_possible ai guess =
               of that type in ai.possible_cards.*)
 let update_ai_not_disproved ai guess =
 print_endline "No one was able to disprove the AI.";
-{ai with past_guesses=(guess, ai.character, None)::ai.past_guesses;
-          possible_cards=update_possible ai guess}
+{ai with possible_cards=update_possible ai guess}
 
 (*[update_ai_disproved ai guess player] takes the card [c] that was returned by
 [player] who disproved [guess] and updates [ai].*)
@@ -264,9 +254,7 @@ print_endline "No one was able to disprove the AI.";
 
 let update_ai_disproved ai c guess player =
   print_endline "The AI's guess has been disproved!";
-  { ai with
-    past_guesses = (guess, ai.character, player)::ai.past_guesses;
-    known_cards  = c::ai.known_cards }
+  { ai with known_cards  = c::ai.known_cards }
 
 (* [step state p] peforms a turn for player [p] (an AI player). This involves:
  *   - defining and setting goals by processing knowledge from suggestions and
@@ -304,10 +292,12 @@ let ai_step state ai =
                                       Prof "Gries"; Prof "Halpern"] in
                   let guess  = make_suggestion dest ai in
                   let state  = updated_state_map new_map in
-                  let new_ai =
+                  let (prof_option, new_ai) =
                     match help_disprove players state guess with
-                    |(None, None)     -> update_ai_not_disproved ai guess
-                    |(Some c, Some p) -> update_ai_disproved     ai c guess p
+                    |(None, None)     ->
+                                (None  , update_ai_not_disproved ai guess)
+                    |(Some c, Some p) ->
+                                (Some p, update_ai_disproved     ai c guess p)
                     | _ -> failwith "not a valid option" in
                   let new_ai_list = replace_ai_with_new new_ai state.ais in
                     (if easy_want_to_accuse ai.possible_cards
@@ -315,8 +305,10 @@ let ai_step state ai =
                       make_accusation state ai
                     else
                       { state with
+                        map = new_map;
                         counter = state.counter+1;
-                        ais     = new_ai_list
+                        ais     = new_ai_list;
+                        past_guesses = (guess, ai.character, prof_option)::state.past_guesses
                       })
                   (*{
                     counter=state.counter+1;
