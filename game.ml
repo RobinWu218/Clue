@@ -7,100 +7,7 @@ open User
 (******************************)
 (* init_state and its helpers *)
 (******************************)
-let int_to_prof i =
-    match i with
-    | 0 -> "Bracy"
-    | 1 -> "Clarkson"
-    | 2 -> "Fan"
-    | 3 -> "Gries"
-    | 4 -> "Halpern"
-    | 5 -> "White"
-    | _ -> failwith "illegal int"
 
-let prof_to_int s =
-  match s with 
-  | "Bracy" -> 0
-  | "Clarkson"  -> 1
-  | "Fan"  -> 2
-  | "Gries" -> 3
-  | "Halpern" -> 4
-  | "White" -> 5
-  | _ -> failwith "Illegal string"
-
-let int_to_building i =
-    match i with
-    | 0 -> "Baker"
-    | 1 -> "Carpenter"
-    | 2 -> "Duffield"
-    | 3 -> "Gates"
-    | 4 -> "Klarman"
-    | 5 -> "Olin"
-    | 6 -> "Phillips"
-    | 7 -> "Rhodes"
-    | 8 -> "Statler"
-    | _ -> failwith "illegal int"
-
-let int_to_lang i =
-    match i with
-    | 0 -> "Bash"
-    | 1 -> "C"
-    | 2 -> "Java"
-    | 3 -> "MATLAB"
-    | 4 -> "OCaml"
-    | 5 -> "Python"
-    | _ -> failwith "illegal int"
-
-(* [int_to_card i] is the card representation of an integer from 0 to 20. *)
-let int_to_card i =
-  match i with
-  | 0 -> "Bracy"
-  | 1 -> "Clarkson"
-  | 2 -> "Fan"
-  | 3 -> "Gries"
-  | 4 -> "Halpern"
-  | 5 -> "White"
-  | 6 ->  "Baker"
-  | 7 -> "Carpenter"
-  | 8 ->  "Duffield"
-  | 9 ->  "Gates"
-  | 10 ->  "Klarman"
-  | 11 ->  "Olin"
-  | 12 ->  "Phillips"
-  | 13 -> "Rhodes"
-  | 14 ->  "Statler"
-  | 15 -> "Bash"
-  | 16 -> "C"
-  | 17 -> "Java"
-  | 18 -> "MATLAB"
-  | 19 -> "OCaml"
-  | 20 -> "Python"
-  | _ -> failwith "Illegal int representation of card"
-
-(* [card_to_int c] is the integer representation of a card. *)
-let card_to_int c  =
-  match c with
-  | "Bracy"          -> 0
-  | "Clarkson"       -> 1
-  | "Fan"            -> 2
-  | "Gries"          -> 3
-  | "Halpern"        -> 4
-  | "White"          -> 5
-  | "Baker"      -> 6
-  |  "Carpenter"  -> 7
-  |  "Duffield"   -> 8
-  | "Gates"      -> 9
-  | "Klarman"    -> 10
-  | "Olin"       -> 11
-  | "Phillips"   -> 12
-  | "Rhodes"     -> 13
-  | "Statler"    -> 14
-  | "Bash"       -> 15
-  | "C"          -> 16
-  | "Java"       -> 17
-  | "MATLAB"     -> 18
-  | "OCaml"      -> 19
-  | "Python"     -> 20
-  | _ -> failwith "Illegal card"
 
 (* [generate_case_file ()] is the case file containing the answers to the
 questions: Who? Where? What language? *)
@@ -121,29 +28,6 @@ let select_non_repeat_lst excluded_lst lst size bound =
         else
           lst:= (r::!lst)
     )done
-(* [lst_to_prof_lst] is a string list indicting professors given by an int list*)
-let rec lst_to_prof_lst lst =
-    match lst with
-    | [] -> []
-    | h::t -> (int_to_prof h)::(lst_to_prof_lst t)
-
-(* [prof_lst_to_int_lst] is an int list given by the correcponding list of profs*)
-let rec prof_lst_to_int_lst prof_lst =
-    match prof_lst with
-    | [] -> []
-    | h::t -> (prof_to_int h)::(prof_lst_to_int_lst t)
-
-(* [lst_to_card_lst] is a string list indicting cards given by an int list*)
-let rec lst_to_card_lst lst =
-    match lst with
-    | [] -> []
-    | h::t -> (int_to_card h)::(lst_to_card_lst t)
-
-(* [card_lst_to_int_lst] is an int list given by the correcponding list of cards*)
-let rec card_lst_to_int_lst prof_lst =
-    match prof_lst with
-    | [] -> []
-    | h::t -> (card_to_int h)::(card_lst_to_int_lst t)
 
 (* [assign_characters n] is a list of non-repeating profs.
  * Requires: [n] is an integer between 3 and 6 inclusive.
