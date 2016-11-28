@@ -37,20 +37,20 @@ val still_in_game: t -> bool
 
  (* [update_ai ai player guess player2] updates the knowledge of [ai] when
  * [player] makes a [guess] that got disproved by [player2]. *)
- val update_ai: t -> string -> card list -> string -> t
+ val update_ai: t -> prof -> case_file -> prof -> t
 
-(* [step state p] peforms a turn for player [p] (an AI player). This involves:
+(* [ai_step state ai] peforms a turn for [ai]. This involves:
  *   - defining and setting goals by processing knowledge from suggestions and
  *     making deductions about other players' turns.
  *   - moving the AI around the map
  *   - forming and making suggestions/accusations
  * Returns: an updated game state.
  *)
-val step: state -> t -> state
+val ai_step: state -> t -> state
 
-(* [disprove ai guess] figures out which card to reveal in response
+(* [ai_disprove ai guess] figures out which card to reveal in response
  * to a suggestion [guess].
  * Returns: [Some c] where [c] is a card that [ai] can reveal. Or, if [ai] has
  * none of the cards in [guess], then it will return [None].
  *)
-val disprove: t -> card list -> card option
+val ai_disprove: t -> card list -> card option

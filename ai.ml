@@ -180,13 +180,48 @@ let rec help_disprove players state guess=
             |`No    -> help_disprove t state guess
               )
 
+(*if c is a prof*)
+let rec helper_update_prof poss c=
+      match poss with
+      |[]   -> [c]
+      |h::t -> if int_of_card h > 5 then h::helper_update_prof t c
+               else helper_update_prof t c
+
+(*if c is a building*)
+let rec helper_update_building poss c=
+      match poss with
+      |[]   -> [c]
+      |h::t -> if (int_of_card h < 6)||(int_of_card h > 14) then h::helper_update_building t c
+               else helper_update_building t c
+
+(*if c is a language*)
+let rec helper_update_lang poss c=
+      match poss with
+      |[]   -> [c]
+      |h::t -> if int_of_card h <15 then h::helper_update_lang t c
+               else helper_update_lang t c
+
 (*[update_possible] returns the updated list of possible cards. If a card was
  * not able to be disproved and the ai knows that it doesn't possess the card,
  * then all other cards of that type (building/prof/language) are removed from
  * the possible cards. If it was not able to be disproved and the ai does
- * possess it, it just returns the old list of possible cards.*)
-let update_possible ai c =
-  if (List.mem c ai.hand) then ai.possible_cards else if (int_of_card c)
+ * possess it, it just returns the old list of possible cards.
+ *)
+let update_possible ai guess =
+  let where = guess.where in
+  let what = guess.with_what in
+  let who = guess.who in
+  if (List.mem where ai.hand)&&(List.mem what ai.hand)&&(List.mem who ai.hand)
+              then ai.possible_cards
+              else if (List.mem where ai.hand)&&(List.mem what ai.hand) then
+                helper_update_prof ai.possible_cards who
+              else if
+
+
+
+
+
+
 
 
 (*[update_ai_not_disproved ai guess] updates the [ai] based on the fact that
@@ -204,7 +239,7 @@ print_endline "No one was able to disprove the AI.";
              (*if disproved, add card to known cards. Add this guess to
              past guesses.  *)
 let update_ai_disproved ai c guess player=
-print_endline "The AI's card has been disproved!";
+print_endline "The AI's guess has been disproved!";
 {ai with past_guesses=(guess, ai.character, player)::ai.past_guesses;
        known_cards=c::ai.known_cards}
 
@@ -222,13 +257,14 @@ let ai_step state ai =
       (Gmap.leave_building state.map 0);
       (step state ai) else
 
-let dest = (Gmap.closest_buildings state.buildling ai.character)[0] in
+let dest = List.hd (Gmap.closest_buildings state.buildling ai.character) in
             (
             match (Gmap.move_towards_building state.map ai.character moves dest) with
             |x, y -> let in_building = x; let new_map = y; ()
             |_    -> failwith "impossible"
-          );
-            if in_building then
+          ) in
+
+            if in_building then (
               let players =
               (match ai.character with
                 |Prof "Bracy"   -> [Prof "Clarkson"; Prof "Fan";
@@ -253,12 +289,15 @@ let dest = (Gmap.closest_buildings state.buildling ai.character)[0] in
                 |(Some c, Some p) -> update_ai_disproved ai c guess p
               ) in
               let new_ai_list=replace_ai_with_new new_ai state.ais in
-
+(
               if easy_want_to_accuse ai.possible_cards
                       then make_accusation state ai else
               {state with counter=state.counter+1;
-                ais = new_ai_list
-              }
+                ais = new_ai_list}
+              )
+
+) else updated_state_map new_map
+     end
 (*{
   counter=state.counter+1;
   game_complete= game_complete;
