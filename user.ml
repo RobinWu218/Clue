@@ -127,8 +127,8 @@ let user_accuse (s:state) : state =
   let where = get_where () in
   let with_what = get_with_what () in
   let (moved_or_not, map) = 
-    if get_current_building s.map who <> (Some where)
-    then (true, (teleport_professor s.map who where))
+    if get_current_building s.map who <> (Some where) (* Gmap *)
+    then (true, (teleport_professor s.map who where)) (* Gmap *)
     else (false, s.map) in
   let accusation = 
     {who = Prof who; 
@@ -139,7 +139,7 @@ let user_accuse (s:state) : state =
     print_endline "YOU WIN!!!";
     print_endline "Clue will exit automatically. Do come again!";
     let news = {s with game_complete = true; map = map} in
-    assign_was_moved news who moved_or_not
+    assign_was_moved news who moved_or_not (* Gmap *)
   else
     print_endline "Uh-oh, wrong accusation."
     print_endline "Unfortunately, you have just lost the game. :("
@@ -148,7 +148,7 @@ let user_accuse (s:state) : state =
                   who with_what where;
     print_endline "Clue will exit automatically. Do come again!";
     let news = {s with game_complete = true; map = map} in
-    assign_was_moved news who moved_or_not
+    assign_was_moved news who moved_or_not (* Gmap *)
 
 (* [accuse_or_not s] asks the user whether s/he wants to make an accusation or
  * not, and if so, updates the current state [s] by calling [accuse s]. *)
@@ -203,16 +203,16 @@ and disprove_helper_case (p:prof) (n:int) (guess:case_file) (s:state)
 let user_suggest (s:state) : state =
   print_endline "Please make a suggestion about the current building now.";
   let who = get_who () in
-  let where_option = get_current_building s1.map s1.user.character in
+  let where_option = get_current_building s1.map s1.user.character in(* Gmap *)
   let with_what = get_with_what () in
   match where_option with
   | Some where ->
       let (moved_or_not, map) = 
-        if get_current_building s.map who <> (Some where)
-        then (true, (teleport_professor s.map who where))
+        if get_current_building s.map who <> (Some where) (* Gmap *)
+        then (true, (teleport_professor s.map who where)) (* Gmap *)
         else (false, s.map) in
       let news = {s with game_complete = true; map = map} in
-      let news' = assign_was_moved news who moved_or_not in
+      let news' = assign_was_moved news who moved_or_not in (* Gmap *)
       let guess = 
         {who = Prof who; 
          where = Building where; 
@@ -224,14 +224,14 @@ let user_suggest (s:state) : state =
           Printf.printf "Prof. %s disproved your suggestion with card %s." 
                         p (string_of_card c);
           let news'' = 
-            {news' with past_guesses = 
-              (guess, s.user.character, Some prof)} in
+            {news' with past_guesses = (*TODO possibly have a helper.ml?*)
+              (guess, s.user.character, Some prof)::news'.past_guesses} in
           accuse_or_not news''
       | None -> 
           print_endline "No one can disprove your suggestion."; 
           let news'' = 
             {news' with past_guesses = 
-              (guess, s.user.character, None)} in
+              (guess, s.user.character, None)::news'.past_guesses} in
           accuse_or_not news''
       end
   | None -> failwith "This should not happen in user_suggest in user.ml"
@@ -268,17 +268,20 @@ let rec user_move (n:int) (s:state) : state =
     failwith "This should not happen in user_move"
   if n = 0 then 
     print_endline "You cannot move anymore.";
-    if is_in_building s.map s.user.character then user_suggest s
+    if is_in_building s.map s.user.character (* Gmap *)
+    then user_suggest s
     else s
   else
     let (dir, x) = get_movement n in
-    let (y, map) = move s.map s.user.character dir x in
+    let (y, map) = move s.map s.user.character dir x in (* Gmap *)
     user_move (n-x+y) {s with map = map}
 
-(* [use_secret s] is the updated state after the user uses the secret passage
- * in the current building. *)
+(* [use_secret s] is the updated state after the user uses the secret 
+ * passage in the current building. 
+ * Requires: s.user is currently in a building where there is a secret 
+ *           passage. *)
 let use_secret (s:state) : state =
-  let map = use_secret_passage s.map s.user.character in
+  let map = use_secret_passage s.map s.user.character in (* Gmap *)
   user_suggest {s with map = map}
 
 (* [suggest_or_secret b s] prompts the user to choose between making a 
@@ -289,7 +292,7 @@ let suggest_or_secret (b:building) (s:state) : state =
                  "secret passage to get into %s Hall. [1/2]\n") b;
   match get_choice_two () with 
   | 1 -> user_suggest s
-  | 2 -> use_secret b s
+  | 2 -> use_secret s
   | _ -> failwith "This should not happen in suggest_or_secret in user.ml"
 
 (* [secret_or_roll b s] prompts the user to choose between using the secret 
@@ -299,7 +302,7 @@ let secret_or_roll (b:building) (s:state) : state =
   Printf.printf ("You can either 1 use the secret passage to get into %s " ^
                  "Hall or 2 roll the dice and move out. [1/2]\n") b;
   match get_choice_two () with 
-  | 1 -> use_secret b s
+  | 1 -> use_secret s
   | 2 -> user_move (roll_two_dice ()) s
   | _ -> failwith "This should not happen in secret_or_roll in user.ml"
 
@@ -323,7 +326,7 @@ let secret_or_roll_or_suggest (b:building) (s:state) : state =
   match get_choice_three () with 
   | 1 -> user_suggest s
   | 2 -> user_move (roll_two_dice ()) s
-  | 3 -> use_secret b s
+  | 3 -> use_secret s
   | _ -> failwith "This should not happen in secret_or_roll_or_suggest in user"
 
 (* [in_building_involuntarily b s] checks whether there is a secrect passage
@@ -356,8 +359,8 @@ let in_building_involuntarily (b:building) (s:state) : state =
  * determines what the user can do given that the user entered the building
  * on his/her own, and returns the updated state accordingly. *)
 let in_building_voluntarily (b:building) (s:state) : state =
-  let secret = has_secret_passage s.map b in
-  let blocked = is_building_blocked s.map b in
+  let secret = has_secret_passage s.map b in (* Gmap *)
+  let blocked = is_building_blocked s.map b in (* Gmap *)
   match secret, blocked with
   | true,  true  -> 
       print_endline "There is a secret passage available.";
@@ -384,7 +387,7 @@ let in_building_voluntarily (b:building) (s:state) : state =
 let user_step (s:state) : state =
   let s1 = accuse_or_not s in
   if s1.game_complete then s1 else 
-  match get_current_building s1.map s1.user.character with
+  match get_current_building s1.map s1.user.character with (* Gmap *)
   | Some b ->
       if s1.user.was_moved 
       then in_building_involuntarily b s1
