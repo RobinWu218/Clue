@@ -38,7 +38,7 @@ let prof_of_int (i:int) : prof =
 
 (* [int_of_prof i] is the integer corresponding to a prof. *)
 let int_of_prof (p:prof) : int =
-  match p with 
+  match p with
   | "Bracy"     -> 0
   | "Clarkson"  -> 1
   | "Fan"       -> 2
@@ -137,7 +137,7 @@ let rec lst_to_prof_lst (lst:string list) : prof list =
   | [] -> []
   | h::t -> (prof_of_int h)::(lst_to_prof_lst t)
 
-(* [prof_lst_to_int_lst lst] is an int list corresponding to prof list 
+(* [prof_lst_to_int_lst lst] is an int list corresponding to prof list
  * [lst]. *)
 let rec prof_lst_to_int_lst (lst:prof list) : int list =
   match lst with
@@ -156,15 +156,15 @@ let rec card_lst_to_int_lst (lst:card list) : int list =
   | [] -> []
   | h::t -> (int_of_card h)::(card_lst_to_int_lst t)
 
-(* [case_file] represents the fact file, a suggestion, or an accusation, which 
- * includes information of who started the virus in which building with which 
+(* [case_file] represents the fact file, a suggestion, or an accusation, which
+ * includes information of who started the virus in which building with which
  * programming language. *)
 type case_file = {who: prof; where: building; with_what: language}
 
 (* [coord] represents a (row, column) coordinate on the map. *)
 type coord = int * int
 
-(* [dir] represents the direction and number of steps of a player's movement 
+(* [dir] represents the direction and number of steps of a player's movement
  * on the map. *)
 type dir = Up of int | Down of int | Left of int | Right of int
 
@@ -172,8 +172,8 @@ type dir = Up of int | Down of int | Left of int | Right of int
 type map = {
   num_rows:       int;
   num_cols:       int;
-  exits:         (building * ((int * coord) list)) list; 
-       (* e.g., [("Gates",   [(1,    (0,0)); 
+  exits:         (building * ((int * coord) list)) list;
+       (* e.g., [("Gates",   [(1,    (0,0));
                              (2,    (5,5))     ])     ] *)
   buildings:      building list;
   waiting_spots: (building * (coord list)) list;
@@ -209,7 +209,7 @@ type ai = {
  * information. *)
 type state = {
   fact_file:     case_file;
-  dictionary:    (prof * [ `AI | `User | `No ]) list;
+  dictionary:    (prof * [`AI |`User |`No ]) list;
   (* Below are fields that can change throughout the game. *)
   game_complete: bool;
   counter:       int;
@@ -224,18 +224,18 @@ type state = {
  * character, then [s] is simply unchanged. *)
 let assign_was_moved (s:state) (p:prof) (b:bool) : state =
   match List.assoc p dictionary with
-  | `AI -> 
-      let newais = List.map 
-        (fun a -> if a.character = p 
-                  then {a with was_moved = b} 
+  | `AI ->
+      let newais = List.map
+        (fun a -> if a.character = p
+                  then {a with was_moved = b}
                   else a) s.ais in
         {s with ais = newais}
-  | `User -> 
+  | `User ->
       let newuser = {s.user with was_moved = b} in
         {s with user = newuser}
   | `No -> s
 
-(* [roll_two_dice ()] simulates rolling two dice, prints the results, and 
+(* [roll_two_dice ()] simulates rolling two dice, prints the results, and
  * returns the sum. *)
 let roll_two_dice () : int =
   let d1 = 1 + Random.int 5 in
