@@ -5,7 +5,16 @@ exception InvalidLocation
 exception InvalidOperation
 
 (* [difficulty] represents the difficulty level of each AI player. *)
-type difficulty = Easy | Medium | Expert
+type difficulty = Easy | Medium | Hard
+
+(*TODO
+ * Requires: n is 1 or 2 or 3 *)
+let difficulty_of_int (n:int) : difficulty =
+  match n with
+  | 1 -> Easy
+  | 2 -> Medium
+  | 3 -> Hard
+  | _ -> failwith "This should not happen in difficulty_of_int"
 
 (* [prof] represents one of the six professors in game. *)
 type prof = string

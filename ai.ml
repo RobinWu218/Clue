@@ -5,10 +5,10 @@ open Gmap
 (* utility methods *)
 (*******************)
 
-(* [init_ai p h d] is the AI data structure that represents an AI playing 
+(* [init p h d] is the AI data structure that represents an AI playing
  * character [p] on difficulty level [d], with hand [h].
  *)
-let init_ai (p:prof) (h:hand) (d:difficulty) : ai =
+let init (p:prof) (h:hand) (d:difficulty) : ai =
   let possible = [
     Prof "Bracy";        Prof "Clarkson";      Prof "Fan";
     Prof "Gries";        Prof "Halpern";       Prof "White";
@@ -18,17 +18,17 @@ let init_ai (p:prof) (h:hand) (d:difficulty) : ai =
     Language "Bash";     Language "C";         Language "Java";
     Language "MATLAB";   Language "OCaml";     Language "Python"] in
   {
-    character      = p;
-    hand           = h;
-    difficulty     = d;
-    was_moved      = false;
-    is_in_game     = true;
-    destination    = None;
-    known_cards    = hand;
-    possible_cards = possible;
+  character      = p;
+  hand           = h;
+  difficulty     = d;
+  was_moved      = false;
+  is_in_game     = true;
+  destination    = None;
+  known_cards    = h;
+  possible_cards = possible;
   }
 
-(* [get_ai p s] is the AI data structure for the AI playing character [p] in 
+(* [get_ai p s] is the AI data structure for the AI playing character [p] in
  * state [s].
  * Raises: Not_found if [p] is not represented by an AI in [s].
  *)
@@ -40,7 +40,7 @@ let get_ai (p:prof) (s:state) : ai =
 let get_difficulty (ai:ai) : difficulty =
   ai.difficulty
 
-(* [still_in_game ai] is [true] iff the AI [ai] is still in the game. 
+(* [still_in_game ai] is [true] iff the AI [ai] is still in the game.
  * If that ai is out, s/he can still prove suggestions wrong.
  *)
 let still_in_game (ai:ai) : bool =
@@ -148,8 +148,8 @@ let easy_want_to_accuse ai : bool =
 
 (*[updated_state_map state new_map] returns the updated state with new_map.
  * Nothing else in state is changed*)
-let updated_state_map state new_map =
-  {state with map = new_map}
+let updated_state_map state new_map : state =
+  let s ={state with map = new_map} in s
 
 (*[character_to_ai] prof ai_list] takes in the prof and a list of ais and returns
  * the ai that corresponds to that professor.
@@ -174,7 +174,7 @@ let rec easy_helper_disprove hand guess = match hand with
  * Returns: [Some c] where [c] is a card that [ai] can reveal. Or, if [ai] has
  * none of the cards in [guess], then it will return [None].
  *)
-let ai_disprove ai (guess: case_file) =
+let disprove ai (guess: case_file) =
     easy_helper_disprove ai.hand guess
   (*|Medium -> failwith "unimplemented"
   |Hard   -> (*if one of the cards has already been in a past guess, the ai wants to
@@ -193,13 +193,13 @@ let rec help_disprove players state guess =
       begin
         match (List.assoc h state.dictionary) with
         |`AI   ->
-          let proof = ai_disprove (character_to_ai h state.ais) guess in
+          let proof = disprove (character_to_ai h state.ais) guess in
             if   proof = None
             then (Printf.printf "%s was not able to disprove it. " h;
                         help_disprove t state guess)
             else (Printf.printf "%s was able to disprove it. " h; (proof, Some h))
         |`User ->
-          let proof = User.user_disprove state guess in
+          let proof = User.disprove state guess in
             if   proof = None
             then (Printf.printf "%s was not able to disprove it. " h;
                         help_disprove t state guess)
@@ -278,29 +278,29 @@ let update_ai_disproved ai c guess player =
   print_endline "The AI's guess has been disproved!";
   { ai with known_cards  = c::ai.known_cards }
 
-(* [step state p] peforms a turn for player [p] (an AI player). This involves:
+(* [step a s] peforms a turn for AI player [a]. This involves:
  *   - defining and setting goals by processing knowledge from suggestions and
  *     making deductions about other players' turns.
  *   - moving the AI around the map
  *   - forming and making suggestions/accusations
  * Returns: an updated game state.
  *)
-let rec ai_step state ai =
+let rec step ai state =
   let moves = roll_two_dice () in
   if ai.is_in_game then
     begin
     if is_in_building state.map ai.character
     then
       begin
-      leave_building state.map ai.character 0;
-      ai_step state ai
+      ignore (leave_building state.map ai.character 0);
+      step ai state
       end
     else
       begin
-      let dest = List.hd (closest_buildings state.map ai.character) in
+      let (i, dest) = List.hd (closest_buildings state.map ai.character) in
       let (in_building, new_map) = move_towards_building state.map
                                             ai.character dest moves in
-      if in_building then
+      if in_building then begin
         let players =
           match ai.character with
                   |"Bracy"   -> ["Clarkson";  "Fan";  "Gries";
@@ -314,7 +314,8 @@ let rec ai_step state ai =
                   |"Halpern" -> [ "White";  "Bracy"; "Clarkson";
                                        "Fan";  "Gries"]
                   |"White"   -> [ "Bracy"; "Clarkson";  "Fan";
-                                       "Gries";  "Halpern"] in
+                                       "Gries";  "Halpern"]
+                  |_   -> failwith "This should not happen in step" in
           let guess = make_suggestion dest ai in
           let new_state = updated_state_map state new_map in
           let (prof_option, new_ai) =
@@ -326,9 +327,10 @@ let rec ai_step state ai =
                     | _ -> failwith "not a valid option" in
           let new_ai_list = replace_ai_with_new new_ai state.ais in
           if easy_want_to_accuse ai
-          then
+          then begin
             make_accusation new_state ai
-          else
+          end
+          else begin
             {new_state with
                         ais     = new_ai_list;
                         past_guesses = (guess, ai.character, prof_option)::state.past_guesses
@@ -343,10 +345,289 @@ let rec ai_step state ai =
                     fact_file=state.fact_file;
                     dictionary=state.dictionary;
                   }*)
+          end
       end
+    else begin
+      updated_state_map state new_map
+    end
+    end
+  end
+    else state
+
+(********************************************************************)
+(* alice's scratch XXD *)
+
+(*TODO*)
+(*let accuse (a:ai) (s:state) : state =
+  failwith "TODO"
+
+(* TODO decides whether to accuse or not in the middle of an AI's turn
+ * AI logic:
+ *   - Easy:   simply not accuse and proceed
+ *   - Medium: TODO
+ *   - Hard:   TODO *)
+let accuse_or_not_middle (a:ai) (s:state) : state =
+  match a.difficulty with
+  | Easy   -> s
+  | Medium -> failwith "TODO"
+  | Hard   -> failwith "TODO"
+
+(* TODO decides whether to accuse or not at the start of an AI's turn
+ * AI logic:
+ *   - Easy:   simply not accuse and proceed
+ *   - Medium: TODO
+ *   - Hard:   TODO *)
+let accuse_or_not_start (a:ai) (s:state) : state =
+  match a.difficulty with
+  | Easy   ->
+      begin
+      Printf.printf "Prof. %s does not wish to make an accusation right now.\n"
+                    a.character;
+      s
+      end
+  | Medium -> failwith "TODO"
+  | Hard   -> failwith "TODO"
+
+(*TODO
+ * AI logic:
+ *   - Easy: simply chooses the first card. *)
+let choose_from_two (c1:card) (c2:card) : card option =
+  match a.difficulty with
+  | Easy   -> Some c1
+  | Medium -> failwith "TODO"
+  | Hard   -> failwith "TODO"
+
+(*TODO
+ * AI logic:
+ *   - Easy: simply chooses the first card. *)
+let choose_from_three (c1:card) (c2:card) (c3:card) : card option =
+  match a.difficulty with
+  | Easy   -> Some c1
+  | Medium -> failwith "TODO"
+  | Hard   -> failwith "TODO"
+
+(*TODO*)
+let disprove (a:ai) (guess:case_file) : card option =
+  Printf.printf "It is Prof. %s's turn to disprove the suggstion:\n"
+                a.character;
+  let hand = a.hand in
+  let {who; where; with_what} = guess in
+  let who_or_not = List.mem (Prof who) hand in
+  let where_or_not = List.mem (Building where) hand in
+  let with_what_or_not = List.mem (Language with_what) hand in
+  match who_or_not, where_or_not, with_what_or_not with
+  | true, true, true ->
+      Printf.printf "Prof. %s disproved the suggestion.\n" a.character;
+      choose_from_three (Prof who) (Building where) (Language with_what)
+  | true, true, false ->
+      Printf.printf "Prof. %s disproved the suggestion.\n" a.character;
+      choose_from_two (Prof who) (Building where)
+  | true, false, true ->
+      Printf.printf "Prof. %s disproved the suggestion.\n" a.character;
+      choose_from_two (Prof who) (Language with_what)
+  | true, false, false ->
+      Printf.printf "Prof. %s disproved the suggestion.\n" a.character;
+      Some (Prof who)
+  | false, true, true ->
+      Printf.printf "Prof. %s disproved the suggestion.\n" a.character;
+      choose_from_two (Building where) (Language with_what)
+  | false, true, false ->
+      Printf.printf "Prof. %s disproved the suggestion.\n" a.character;
+      Some (Building where)
+  | false, false, true ->
+      Printf.printf "Prof. %s disproved the suggestion.\n" a.character;
+      Some (Language with_what)
+  | false, false, false ->
+      Printf.printf "Prof. %s was not able to disprove the suggestion.\n"
+                    a.character;
+      None
+
+(* [disprove_loop n guess s] is [Some (prof, card)] if [prof] disproved
+ * [guess] with [card] and [None] if no one can disprove [guess].
+ * It starts with the professor corresponding to integer [n], goes along
+ * the loop B->C->F->G->H->W->B until someone is able to disprove [guess]
+ * or when the user's character is reached. *)
+let rec disprove_loop (ncurrent:int) (n:int) (guess:case_file) (s:state)
+                        : ((prof * card) option) =
+  let n' = n mod 6 in
+  if n' = ncurrent then None else
+  match n' with
+  | 0 -> disprove_case "Bracy"    ncurrent 0 guess s
+  | 1 -> disprove_case "Clarkson" ncurrent 1 guess s
+  | 2 -> disprove_case "Fan"      ncurrent 2 guess s
+  | 3 -> disprove_case "Gries"    ncurrent 3 guess s
+  | 4 -> disprove_case "Halpern"  ncurrent 4 guess s
+  | 5 -> disprove_case "White"    ncurrent 5 guess s
+  | _ -> failwith "This should not happen in disprove_loop in user.ml"
+(* [disprove_case p n guess s] checks if the professor corresponding
+ * to integer [n] is represented by any ai and if so, if that ai can disprove
+ * [guess], before possibly calling [disprove_loop (n+1) guess s] to move
+ * on to check the next professor. *)
+and disprove_case (p:prof) (ncurrent:int) (n:int) (guess:case_file) (s:state)
+                         : ((prof * card) option) =
+  match List.assoc p s.dictionary with
+  | `AI ->
+      let ai = List.find (fun a -> a.character = p) s.ais in (*TODO use get_ai?*)
+      begin
+      match disprove ai guess with
+      | Some card -> Some (p, card)
+      | None -> disprove_loop ncurrent (n+1) guess s
+      end
+  | `User ->
+      begin
+      match User.disprove s guess with
+      | Some card -> Some (p, card)
+      | None -> disprove_loop ncurrent (n+1) guess s
+      end
+  | `No ->
+      disprove_loop ncurrent (n+1) guess s
+
+(*TODO
+ * AI logic: very stupid, always makes the same suggestion. *)
+let suggest_easy (a:ai) (s:state) : (prof * language) =
+  ("Bracy", "Bash")
+
+(*TODO*)
+let suggest (a:ai) (s:state) : state =
+  Printf.printf "Prof. %s is making a suggestion about the current building.\n"
+                a.character;
+  let where_option = get_current_building s.map a.character in (* Gmap *)
+  match where_option with
+  | Some where ->
+    let (who, with_what) =
+      begin
+      match a.difficulty with
+      | Easy   -> suggest_easy a s
+      | Medium -> failwith "TODO"
+      | Hard   -> failwith "TODO"
+      end
+    let (moved_or_not, map) =
+      if get_current_building s.map who <> (Some where) (* Gmap *)
+      then (true, (teleport_professor s.map who where)) (* Gmap *)
+      else (false, s.map) in
+    let news = {s with map = map} in
+    let news' = assign_was_moved news who moved_or_not in (* Gmap *)
+    let guess =
+      {who = who;
+       where = where;
+       with_what = with_what} in
+    let ncurrent = int_of_card (Prof a.character) in
+    begin
+    match disprove_loop ncurrent (ncurrent+1) guess s with
+    | Some (p, c) ->
+        Printf.printf "Prof. %s disproved Prof. %s's suggestion.\n"
+                      p a.character;
+        let newais = List.map (fun a' ->
+          if a' <> a then a'
+          else {a with known_cards = c::a.known_cards})
+          s.ais in
+        let news'' =
+          {news' with ais = newais;
+                      past_guesses = (*TODO possibly have a helper.ml?*)
+                      (guess, a.character, Some p)::news'.past_guesses;} in
+        accuse_or_not_middle news''
+    | None ->
+        Printf.printf "No one can disprove Prof. %s's suggestion.\n"
+                      a.character;
+        let news'' =
+          {news' with past_guesses =
+                      (guess, a.character, None)::news'.past_guesses} in
+        accuse_or_not_middle news''
+    end
+  | None -> failwith "This should not happen in suggest in ai.ml"
+
+(*TODO
+ * Requires: n > 0.
+ * AI logic: finds the closest building and tries to enter that one
+ *           if does not already have a destination. *)
+let move_easy (a:ai) (n:int) (s:state) : state =
+  if is_in_building s.map a.character (* Gmap *)
+  then
+    suggest a s
+  else
+    let coord =
+      begin
+      match a.destination with
+      | Some c -> c
+      | None ->
+          List.hd (closest_buildings s.map a.character) (* Gmap *)
+      end
+    in
+    let (in_building, new_map) =
+      move_towards_building s.map a.character coord n in (* Gmap *)
+    if in_building
+    then suggest a {s with map = new_map} (*TODO print?*)
+    else {s with map = new_map} (*TODO print?*)
+
+(* [move a n s] allows the AI [a]'s character to move n steps,
+ * or fewer if the character gets into a building
+ * before using up all the steps. *)
+let move (a:ai) (n:int) (s:state) : state =
+  if n < 0 then
+    failwith "This should not happen in user_move"
+  else if n = 0 then
+    begin
+    Printf.printf "Prof. %s cannot move anymore.\n" a.character;
+    if is_in_building s.map a.character (* Gmap *)
+    then suggest a s
+    else s
     end
   else
-    updated_state_map new_map
-   (* else state*)
+    match a.difficulty with
+    | Easy   -> move_easy a n s
+    | Medium -> failwith "TODO"
+    | Hard   -> failwith "TODO"
 
+(*TODO*)
+let in_building_involuntarily (a:ai) (b:building) (s:state) : state =
+  let secret = has_secret_passage s.map b in
+  let blocked = is_building_blocked s.map b in
+  let news =
+    begin
+    match secret, blocked with
+    | true,  true  ->
+        suggest_or_secret a b s (*TODO*)
+    | true,  false ->
+        secret_or_roll_or_suggest a b s (*TODO*)
+    | false, true  ->
+        suggest a s
+    | false, false ->
+        suggest_or_roll a s (*TODO*)
+    end
+  in assign_was_moved news a.character false
 
+(*TODO*)
+let in_building_voluntarily (a:ai) (b:building) (s:state) : state =
+  let secret = has_secret_passage s.map b in (* Gmap *)
+  let blocked = is_building_blocked s.map b in (* Gmap *)
+  match secret, blocked with
+  | true,  true  ->
+      print_endline "AI has to use the secret passage.";
+      use_secret a s (*TODO*)
+  | true,  false ->
+      print_endline "There is a secret passage available.";
+      secret_or_roll a b s (*TODO*)
+  | false, true  ->
+      print_endline "AI has to wait until your next turn.";
+      s
+  | false, false ->
+      move a (roll_two_dice ()) s
+
+(* [step a s] peforms a turn for AI player [a]. This involves:
+ *   - defining and setting goals by processing knowledge from suggestions and
+ *     making deductions about other players' turns.
+ *   - moving the AI around the map
+ *   - forming and making suggestions/accusations
+ * Returns: an updated game state.
+ *)
+let rec step (a:ai) (s:state) : state =
+  let s1 = accuse_or_not_start a s in
+  if s1.game_complete then s1 else
+  match get_current_building s1.map a.character with (* Gmap *)
+  | Some b ->
+      if a.was_moved
+      then in_building_involuntarily a b s1
+      else in_building_voluntarily a b s1
+  | None ->
+      move a (roll_two_dice ()) s1 (* Gmap *)
+    *)

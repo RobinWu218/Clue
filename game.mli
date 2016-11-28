@@ -8,7 +8,7 @@ open User
  * the user’s hands.
  * Requires: [n] is an integer between 2 and 5 inclusive, [d] is an integer
  * between 1 and 3 inclusive. *)
-val init_state : int -> int -> state
+val init_state : int -> difficulty -> state
 
 (* [step s] is the updated state after one player's turn. *)
 val step : state -> state
