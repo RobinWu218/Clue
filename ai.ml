@@ -1,6 +1,5 @@
 open Data
 open Gmap
-open User
 
 (***********************************************
  * Utility methods
@@ -76,13 +75,20 @@ let update_ai ai prof1 guess prof2 =
     past_guesses=(guess, prof1, prof2)::ai.past_guesses
   }
 
+(**)
+let card_to_string card=
+  match card with
+  |Prof p -> p
+  |Building b -> b
+  |Language l -> l
+
 (*[easy_helper_who possible] takes a list of possible cards and returns the
  * first prof that is in the list. This is a helper function for the easy ai.*)
 let rec easy_helper_who possible =
   match possible with
   |[]   -> failwith "there are no possible professors"
   |h::t -> if (((int_of_card h) > (-1)) && ((int_of_card h) < 6))
-    then h else easy_helper_who t
+    then card_to_string h else easy_helper_who t
 
 (*[easy_helper_who possible] takes a list of possible cards and returns the
  * first language that is in the list. This is a helper function for the easy ai.
@@ -91,7 +97,7 @@ let rec easy_helper_what possible =
   match possible with
   |[]   -> failwith "there are no possible languages"
   |h::t -> if (((int_of_card h) > 14) && ((int_of_card h) < 21))
-    then h else easy_helper_what t
+    then card_to_string h else easy_helper_what t
 
 (*[easy_helper_where possible] takes a list of possible cards and returns the
  * first language that is in the list. This is a helper function for the easy ai.
@@ -100,22 +106,19 @@ let rec easy_helper_where possible =
   match possible with
   |[]   -> failwith "there are no possible buildings"
   |h::t -> if (((int_of_card h) > 5) && ((int_of_card h) < 15))
-    then h else easy_helper_where t
+    then card_to_string h else easy_helper_where t
 
 (*[make_suggestion building ai] produces a [case_file] that the other players
  * will attempt to disprove. *)
 let make_suggestion building ai =
-  match ai.difficulty with
-  |Easy   ->
     let loc    = building in
     let perp   = easy_helper_who  ai.possible_cards in
     let weapon = easy_helper_what ai.possible_cards in
     (Printf.printf "%s has guessed that the culprit was %s using %s in %s Hall.\n
                     We will now go around and attempt to disprove the guess."
       ai.character, perp, weapon, loc
-    ;{who = perp; where = loc; with_what = weapon})
-  |Medium -> failwith "unimplemented"
-  |Hard   ->failwith "unimplemented"
+    ;
+  {who = perp; where = loc; with_what = weapon})
 
 (*[replace_ai_with_new new_ai ai_list] returns an updated list of ais, replacing
 the old ai with this new one.*)
@@ -203,7 +206,8 @@ let rec helper_update_prof poss c=
 let rec helper_update_building poss c=
       match poss with
       |[]   -> [c]
-      |h::t -> if (int_of_card h < 6)||(int_of_card h > 14) then h::helper_update_building t c
+      |h::t -> if (int_of_card h < 6)||(int_of_card h > 14) then
+                    h::helper_update_building t c
                else helper_update_building t c
 
 (*if c is a language*)
@@ -231,11 +235,11 @@ let update_possible ai guess =
                 helper_update_lang ai.possible_cards what
               else if (List.mem what ai.hand)&&(List.mem who ai.hand) then
                 helper_update_building ai.possible_cards where
-              else (List.mem where ai.hand) then
+              else if(List.mem where ai.hand) then
                 helper_update_lang (helper_update_prof ai.possible_cards who) what
-              else (List.mem what ai.hand) then
+              else if(List.mem what ai.hand) then
                 helper_update_building (helper_update_prof ai.possible_cards who) where
-              else (List.mem who ai.hand) then
+              else if(List.mem who ai.hand) then
                 helper_update_building (helper_update_lang ai.possible_cards what) where
               else
                 helper_update_building
@@ -272,7 +276,7 @@ let update_ai_disproved ai c guess player =
  * Returns: an updated game state.
  *)
 let ai_step state ai =
-  let moves = Data.roll_two_dice () in
+  let moves = roll_two_dice () in
     if ai.is_in_game then
       begin
         if is_in_building state.map ai.character
@@ -306,14 +310,14 @@ let ai_step state ai =
                     |(Some c, Some p) -> update_ai_disproved     ai c guess p
                     | _ -> failwith "not a valid option" in
                   let new_ai_list = replace_ai_with_new new_ai state.ais in
-                    if easy_want_to_accuse ai.possible_cards
+                    (if easy_want_to_accuse ai.possible_cards
                     then
                       make_accusation state ai
                     else
                       { state with
                         counter = state.counter+1;
                         ais     = new_ai_list
-                      }
+                      })
                   (*{
                     counter=state.counter+1;
                     game_complete= game_complete;
@@ -329,7 +333,7 @@ let ai_step state ai =
       begin
         updated_state_map new_map
       end
-    else state
+   (* else state*)
 
 (*[easy_helper_disprove hand guess] attempts to disprove [guess] with the cards
 they have in their [hand]. Returns Some Card that the player uses to disprove
@@ -345,12 +349,9 @@ let rec easy_helper_disprove hand guess = match hand with
  * none of the cards in [guess], then it will return [None].
  *)
 let ai_disprove ai (guess: case_file) =
-  match ai.difficulty with
-  |Easy   -> easy_helper_reveal ai.hand guess
-  |Medium -> failwith "unimplemented"
+    easy_helper_reveal ai.hand guess
+  (*|Medium -> failwith "unimplemented"
   |Hard   -> (*if one of the cards has already been in a past guess, the ai wants to
    show that one so we give the other players as little information as possible.
     *)
-    failwith "unimplemented"
-
-
+    failwith "unimplemented"*)

@@ -432,3 +432,33 @@ let use_secret_passage map p =
     with
     | _ -> failwith ("No secret passage to take in "^b)
 
+(**************************)
+(* other useful functions *)
+(**************************)
+
+(* [assign_was_moved s p b] assigns bool [b] to the [was_moved] field of
+ * whoever playing the character of prof [p] in state [s]. If no one plays that
+ * character, then [s] is simply unchanged. *)
+let assign_was_moved (s:state) (p:prof) (b:bool) : state =
+  match List.assoc p dictionary with
+  | `AI -> 
+      let newais = List.map 
+        (fun a -> if a.character = p 
+                  then {a with was_moved = b} 
+                  else a) s.ais in
+        {s with ais = newais}
+  | `User -> 
+      let newuser = {s.user with was_moved = b} in
+        {s with user = newuser}
+  | `No -> s
+
+(* [roll_two_dice ()] simulates rolling two dice, prints the results, and 
+ * returns the sum. *)
+let roll_two_dice () : int =
+  let d1 = 1 + Random.int 5 in
+  let d2 = 1 + Random.int 5 in
+  let sum = d1 + d2 in
+    print_endline "Rolling two dice...";
+    Printf.printf "Die 1: %d\n" d1;
+    Printf.printf "Die 2: %d\n" d2;
+    sum
