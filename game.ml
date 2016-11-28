@@ -3,14 +3,12 @@ open Gmap
 open Ai
 open User
 
-
 (******************************)
 (* init_state and its helpers *)
 (******************************)
 
-
 (* [generate_case_file ()] is the case file containing the answers to the
-questions: Who? Where? What language? *)
+ * questions: Who? Where? What language? *)
 let generate_case_file () : case_file =
     let r_prof = prof_of_int(Random.int 6) in
     let r_building = building_of_int(Random.int 9) in
@@ -45,6 +43,7 @@ let choose_card card_chosen (n:int) =
     select_non_repeat_lst (card_lst_to_int_lst card_chosen) card_lst n 21;
     int_lst_to_card_lst (!card_lst)
 
+(*TODO*)
 let deal_card fact_card n = 
   match n with 
   | 2 -> 
@@ -74,11 +73,13 @@ let deal_card fact_card n =
     let lst6 = choose_card (fact_card @ lst1 @ lst2 @ lst3 @ lst4 @ lst5) 3 in
     [lst1; lst2; lst3; lst4; lst5; lst6]
 
+(*TODO*)
 let remove_first_el lst = 
   match lst with 
   | [] -> failwith "No elements in the list"
   | h::t -> t
 
+(*TODO*)
 let init_ai_lst n d hand_lst character_lst = 
   let ai_lst = ref [] in 
   while (List.length !ai_lst < n) do (
@@ -90,6 +91,7 @@ let init_ai_lst n d hand_lst character_lst =
   ) done;
   !ai_lst
 
+(*TODO*)
 let rec generate_dictionary prof_lst user_char ai_char_lst = 
   match prof_lst with 
   | [] -> []
@@ -102,10 +104,10 @@ let rec generate_dictionary prof_lst user_char ai_char_lst =
       (h, `No) :: generate_dictionary t user_char ai_lst 
 
 (* [init n d] is the initial game state with [n] AI bots and a difficulty level
-of [d]. It prints out which character each player plays, and the cards in the
-user’s hands.
+ * of [d]. It prints out which character each player plays, and the cards in 
+ * the user’s hands.
  * Requires: [n] is an integer between 2 and 5 inclusive, [d] is an integer
-between 1 and 3 inclusive. *)
+ * between 1 and 3 inclusive. *)
 let init_state (n:int) (d:int) : state =
   if (n >= 2) && (n <= 5) then
     let fact_file = generate_case_file () in 
@@ -126,45 +128,52 @@ let init_state (n:int) (d:int) : state =
      user = {character = user_character; hand = user_hand; was_moved = false};
      ais = ai_lst;
      fact_file = fact_file;
-     dictionary = dictionary
+     dictionary = dictionary;
      }
-    else failwith "This should not happen in init_state"
+    else failwith "This should not happen in init_state in game.ml"
 
 (************************)
-(* repl and its helpers *)
+(* step and its helpers *)
 (************************)
 
-(* [roll_two_dice ()] is the sum of two random integers between 1 and 6 inclusive. It also prints the two integers and the sum. *)
-let roll_two_dice () =
-    let d1 = 1 + Random.int 5 in
-    let d2 = 1 + Random.int 5 in
-    let sum = d1 + d2 in
-    print_endline "Die 1: " ^ (string_of_int d1);
-    print_endline "Die 2: " ^ (string_of_int d2);
-    print_endline "# of movements: " ^ (string_of_int sum);
-
-(* [update_state c s] is the new state after command [c] is executed when
- * the current state is [s]. *)
-val update_state = failwith "TODO"
-
-(* [repl turn s] is . *)
-let rec repl (turn:int) (s:state) : unit =
-    if (turn mod s.n) = 0 then ...
-    else if (turn mod s.n) = 1 then ...
-    else if (turn mod s.n) = 2 then ...
-    ...
-    repl (turn + 1) s'
+(* [step s] is the updated state after one player's turn. *)
+let rec step (s:state) : state =
+  if s.game_complete then s else 
+  match s.counter mod 6 with
+  | 0 -> step_helper "Bracy"    s
+  | 1 -> step_helper "Clarkson" s
+  | 2 -> step_helper "Fan"      s
+  | 3 -> step_helper "Gries"    s
+  | 4 -> step_helper "Halpern"  s
+  | 5 -> step_helper "White"    s
+  | _ -> failwith "This should not happen in step in game.ml"
+(* [step_helper p s] is the updated state after the player whose character is
+ * prof [p] plays his/her turn. *)
+and step_helper (p:prof) (s:state) : state =
+  match List.assoc p s.dictionary with
+  | `AI -> 
+      let ai = List.find (fun a -> a.character = p) s.ais in
+      let news = ai_step s ai in
+      step {news with counter = news.counter + 1}
+  | `User -> 
+      let news = user_step s in
+      step {news with counter = news.counter + 1}
+  | `None -> 
+      step {s with counter = s.counter + 1}
 
 (********)
 (* main *)
 (********)
 
-(* [main n d] is the main entry point from outside this module to initialize a game with [n] AI bots and a difficulty level of [d] and start playing it. *)
+(* [main n d] is the main entry point from outside this module to initialize 
+ * a game with [n] AI bots and a difficulty level of [d] and start playing 
+ * it. *)
 let main n d =
-  let s = init_state n d in
-  print_endline "The game begins now... ";
-  print_endline "To play the game, type short phrases into the command line when
-   it is your turn. You may terminate the game at any time with [quit], show the
-    current map with [map], show your cards with [cards], and redisplay
-    instructions with [help]. \n";
-  repl 0 s
+  let s = init_state n d in 
+  (*TODO print out user's character and hand*)
+  print_endline ("The game begins now...\n" ^
+    "To play the game, follow the instructions and type into the command line\n" ^ 
+    "when it is your turn. You may find a \"detective notebook\" helpful for\n" ^
+    "keeping track of cards you have and other players might have. Good luck!\n";
+  step s; ()
+
