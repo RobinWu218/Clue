@@ -237,28 +237,29 @@ let rec helper_update_lang poss c=
  *)
 let update_possible ai guess =
   let where = Building guess.where in
-  let what = Language guess.with_what in
-  let who = Prof guess.who in
-  if (List.mem where ai.hand)&&(List.mem what ai.hand)&&(List.mem who ai.hand)
-              then ai.possible_cards
-              else if (List.mem where ai.hand)&&(List.mem what ai.hand) then
-                helper_update_prof ai.possible_cards who
-              else if (List.mem where ai.hand)&&(List.mem who ai.hand) then
-                helper_update_lang ai.possible_cards what
-              else if (List.mem what ai.hand)&&(List.mem who ai.hand) then
-                helper_update_building ai.possible_cards where
-              else if(List.mem where ai.hand) then
-                helper_update_lang (helper_update_prof ai.possible_cards who) what
-              else if(List.mem what ai.hand) then
-                helper_update_building (helper_update_prof ai.possible_cards who) where
-              else if(List.mem who ai.hand) then
-                helper_update_building (helper_update_lang ai.possible_cards what) where
-              else
-                helper_update_building
-                      (helper_update_lang
-                              (helper_update_prof ai.possible_cards who)
-                                            what)
-                                                where
+  let what  = Language guess.with_what in
+  let who   = Prof guess.who in
+  let have_where = List.mem where ai.hand in
+  let have_what  = List.mem what  ai.hand in
+  let have_who   = List.mem who   ai.hand in
+    if have_where && have_what && have_who
+      then ai.possible_cards
+    else if have_where && have_what then
+      helper_update_prof ai.possible_cards who
+    else if have_where && have_who then
+      helper_update_lang ai.possible_cards what
+    else if have_what && have_who then
+      helper_update_building ai.possible_cards where
+    else if have_where then
+      helper_update_lang (helper_update_prof ai.possible_cards who) what
+    else if have_what then
+      helper_update_building (helper_update_prof ai.possible_cards who) where
+    else if have_who then
+      helper_update_building (helper_update_lang ai.possible_cards what) where
+    else
+      helper_update_building where 
+     (helper_update_lang
+     (helper_update_prof ai.possible_cards who) what) where
 
 (*[update_ai_not_disproved ai guess] updates the [ai] based on the fact that
 [guess] was disproved. Returns updated ai.*)
