@@ -6,7 +6,7 @@ open Reader
  *******************************************)
 
 (* [constuct_map] creates a map data structure. *)
-let construct_map () = make_map()
+let construct_map () = make_map ()
 
 (* [print_map map] prints out an ascii representation of the map and where all
  * characters are on it to the console window.

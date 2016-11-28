@@ -70,6 +70,7 @@ let deal_card fact_card n =
     let lst5 = choose_card (fact_card @ lst1 @ lst2 @ lst3 @ lst4) 3 in
     let lst6 = choose_card (fact_card @ lst1 @ lst2 @ lst3 @ lst4 @ lst5) 3 in
     [lst1; lst2; lst3; lst4; lst5; lst6]
+  | _ -> failwith "This shoudl not happen in deal_card in game.ml"
 
 (*TODO*)
 let remove_first_el lst =
@@ -89,14 +90,14 @@ let init_ai_lst n d hand_lst character_lst =
   ) done;
   !ai_lst
 
-(*TODO*)
-let rec generate_dictionary prof_lst user_char ai_char_lst =
+(*TODO Robin double check? Alice changed ai_char_lst to ai_lst *)
+let rec generate_dictionary prof_lst user_char ai_lst =
   match prof_lst with
   | [] -> []
   | h::t ->
     if (h = user_char) then
       (h, `User) :: generate_dictionary t user_char ai_lst
-    else if (List.mem h ai_char_lst) then
+    else if (List.mem h ai_lst) then
       (h, `AI) :: generate_dictionary t user_char ai_lst
     else
       (h, `No) :: generate_dictionary t user_char ai_lst
@@ -106,12 +107,13 @@ let rec generate_dictionary prof_lst user_char ai_char_lst =
  * the user’s hands.
  * Requires: [n] is an integer between 2 and 5 inclusive, [d] is an integer
  * between 1 and 3 inclusive. *)
-let init_state (n:int) (d:int) : state =
+let init_state (n:int) (d:difficulty) : state =
   if (n >= 2) && (n <= 5) then
-    begin
     let fact_file = generate_case_file () in
-    let fact_cards = [Prof fact_file.who; Building fact_file.where; Language fact_file.with_what];
-    let character_lst = assign_characters (fact_file.who) n in
+    let fact_cards = [Prof fact_file.who; 
+                      Building fact_file.where; 
+                      Language fact_file.with_what] in
+    let character_lst = assign_characters [fact_file.who] n in
     let dealt_cards_lst = deal_card fact_cards n in
     let user_hand = List.hd dealt_cards_lst in
     let ai_hand_lst = remove_first_el dealt_cards_lst in
@@ -124,13 +126,13 @@ let init_state (n:int) (d:int) : state =
     {
     counter = 0;
     game_complete = false;
-    map = make_map ();
+    map = construct_map ();
     user = {character = user_character; hand = user_hand; was_moved = false};
     ais = ai_lst;
     fact_file = fact_file;
     dictionary = dictionary;
+    past_guesses = [];
     }
-    end
   else
     failwith "This should not happen in init_state in game.ml"
 
@@ -160,7 +162,7 @@ and step_helper (p:prof) (s:state) : state =
   | `User ->
       let news = User.step s in
       step {news with counter = news.counter + 1}
-  | `None ->
+  | `No ->
       step {s with counter = s.counter + 1}
 
 (********)
@@ -171,11 +173,11 @@ and step_helper (p:prof) (s:state) : state =
  * a game with [n] AI bots and a difficulty level of [d] and start playing
  * it. *)
 let main n d =
-  let s = init_state n d in
+  let s = init_state n (difficulty_of_int d) in
   (*TODO print out user's character and hand*)
   print_endline ("The game begins now...\n" ^
     "To play the game, follow the instructions and type into the command line\n" ^
     "when it is your turn. You may find a \"detective notebook\" helpful for\n" ^
-    "keeping track of cards you have and other players might have. Good luck!\n";
-  step s; ()
+    "keeping track of cards you have and other players might have. Good luck!\n");
+  ignore (step s)
 

@@ -43,7 +43,7 @@ let rec get_choice_three () : int =
     match str'.[0] with 
     | '1' -> 1
     | '2' -> 2
-    | '1' -> 3
+    | '3' -> 3
     | _   -> print_endline "Please type 1 or 2 or 3!"; get_choice_three ()
 
 (* [choose_from_two c1 c2] is [Some c1] or [Some c2] as determined by user. *)
@@ -211,7 +211,7 @@ and disprove_case (p:prof) (n:int) (guess:case_file) (s:state)
   | `AI -> 
       let ai = List.find (fun a -> a.character = p) s.ais in
       begin
-      match Ai.ai_disprove ai guess with
+      match Ai.disprove ai guess with
       | Some card -> Some (p, card)
       | None -> disprove_loop (n+1) guess s
       end
@@ -221,7 +221,7 @@ and disprove_case (p:prof) (n:int) (guess:case_file) (s:state)
       disprove_loop (n+1) guess s
 
 (* [suggest s] prompts the user for his/her suggestion and calls 
- * [ai_disprove] until it is disproved or all passed. Calls [teleport_professor]
+ * [Ai.disprove] until it is disproved or all passed. Calls [teleport_professor]
  * to move the suggested prof's corresponding ai player to the suggested 
  * building and change that ai's [was_moved] field to true. 
  * Requires: user is currently in a building. *)
@@ -300,7 +300,7 @@ let rec move (n:int) (s:state) : state =
     end
   else
     let (dir, x) = get_movement n in
-    let (y, map) = move s.map s.user.character dir x in (* Gmap *)
+    let (y, map) = Gmap.move s.map s.user.character dir x in (* Gmap *)
     move (n-x+y) {s with map = map}
 
 (* [use_secret s] is the updated state after the user uses the secret 

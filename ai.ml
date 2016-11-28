@@ -5,10 +5,10 @@ open Gmap
 (* utility methods *)
 (*******************)
 
-(* [init_ai p h d] is the AI data structure that represents an AI playing
+(* [init p h d] is the AI data structure that represents an AI playing
  * character [p] on difficulty level [d], with hand [h].
  *)
-let init_ai (p:prof) (h:hand) (d:difficulty) : ai =
+let init (p:prof) (h:hand) (d:difficulty) : ai =
   let possible = [
     Prof "Bracy";        Prof "Clarkson";      Prof "Fan";
     Prof "Gries";        Prof "Halpern";       Prof "White";
@@ -169,12 +169,12 @@ let rec easy_helper_disprove hand guess = match hand with
                     (card_to_string h)=guess.with_what then
       (Some h) else easy_helper_disprove t guess
 
-(* [ai_disprove ai guess] figures out which card to reveal in response
+(* [disprove ai guess] figures out which card to reveal in response
  * to a suggestion [guess].
  * Returns: [Some c] where [c] is a card that [ai] can reveal. Or, if [ai] has
  * none of the cards in [guess], then it will return [None].
  *)
-let ai_disprove ai (guess: case_file) =
+let disprove ai (guess: case_file) =
     easy_helper_disprove ai.hand guess
   (*|Medium -> failwith "unimplemented"
   |Hard   -> (*if one of the cards has already been in a past guess, the ai wants to
@@ -193,7 +193,7 @@ let rec help_disprove players state guess =
       begin
         match (List.assoc h state.dictionary) with
         |`AI   ->
-          let proof = ai_disprove (character_to_ai h state.ais) guess in
+          let proof = disprove (character_to_ai h state.ais) guess in
             if   proof = None
             then (Printf.printf "%s was not able to disprove it. " h;
                         help_disprove t state guess)
@@ -284,7 +284,7 @@ let update_ai_disproved ai c guess player =
  *   - forming and making suggestions/accusations
  * Returns: an updated game state.
  *)
-let rec ai_step ai state =
+let rec step ai state =
   let moves = roll_two_dice () in
   if ai.is_in_game then
     begin
@@ -292,7 +292,7 @@ let rec ai_step ai state =
     then
       begin
       ignore (leave_building state.map ai.character 0);
-      ai_step ai state
+      step ai state
       end
     else
       begin
@@ -313,7 +313,8 @@ let rec ai_step ai state =
                   |"Halpern" -> [ "White";  "Bracy"; "Clarkson";
                                        "Fan";  "Gries"]
                   |"White"   -> [ "Bracy"; "Clarkson";  "Fan";
-                                       "Gries";  "Halpern"] in
+                                       "Gries";  "Halpern"]
+                  |_   -> failwith "This should not happen in step" in
           let guess = make_suggestion dest ai in
           let new_state = updated_state_map state new_map in
           let (prof_option, new_ai) =
