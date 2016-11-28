@@ -36,7 +36,7 @@ in
 let rec help_get_ai ais p=
   match ais with
   |[]-> failwith "character not in play"
-  |h::t-> if (h.character = p) then h else (get_ai t p)
+  |h::t-> if (h.character = p) then h else (help_get_ai t p)
 
 (* [get_ai state p]
  * Returns: the AI data structure for the AI playing character [p]
@@ -85,7 +85,7 @@ let update_ai ai prof1 guess prof2 =
 let rec easy_helper_who possible =
               match possible with
               |[]   -> failwith "there are no possible professors"
-              |h::t -> if (((Data.int_of_card h)> (-1))||((Data.int_of_card h)<6))
+              |h::t -> if (((int_of_card h)> (-1))||((int_of_card h)<6))
                then h else easy_helper_who t
 
 (*[easy_helper_who possible] takes a list of possible cards and returns the
@@ -94,7 +94,7 @@ let rec easy_helper_who possible =
 let rec easy_helper_what possible =
               match possible with
               |[]   -> failwith "there are no possible languages"
-              |h::t -> if (((Data.int_of_card h)>14)||((Data.int_of_card h)<21))
+              |h::t -> if (((int_of_card h)>14)||((int_of_card h)<21))
               then h else easy_helper_what t
 
 (*[easy_helper_where possible] takes a list of possible cards and returns the
@@ -103,7 +103,7 @@ let rec easy_helper_what possible =
 let rec easy_helper_where possible=
                     match possible with
               |[]   -> failwith "there are no possible buildings"
-              |h::t -> if (((Data.int_of_card h)>5)||((Data.int_of_card h)<15))
+              |h::t -> if (((int_of_card h)>5)||((int_of_card h)<15))
               then h else easy_helper_where t
 
 (*[make_suggestion building ai] produces a [case_file] that the other players
@@ -115,23 +115,42 @@ let make_suggestion building ai =
     let perp = easy_helper_who ai.possible_cards in
     let weapon= easy_helper_what ai.possible_cards in
     {who=perp; where=loc; with_what=weapon}
+
   |Medium -> failwith "unimplemented"
   |Hard   ->failwith "unimplemented"
 
-(*[make_accusation state ai] produces a [case_file] that the ai believes is
- * correct. Does not depend on ai difficulty. The ai only makes an accusation
+(*[replace_ai_with_new new_ai ai_list] returns an updated list of ais, replacing
+the old ai with this new one.*)
+let rec replace_ai_with_new new_ai ai_list =
+  match ai_list with
+  |[]-> failwith "not an ai"
+  |h::t-> if h.character=new_ai.character then new_ai::t
+          else h::replace_ai_with_new new_ai t
+
+(*[make_accusation state ai] produces a state where the accusation has been made
+ * with the case_file that the ai believes is correct. Does not depend on ai
+ * difficulty. The ai only makes an accusation
  * when it has narrowed down the possible cards to 3. *)
 let make_accusation state ai =
     let loc = easy_helper_where ai.possible_cards in
     let perp = easy_helper_who ai.possible_cards in
     let weapon= easy_helper_what ai.possible_cards in
-    {who=perp; where=loc; with_what=weapon}
+    let guess = {who=perp; where=loc; with_what=weapon} in
+    if guess=state.fact_file then print_endline "Uh oh, the AI has won!
+                            You have lost the game.";
+                            state = {state with game_complete=true}
 
+        else print_endline "The AI has made the wrong guess! This AI is now
+        out of of the game, though it can still prove your suggestions
+        wrong/right, it can no longer win and will not move. ";
+        let new_ai = {ai with is_in_game=false} in
+        let new_ai_list = replace_ai_with_new new_ai state.ais in
+        state ={state with ais=new_ai_list}
 
 (*[easy_want_to_accuse] is true when there are only three possible cards left
  * so the ai knows the right answer and thus wants to accuse. *)
-let easy_want_to_accuse possible_cards ai =
-    if (List.length possible_cards)=3 then true else false
+let easy_want_to_accuse ai =
+    if (List.length ai.possible_cards)=3 then true else false
 
 (*[updated_state_map state new_map] returns the updated state with new_map.
  * Nothing else in state is changed*)
@@ -189,14 +208,6 @@ print_endline "The AI's card has been disproved!";
 {ai with past_guesses=(guess, ai.character, player)::ai.past_guesses;
        known_cards=c::ai.known_cards}
 
-(*;replace_ai_with_new new_ai ai_list] returns an updated list of ais, replacing
-the old ai with this new one.*)
-let rec replace_ai_with_new new_ai ai_list =
-  match ai_list with
-  |[]-> failwith "not an ai"
-  |h::t-> if h.character=new_ai.character then new_ai::t
-          else h::replace_ai_with_new new_ai t
-
 (* [step state p] peforms a turn for player [p] (an AI player). This involves:
  *   - defining and setting goals by processing knowledge from suggestions and
  *     making deductions about other players' turns.
@@ -211,8 +222,7 @@ let ai_step state ai =
       (Gmap.leave_building state.map 0);
       (step state ai) else
 
-  match ai.difficulty with
-  |Easy-> let dest = (Gmap.closest_buildings state.buildling ai.character)[0] in
+let dest = (Gmap.closest_buildings state.buildling ai.character)[0] in
             (
             match (Gmap.move_towards_building state.map ai.character moves dest) with
             |x, y -> let in_building = x; let new_map = y; ()
@@ -236,21 +246,19 @@ let ai_step state ai =
             )
               in
               let guess = make_suggestion dest ai in
+              let state = updated_state_map in
               let new_ai =
               (match help_disprove players state guess with
                 |(None, None)   -> update_ai_not_disproved ai guess
                 |(Some c, Some p) -> update_ai_disproved ai c guess p
               ) in
               let new_ai_list=replace_ai_with_new new_ai state.ais in
+
+              if easy_want_to_accuse ai.possible_cards
+                      then make_accusation state ai else
               {state with counter=state.counter+1;
                 ais = new_ai_list
               }
-              else if easy_want_to_accuse then make_accusation state ai else None
-;
-
-  |Medium-> failwith "unimplemented"
-  |Hard->failwith "unimplemented"
-);
 (*{
   counter=state.counter+1;
   game_complete= game_complete;
@@ -259,7 +267,7 @@ let ai_step state ai =
   ais=state.ais;
   fact_file=state.fact_file;
   dictionary=state.dictionary;
-}*)
+}*))
 else
   state
 
