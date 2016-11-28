@@ -105,9 +105,9 @@ let make_suggestion building ai =
     let loc    = building in
     let perp   = easy_helper_who  ai.possible_cards in
     let weapon = easy_helper_what ai.possible_cards in
-    (Printf.printf "%s has guessed that the culprit was %s using %s in %s Hall.\n
+    ( ignore (Printf.printf "%s has guessed that the culprit was %s using %s in %s Hall.\n
                     We will now go around and attempt to disprove the guess."
-      ai.character, perp, weapon, loc
+      ai.character, perp, weapon, loc)
     ;
   {who = perp; where = loc; with_what = weapon})
 
@@ -123,31 +123,34 @@ let rec replace_ai_with_new new_ai ai_list =
  * with the case_file that the ai believes is correct. Does not depend on ai
  * difficulty. The ai only makes an accusation
  * when it has narrowed down the possible cards to 3. *)
-let make_accusation state ai =
+let make_accusation state ai : state=
     let loc    = easy_helper_where ai.possible_cards in
     let perp   = easy_helper_who   ai.possible_cards in
     let weapon = easy_helper_what  ai.possible_cards in
     let guess  = {who=perp; where=loc; with_what=weapon} in
-    (Printf.printf "%s has made an accusation that the culprit was %s using
+    Printf.printf "%s has made an accusation that the culprit was %s using
                     %s in %s Hall!\n"
-                     ai.character, perp, weapon, loc;
-    (if guess = state.fact_file
+                     ai.character perp weapon loc;
+    if guess = state.fact_file
     then
-      (print_endline "Uh oh, the AI has won! That accusation was correct.
+      begin
+      print_endline "Uh oh, the AI has won! That accusation was correct.
                           You have lost the game. :(";
-       state = {state with game_complete=true})
+      {state with game_complete=true}
+      end
     else
-      (print_endline "The AI has made the wrong accusation! This AI is now
+      begin
+      print_endline "The AI has made the wrong accusation! This AI is now
         out of of the game, though it can still prove your suggestions
         wrong/right, it can no longer win and will not move. ";
-        let new_ai      = {ai with is_in_game=false} in
-        let new_ai_list = replace_ai_with_new new_ai state.ais in
-          state = {state with ais = new_ai_list})
-    )
-)
+      let new_ai      = {ai with is_in_game=false} in
+      let new_ai_list = replace_ai_with_new new_ai state.ais in
+      {state with ais = new_ai_list}
+      end
+
 (*[easy_want_to_accuse] is true when there are only three possible cards left
  * so the ai knows the right answer and thus wants to accuse. *)
-let easy_want_to_accuse ai =
+let easy_want_to_accuse ai : bool =
   (List.length ai.possible_cards) = 3
 
 (*[updated_state_map state new_map] returns the updated state with new_map.
@@ -163,6 +166,29 @@ let rec character_to_ai prof ai_list =
   |[]    -> failwith "should not occur"
   |h::t  -> if h.character = prof then h else character_to_ai prof t
 
+(*[easy_helper_disprove hand guess] attempts to disprove [guess] with the cards
+they have in their [hand]. Returns Some Card that the player uses to disprove
+or None if no such card exists. *)
+let rec easy_helper_disprove hand guess = match hand with
+  |[]   -> None
+  |h::t -> if (card_to_string h)=guess.who ||
+                    (card_to_string h)=guess.where ||
+                    (card_to_string h)=guess.with_what then
+      (Some h) else easy_helper_disprove t guess
+
+(* [disprove ai guess] figures out which card to reveal in response
+ * to a suggestion [guess].
+ * Returns: [Some c] where [c] is a card that [ai] can reveal. Or, if [ai] has
+ * none of the cards in [guess], then it will return [None].
+ *)
+let ai_disprove ai (guess: case_file) =
+    easy_helper_disprove ai.hand guess
+  (*|Medium -> failwith "unimplemented"
+  |Hard   -> (*if one of the cards has already been in a past guess, the ai wants to
+   show that one so we give the other players as little information as possible.
+    *)
+    failwith "unimplemented"*)
+
 (*[help_disprove players state guess] takes in [players], a prof list of the
  * current players, and a state and returns (Some card, Some Prof) that some
  * player disproved the guess with or returns (None, None) if the guess is not
@@ -173,16 +199,18 @@ let rec help_disprove players state guess =
     |h::t ->
       begin
         match (List.assoc h state.dictionary) with
-        |`Ai   ->
+        |`AI   ->
           let proof = ai_disprove (character_to_ai h state.ais) guess in
             if   proof = None
-            then help_disprove t state guess
-            else (proof, Some h)
+            then (Printf.printf "%s was not able to disprove it. " h;
+                        help_disprove t state guess)
+            else (Printf.printf "%s was able to disprove it. " h; (proof, Some h))
         |`User ->
           let proof = User.user_disprove state guess in
             if   proof = None
-            then help_disprove t state guess
-            else (proof, Some h)
+            then (Printf.printf "%s was not able to disprove it. " h;
+                        help_disprove t state guess)
+            else (Printf.printf "%s was able to disprove it." h;(proof, Some h))
         |`No   -> help_disprove t state guess
       end
 
@@ -215,9 +243,9 @@ let rec helper_update_lang poss c=
  * possess it, it just returns the old list of possible cards.
  *)
 let update_possible ai guess =
-  let where = guess.where in
-  let what = guess.with_what in
-  let who = guess.who in
+  let where = Building guess.where in
+  let what = Language guess.with_what in
+  let who = Prof guess.who in
   if (List.mem where ai.hand)&&(List.mem what ai.hand)&&(List.mem who ai.hand)
               then ai.possible_cards
               else if (List.mem where ai.hand)&&(List.mem what ai.hand) then
@@ -263,53 +291,55 @@ let update_ai_disproved ai c guess player =
  *   - forming and making suggestions/accusations
  * Returns: an updated game state.
  *)
-let ai_step state ai =
+let rec ai_step state ai =
   let moves = roll_two_dice () in
-    if ai.is_in_game then
+  if ai.is_in_game then
+    begin
+    if is_in_building state.map ai.character
+    then
       begin
-        if is_in_building state.map ai.character
-        then
-          (leave_building state.map 0;
-           step state ai)
-        else
-          begin
-            let dest = List.hd (closest_buildings state.buildling ai.character) in
-            let (in_building, new_map) = move_towards_building state.map
-                                         ai.character moves dest in
-              if in_building then
-                let players = match ai.character with
-                  |Prof "Bracy"   -> [Prof "Clarkson"; Prof "Fan"; Prof "Gries";
-                                      Prof "Halpern"; Prof "White"]
-                  |Prof "Clarkson"-> [Prof "Fan"; Prof "Gries"; Prof "Halpern";
-                                      Prof "White"; Prof "Bracy"]
-                  |Prof "Fan"     -> [Prof "Gries"; Prof "Halpern"; Prof "White";
-                                      Prof "Bracy"; Prof "Clarkson"]
-                  |Prof "Gries"   -> [Prof "Halpern";Prof "White"; Prof "Bracy";
-                                      Prof "Clarkson"; Prof "Fan"]
-                  |Prof "Halpern" -> [Prof "White"; Prof "Bracy";Prof "Clarkson";
-                                      Prof "Fan"; Prof "Gries"]
-                  |Prof "White"   -> [Prof "Bracy";Prof "Clarkson"; Prof "Fan";
-                                      Prof "Gries"; Prof "Halpern"] in
-                  let guess  = make_suggestion dest ai in
-                  let state  = updated_state_map new_map in
-                  let (prof_option, new_ai) =
-                    match help_disprove players state guess with
+      leave_building state.map ai.character 0;
+      ai_step state ai
+      end
+    else
+      begin
+      let dest = List.hd (closest_buildings state.map ai.character) in
+      let (in_building, new_map) = move_towards_building state.map
+                                            ai.character dest moves in
+      if in_building then
+        let players =
+          match ai.character with
+                  |"Bracy"   -> ["Clarkson";  "Fan";  "Gries";
+                                       "Halpern";  "White"]
+                  |"Clarkson"-> [ "Fan";  "Gries";  "Halpern";
+                                       "White";  "Bracy"]
+                  |"Fan"     -> [ "Gries";  "Halpern";  "White";
+                                       "Bracy";  "Clarkson"]
+                  |"Gries"   -> [ "Halpern"; "White";  "Bracy";
+                                       "Clarkson";  "Fan"]
+                  |"Halpern" -> [ "White";  "Bracy"; "Clarkson";
+                                       "Fan";  "Gries"]
+                  |"White"   -> [ "Bracy"; "Clarkson";  "Fan";
+                                       "Gries";  "Halpern"] in
+          let guess = make_suggestion dest ai in
+          let new_state = updated_state_map state new_map in
+          let (prof_option, new_ai) =
+            match help_disprove players new_state guess with
                     |(None, None)     ->
                                 (None  , update_ai_not_disproved ai guess)
                     |(Some c, Some p) ->
                                 (Some p, update_ai_disproved     ai c guess p)
                     | _ -> failwith "not a valid option" in
-                  let new_ai_list = replace_ai_with_new new_ai state.ais in
-                    (if easy_want_to_accuse ai.possible_cards
-                    then
-                      make_accusation state ai
-                    else
-                      { state with
-                        map = new_map;
-                        counter = state.counter+1;
+          let new_ai_list = replace_ai_with_new new_ai state.ais in
+          if easy_want_to_accuse ai
+          then
+            make_accusation new_state ai
+          else
+            {new_state with
                         ais     = new_ai_list;
                         past_guesses = (guess, ai.character, prof_option)::state.past_guesses
-                      })
+            }
+
                   (*{
                     counter=state.counter+1;
                     game_complete= game_complete;
@@ -319,31 +349,10 @@ let ai_step state ai =
                     fact_file=state.fact_file;
                     dictionary=state.dictionary;
                   }*)
-          end
-        end
-      else
-      begin
-        updated_state_map new_map
       end
+    end
+  else
+    updated_state_map new_map
    (* else state*)
 
-(*[easy_helper_disprove hand guess] attempts to disprove [guess] with the cards
-they have in their [hand]. Returns Some Card that the player uses to disprove
-or None if no such card exists. *)
-let rec easy_helper_disprove hand guess = match hand with
-  |[]   -> None
-  |h::t -> if h=guess.who || h=guess.where || h=guess.with_what then
-      (Some h) else easy_helper_disprove t guess
 
-(* [disprove ai guess] figures out which card to reveal in response
- * to a suggestion [guess].
- * Returns: [Some c] where [c] is a card that [ai] can reveal. Or, if [ai] has
- * none of the cards in [guess], then it will return [None].
- *)
-let ai_disprove ai (guess: case_file) =
-    easy_helper_reveal ai.hand guess
-  (*|Medium -> failwith "unimplemented"
-  |Hard   -> (*if one of the cards has already been in a past guess, the ai wants to
-   show that one so we give the other players as little information as possible.
-    *)
-    failwith "unimplemented"*)
