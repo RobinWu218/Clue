@@ -86,7 +86,7 @@ let init_ai_lst n d hand_lst character_lst =
     let nth = List.length !ai_lst in 
     let character = List.nth character_lst nth in 
     let hand = List.nth hand_lst nth in 
-    let ai = AI.init character d hand in 
+    let ai = init_ai character hand d in (* Ai *)
     ai_lst := (!ai_lst) @ [ai]
   ) done;
   !ai_lst

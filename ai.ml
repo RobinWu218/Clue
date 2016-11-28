@@ -1,15 +1,14 @@
 open Data
 open Gmap
 
-(***********************************************
- * Utility methods
- ***********************************************)
+(*******************)
+(* utility methods *)
+(*******************)
 
-(* [init p d hand] creates and returns an AI data structure that represents an
- * AI playing character [p] on difficulty [d], with starting hand [hand].
- * Returns: the initialized setup for an AI.
+(* [init_ai p h d] is the AI data structure that represents an AI playing 
+ * character [p] on difficulty level [d], with hand [h].
  *)
-let init p d hand =
+let init_ai (p:prof) (h:hand) (d:difficulty) : ai =
   let possible = [
     Prof "Bracy";        Prof "Clarkson";      Prof "Fan";
     Prof "Gries";        Prof "Halpern";       Prof "White";
@@ -18,39 +17,33 @@ let init p d hand =
     Building "Phillips"; Building "Rhodes";    Building "Statler";
     Language "Bash";     Language "C";         Language "Java";
     Language "MATLAB";   Language "OCaml";     Language "Python"] in
-    {
-      character   = p;
-      hand        = hand;
-      was_moved   = false;
-      is_in_game  = true;
-      difficulty  = d;
-      destination = None;
-      known_cards = hand;
-      possible_cards = possible;
-    }
+  {
+    character      = p;
+    hand           = h;
+    difficulty     = d;
+    was_moved      = false;
+    is_in_game     = true;
+    destination    = None;
+    known_cards    = hand;
+    possible_cards = possible;
+  }
 
-let rec help_get_ai ais p=
-  match ais with
-  |[]-> failwith "character not in play"
-  |h::t-> if (h.character = p) then h else (help_get_ai t p)
-
-(* [get_ai state p]
- * Returns: the AI data structure for the AI playing character [p]
+(* [get_ai p s] is the AI data structure for the AI playing character [p] in 
+ * state [s].
+ * Raises: Not_found if [p] is not represented by an AI in [s].
  *)
-let get_ai state p =
-  help_get_ai state.ais p
+let get_ai (p:prof) (s:state) : ai =
+  List.find (fun a -> a.character = p) s.ais
 
-(* [get_difficulty ai]
- * Returns: the difficulty of the AI [ai].
+(* [get_difficulty ai] is the difficulty level of the AI [ai].
  *)
-let get_difficulty ai =
+let get_difficulty (ai:ai) : difficulty =
   ai.difficulty
 
-(* [still_in_game ai]
- * Returns: [true] iff the AI [ai] is still in the game. (If you're out you
- * can still prove suggestions wrong)
+(* [still_in_game ai] is [true] iff the AI [ai] is still in the game. 
+ * If that ai is out, s/he can still prove suggestions wrong.
  *)
-let still_in_game ai =
+let still_in_game (ai:ai) : bool =
   ai.is_in_game
 
 (************************************************
