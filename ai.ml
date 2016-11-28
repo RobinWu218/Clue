@@ -2,9 +2,6 @@ open Data
 open Gmap
 open User
 
-(* [t] is the data type representing the Ai's state and goals *)
-type t = ai
-
 (***********************************************
  * Utility methods
  ***********************************************)
@@ -14,36 +11,36 @@ type t = ai
  * Returns: the initialized setup for an AI.
  *)
 let init p d hand =
-  let possible = [Prof "Bracy"; Prof "Clarkson";Prof "Fan";Prof "Gries";
-  Prof "Halpern";Prof "White";Building "Baker";Building "Carpenter";
-  Building "Duffield";Building "Gates";Building "Klarman";Building "Olin";
-  Building "Phillips";Building "Rhodes";Building "Statler";Language "Bash";
-  Language "C";Language "Java";Language "MATLAB";Language "OCaml";
-  Language "Python"]
-in
-  {
-  character =p;
-  hand=hand;
-  was_moved=false;
-  is_in_game=true;
-  difficulty=d;
-  destination=None;
-  known_cards=hand;
-  possible_cards=possible;
-  past_guesses=[]
-}
+  let possible = [
+    Prof "Bracy";        Prof "Clarkson";      Prof "Fan"; 
+    Prof "Gries";        Prof "Halpern";       Prof "White";
+    Building "Baker";    Building "Carpenter"; Building "Duffield";
+    Building "Gates";    Building "Klarman";   Building "Olin";
+    Building "Phillips"; Building "Rhodes";    Building "Statler";
+    Language "Bash";     Language "C";         Language "Java";
+    Language "MATLAB";   Language "OCaml";     Language "Python"] in
+    {
+      character   = p;
+      hand        = hand;
+      was_moved   = false;
+      is_in_game  = true;
+      difficulty  = d;
+      destination = None;
+      known_cards = hand;
+      possible_cards = possible;
+      past_guesses   = [];
+    }
 
 let rec help_get_ai ais p=
   match ais with
   |[]-> failwith "character not in play"
-  |h::t-> if (h.character = p) then h else (get_ai t p)
+  |h::t-> if (h.character = p) then h else (help_get_ai t p)
 
 (* [get_ai state p]
  * Returns: the AI data structure for the AI playing character [p]
  *)
 let get_ai state p =
   help_get_ai state.ais p
-
 
 (* [get_difficulty ai]
  * Returns: the difficulty of the AI [ai].
@@ -58,7 +55,6 @@ let get_difficulty ai =
 let still_in_game ai =
   ai.is_in_game
 
-
 (************************************************
  * Methods for interacting with game state
  ************************************************)
@@ -68,53 +64,53 @@ let still_in_game ai =
 let update_ai ai prof1 guess prof2 =
   (*TODO: if the ai has two of the three cards in its hand and the guess is
    * disproved by someone else, then that third card also becomes a known card.*)
-{
-  character = ai.character;
-  hand=ai.hand;
-  was_moved=ai.was_moved;
-  is_in_game=ai.is_in_game;
-  difficulty=ai.difficulty;
-  destination=ai.destination;
-  known_cards=ai.known_cards;
-  possible_cards=ai.possible_cards;
-  past_guesses=(guess, prof1, prof2)::ai.past_guesses
-}
+  {
+    character   = ai.character;
+    hand        = ai.hand;
+    was_moved   = ai.was_moved;
+    is_in_game  = ai.is_in_game;
+    difficulty  = ai.difficulty;
+    destination = ai.destination;
+    known_cards = ai.known_cards;
+    possible_cards=ai.possible_cards;
+    past_guesses=(guess, prof1, prof2)::ai.past_guesses
+  }
 
 (*[easy_helper_who possible] takes a list of possible cards and returns the
  * first prof that is in the list. This is a helper function for the easy ai.*)
 let rec easy_helper_who possible =
-              match possible with
-              |[]   -> failwith "there are no possible professors"
-              |h::t -> if (((Data.int_of_card h)> (-1))||((Data.int_of_card h)<6))
-               then h else easy_helper_who t
+  match possible with
+  |[]   -> failwith "there are no possible professors"
+  |h::t -> if (((int_of_card h) > (-1)) && ((int_of_card h) < 6))
+    then h else easy_helper_who t
 
 (*[easy_helper_who possible] takes a list of possible cards and returns the
  * first language that is in the list. This is a helper function for the easy ai.
  *)
 let rec easy_helper_what possible =
-              match possible with
-              |[]   -> failwith "there are no possible languages"
-              |h::t -> if (((Data.int_of_card h)>14)||((Data.int_of_card h)<21))
-              then h else easy_helper_what t
+  match possible with
+  |[]   -> failwith "there are no possible languages"
+  |h::t -> if (((int_of_card h) > 14) && ((int_of_card h) < 21))
+    then h else easy_helper_what t
 
 (*[easy_helper_where possible] takes a list of possible cards and returns the
  * first language that is in the list. This is a helper function for the easy ai.
  *)
 let rec easy_helper_where possible=
-                    match possible with
-              |[]   -> failwith "there are no possible buildings"
-              |h::t -> if (((Data.int_of_card h)>5)||((Data.int_of_card h)<15))
-              then h else easy_helper_where t
+  match possible with
+  |[]   -> failwith "there are no possible buildings"
+  |h::t -> if (((int_of_card h) > 5) && ((int_of_card h) < 15))
+    then h else easy_helper_where t
 
 (*[make_suggestion building ai] produces a [case_file] that the other players
  * will attempt to disprove. *)
 let make_suggestion building ai =
   match ai.difficulty with
   |Easy   ->
-    let loc = building in
-    let perp = easy_helper_who ai.possible_cards in
-    let weapon= easy_helper_what ai.possible_cards in
-    {who=perp; where=loc; with_what=weapon}
+    let loc    = building in
+    let perp   = easy_helper_who  ai.possible_cards in
+    let weapon = easy_helper_what ai.possible_cards in
+    {who = perp; where = loc; with_what = weapon}
   |Medium -> failwith "unimplemented"
   |Hard   ->failwith "unimplemented"
 
@@ -122,21 +118,20 @@ let make_suggestion building ai =
  * correct. Does not depend on ai difficulty. The ai only makes an accusation
  * when it has narrowed down the possible cards to 3. *)
 let make_accusation state ai =
-    let loc = easy_helper_where ai.possible_cards in
-    let perp = easy_helper_who ai.possible_cards in
-    let weapon= easy_helper_what ai.possible_cards in
-    {who=perp; where=loc; with_what=weapon}
-
+    let loc    = easy_helper_where ai.possible_cards in
+    let perp   = easy_helper_who   ai.possible_cards in
+    let weapon = easy_helper_what  ai.possible_cards in
+    {who = perp; where = loc; with_what = weapon}
 
 (*[easy_want_to_accuse] is true when there are only three possible cards left
  * so the ai knows the right answer and thus wants to accuse. *)
 let easy_want_to_accuse possible_cards ai =
-    if (List.length possible_cards)=3 then true else false
+    (List.length possible_cards) = 3
 
 (*[updated_state_map state new_map] returns the updated state with new_map.
  * Nothing else in state is changed*)
 let updated_state_map state new_map=
-{state with map=new_map}
+  {state with map = new_map}
 
 (*[character_to_ai] prof ai_list] takes in the prof and a list of ais and returns
  * the ai that corresponds to that professor.
@@ -144,7 +139,7 @@ let updated_state_map state new_map=
 let rec character_to_ai prof ai_list=
   match ai_list with
   |[]    -> failwith "should not occur"
-  |h::t  ->if h.character=prof then h else character_to_ai prof t
+  |h::t  -> if h.character=prof then h else character_to_ai prof t
 
 (*[help_disprove players state guess] takes in [players], a prof list of the
  * current players, and a state and returns (Some card, Some Prof) that some
@@ -153,13 +148,21 @@ let rec character_to_ai prof ai_list=
 let rec help_disprove players state guess=
     match players with
     |[]   -> (None, None)
-    |h::t ->(match (List.assoc h state.dictionary) with
-            |`Ai    -> let proof= ai_disprove (character_to_ai h state.ais) guess in
-                if proof=None then help_disprove t state guess else (proof, Some h)
-            |`User  -> let proof= User.user_disprove state guess in
-                if proof=None then help_disprove t state guess else (proof, Some h)
-            |`No    -> help_disprove t state guess
-              )
+    |h::t ->
+      begin
+        match (List.assoc h state.dictionary) with
+        |`Ai   -> 
+          let proof = ai_disprove (character_to_ai h state.ais) guess in
+            if   proof = None 
+            then help_disprove t state guess 
+            else (proof, Some h)
+        |`User -> 
+          let proof = User.user_disprove state guess in
+            if   proof = None 
+            then help_disprove t state guess 
+            else (proof, Some h)
+        |`No   -> help_disprove t state guess
+      end
 
 (*[update_possible] returns the updated list of possible cards. If a card was
  * not able to be disproved and the ai knows that it doesn't possess the card,
