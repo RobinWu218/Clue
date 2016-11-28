@@ -42,49 +42,50 @@ type coord = int * int
 
 (* map is the type that holds information about the map. *)
 type map = {
-  num_rows: int;
-  num_cols: int;
-  map_values: string option array array;
-  exits: (building * ((int * coord) list)) list; (* ("Gates", [ (1, (0,0)); (2,(5,5))] *)
-  buildings: building list;
-  in_building: (prof * building)list;
-  location: (prof * coord) list;
-  waiting_spots: (building * (coord list)) list;
-  secrets: (building * building) list;
+  num_rows:      int;
+  num_cols:      int;
+  map_values:    string option array array;
+  exits:        (building * ((int * coord) list)) list; 
+             (* ("Gates",   [ (1, (0,0)); (2,(5,5)) ] *)
+  buildings:     building list;
+  in_building:  (prof * building)list;
+  location:     (prof * coord) list;
+  waiting_spots:(building * (coord list)) list;
+  secrets:      (building * building) list;
 }
+
 (* user stores the information about the user's character, number of turns,
  * specific location and the language that s/he uses.*)
 type user = {
   character: prof;
-  hand: hand;
+  hand:      hand;
   was_moved: bool;
 }
 
 (* ai and player are almost the same except for that ai also has a list of
  * case_file that he obtains*)
 type ai = {
-  character : prof;
-  hand: hand;
-  was_moved: bool;
-  is_in_game: bool;
-  difficulty: int;
-  destination: coord option;
-  known_cards: card list;
+  character :   prof;
+  hand:         hand;
+  was_moved:    bool;
+  is_in_game:   bool;
+  difficulty:   difficulty;
+  destination:  coord option;
+  known_cards:  card list;
   possible_cards: card list;
-  past_guesses: (case_file * prof * (prof option)) list;
+  past_guesses:  (case_file * prof * (prof option)) list;
 }
 
-(* state is the type specifying the currect map situation and player's and 
- * ais' information. It also includes a case_file which was initiated at 
- * the init phase of the game. *)
+(* state is the type specifying the currect map situation and player's and ais' information.
+ * Also, it includes a fact_file which was initiated at the init phase of the game.*)
 type state = {
-  counter: int;
+  counter:  int;
   game_complete: bool;
-  map: map;
-  user: user;
-  ais: ai list;
-  fact_file: case_file;
-  dictionary: prof * [ `AI | `User | `No ] list;
+  map:      map;
+  user:     user;
+  ais:      ai list;
+  fact_file:   case_file;
+  dictionary: (prof * [ `AI | `User | `No ]) list;
 }
 
 (* [assign_was_moved s p b] assigns bool [b] to the [was_moved] field of

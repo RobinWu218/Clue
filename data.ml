@@ -30,16 +30,16 @@ type hand = card list
 (* [card_of_int i] is the card representation of an integer from 0 to 20. *)
 let card_of_int (i:int) : card =
   match i with
-  | 0 -> Prof "Bracy"
-  | 1 -> Prof "Clarkson"
-  | 2 -> Prof "Fan"
-  | 3 -> Prof "Gries"
-  | 4 -> Prof "Halpern"
-  | 5 -> Prof "White"
-  | 6 -> Building "Baker"
-  | 7 -> Building "Carpenter"
-  | 8 -> Building "Duffield"
-  | 9 -> Building "Gates"
+  | 0  -> Prof "Bracy"
+  | 1  -> Prof "Clarkson"
+  | 2  -> Prof "Fan"
+  | 3  -> Prof "Gries"
+  | 4  -> Prof "Halpern"
+  | 5  -> Prof "White"
+  | 6  -> Building "Baker"
+  | 7  -> Building "Carpenter"
+  | 8  -> Building "Duffield"
+  | 9  -> Building "Gates"
   | 10 -> Building "Klarman"
   | 11 -> Building "Olin"
   | 12 -> Building "Phillips"
@@ -51,7 +51,7 @@ let card_of_int (i:int) : card =
   | 18 -> Language "MATLAB"
   | 19 -> Language "OCaml"
   | 20 -> Language "Python"
-  | _ -> failwith "Illegal int representation of card"
+  | _  -> failwith "Illegal int representation of card"
 
 (* [int_of_card c] is the integer representation of a card. *)
 let int_of_card (c:card) : int =
@@ -82,7 +82,7 @@ let int_of_card (c:card) : int =
 (* [string_of_card c] is the string representation of a card. *)
 let string_of_card (c:card) : string =
   match c with
-  | Prof s -> "Prof. " ^ s
+  | Prof s     -> "Prof. " ^ s
   | Building s -> s ^ " Hall"
   | Language s -> s
 
@@ -98,49 +98,50 @@ type dir = Up of int | Down of int | Left of int | Right of int
 
 (* map is the type that holds information about the map. *)
 type map = {
-  num_rows: int;
-  num_cols: int;
-  map_values: string option array array;
-  exits: (building * ((int * coord) list)) list; (* ("Gates", [ (1, (0,0)); (2,(5,5))] *)
-  buildings: building list;
-  in_building: (prof * building)list;
-  location: (prof * coord) list;
-  waiting_spots: (building * (coord list)) list;
-  secrets: (building * building) list;
+  num_rows:      int;
+  num_cols:      int;
+  map_values:    string option array array;
+  exits:        (building * ((int * coord) list)) list; 
+             (* ("Gates",   [ (1, (0,0)); (2,(5,5)) ] *)
+  buildings:     building list;
+  in_building:  (prof * building)list;
+  location:     (prof * coord) list;
+  waiting_spots:(building * (coord list)) list;
+  secrets:      (building * building) list;
 }
 
 (* user stores the information about the user's character, number of turns,
  * specific location and the language that s/he uses.*)
 type user = {
   character: prof;
-  hand: hand;
+  hand:      hand;
   was_moved: bool;
 }
 
 (* ai and player are almost the same except for that ai also has a list of
  * case_file that he obtains*)
 type ai = {
-  character : prof;
-  hand: hand;
-  was_moved: bool;
-  is_in_game: bool;
-  difficulty: difficulty;
-  destination: coord option;
-  known_cards: card list;
+  character :   prof;
+  hand:         hand;
+  was_moved:    bool;
+  is_in_game:   bool;
+  difficulty:   difficulty;
+  destination:  coord option;
+  known_cards:  card list;
   possible_cards: card list;
-  past_guesses: (case_file * prof * (prof option)) list;
+  past_guesses:  (case_file * prof * (prof option)) list;
 }
 
 (* state is the type specifying the currect map situation and player's and ais' information.
  * Also, it includes a fact_file which was initiated at the init phase of the game.*)
 type state = {
-  counter: int;
+  counter:  int;
   game_complete: bool;
-  map: map;
-  user: user;
-  ais: ai list;
-  fact_file: case_file;
-  dictionary: prof * [ `AI | `User | `No ] list;
+  map:      map;
+  user:     user;
+  ais:      ai list;
+  fact_file:   case_file;
+  dictionary: (prof * [ `AI | `User | `No ]) list;
 }
 
 (* [assign_was_moved s p b] assigns bool [b] to the [was_moved] field of
@@ -150,15 +151,14 @@ let assign_was_moved (s:state) (p:prof) (b:bool) : state =
   match List.assoc p dictionary with
   | `AI -> 
       let newais = List.map 
-                   (fun a -> if a.character = p 
-                             then {a with was_moved = b} 
-                             else a) s.ais in
-      {s with ais = newais}
+        (fun a -> if a.character = p 
+                  then {a with was_moved = b} 
+                  else a) s.ais in
+        {s with ais = newais}
   | `User -> 
       let newuser = {s.user with was_moved = b} in
-      {s with user = newuser}
-  | `No -> 
-      s
+        {s with user = newuser}
+  | `No -> s
 
 (* [roll_two_dice ()] simulates rolling two dice, prints the results, and 
  * returns the sum. *)
@@ -166,7 +166,7 @@ let roll_two_dice () : int =
   let d1 = 1 + Random.int 5 in
   let d2 = 1 + Random.int 5 in
   let sum = d1 + d2 in
-  print_endline "Rolling two dice...";
-  Printf.printf "Die 1: %d\n" d1;
-  Printf.printf "Die 2: %d\n" d2;
-  sum
+    print_endline "Rolling two dice...";
+    Printf.printf "Die 1: %d\n" d1;
+    Printf.printf "Die 2: %d\n" d2;
+    sum
