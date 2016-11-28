@@ -429,8 +429,8 @@ let disprove (s:state) (guess:case_file) : card option =
   print_endline "It is your turn to disprove the suggstion:";
   let hand = s.user.hand in
   let {who; where; with_what} = guess in
-  let who_or_not = List.mem (Prof who) hand in
-  let where_or_not = List.mem (Building where) hand in
+  let who_or_not       = List.mem (Prof who) hand in
+  let where_or_not     = List.mem (Building where) hand in
   let with_what_or_not = List.mem (Language with_what) hand in
   match who_or_not, where_or_not, with_what_or_not with
   | true, true, true ->

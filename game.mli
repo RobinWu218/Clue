@@ -1,7 +1,7 @@
 open Data
 open Gmap
+open User 
 open Ai
-open User
 
 (* [init n d] is the initial game state with [n] AI bots and a difficulty level
  * of [d]. It prints out which character each player plays, and the cards in 

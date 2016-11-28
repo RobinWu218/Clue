@@ -1,5 +1,7 @@
 open Data
 open Gmap
+open User 
+open Ai
 
 (******************************)
 (* init_state and its helpers *)

@@ -18,14 +18,14 @@ let init (p:prof) (h:hand) (d:difficulty) : ai =
     Language "Bash";     Language "C";         Language "Java";
     Language "MATLAB";   Language "OCaml";     Language "Python"] in
   {
-  character      = p;
-  hand           = h;
-  difficulty     = d;
-  was_moved      = false;
-  is_in_game     = true;
-  destination    = None;
-  known_cards    = h;
-  possible_cards = possible;
+    character      = p;
+    hand           = h;
+    difficulty     = d;
+    was_moved      = false;
+    is_in_game     = true;
+    destination    = None;
+    known_cards    = h;
+    possible_cards = possible;
   }
 
 (* [get_ai p s] is the AI data structure for the AI playing character [p] in
@@ -62,7 +62,7 @@ let update_state_guess state prof1 guess prof2 =
 (**)
 let card_to_string card=
   match card with
-  |Prof p -> p
+  |Prof  p    -> p
   |Building b -> b
   |Language l -> l
 
@@ -98,11 +98,10 @@ let make_suggestion building ai =
     let loc    = building in
     let perp   = easy_helper_who  ai.possible_cards in
     let weapon = easy_helper_what ai.possible_cards in
-    ( ignore (Printf.printf "%s has guessed that the culprit was %s using %s in %s Hall.\n
-                    We will now go around and attempt to disprove the guess."
-      ai.character, perp, weapon, loc)
-    ;
-  {who = perp; where = loc; with_what = weapon})
+    ( ignore (Printf.printf "%s has guessed that the culprit was %s using %s in 
+      %s Hall.\n We will now go around and attempt to disprove the guess."
+      ai.character, perp, weapon, loc);
+      {who = perp; where = loc; with_what = weapon})
 
 (*[replace_ai_with_new new_ai ai_list] returns an updated list of ais, replacing
 the old ai with this new one.*)
@@ -122,23 +121,22 @@ let make_accusation state ai : state=
     let weapon = easy_helper_what  ai.possible_cards in
     let guess  = {who=perp; where=loc; with_what=weapon} in
     Printf.printf "%s has made an accusation that the culprit was %s using
-                    %s in %s Hall!\n"
-                     ai.character perp weapon loc;
+      %s in %s Hall!\n" ai.character perp weapon loc;
     if guess = state.fact_file
     then
       begin
       print_endline "Uh oh, the AI has won! That accusation was correct.
-                          You have lost the game. :(";
+        You have lost the game. :(";
       {state with game_complete=true}
       end
     else
       begin
-      print_endline "The AI has made the wrong accusation! This AI is now
-        out of of the game, though it can still prove your suggestions
-        wrong/right, it can no longer win and will not move. ";
-      let new_ai      = {ai with is_in_game=false} in
-      let new_ai_list = replace_ai_with_new new_ai state.ais in
-      {state with ais = new_ai_list}
+        print_endline "The AI has made the wrong accusation! This AI is now
+          out of of the game, though it can still prove your suggestions
+          wrong/right, it can no longer win and will not move. ";
+        let new_ai      = {ai with is_in_game=false} in
+        let new_ai_list = replace_ai_with_new new_ai state.ais in
+          {state with ais = new_ai_list}
       end
 
 (*[easy_want_to_accuse] is true when there are only three possible cards left
@@ -164,9 +162,9 @@ they have in their [hand]. Returns Some Card that the player uses to disprove
 or None if no such card exists. *)
 let rec easy_helper_disprove hand guess = match hand with
   |[]   -> None
-  |h::t -> if (card_to_string h)=guess.who ||
-                    (card_to_string h)=guess.where ||
-                    (card_to_string h)=guess.with_what then
+  |h::t -> if (card_to_string h) = guess.who   ||
+              (card_to_string h) = guess.where ||
+              (card_to_string h) = guess.with_what then
       (Some h) else easy_helper_disprove t guess
 
 (* [disprove ai guess] figures out which card to reveal in response
@@ -257,9 +255,11 @@ let update_possible ai guess =
     else if have_who then
       helper_update_building (helper_update_lang ai.possible_cards what) where
     else
-      helper_update_building where 
-     (helper_update_lang
-     (helper_update_prof ai.possible_cards who) what) where
+      helper_update_building 
+        (helper_update_lang
+          (helper_update_prof ai.possible_cards who) 
+        what) 
+      where
 
 (*[update_ai_not_disproved ai guess] updates the [ai] based on the fact that
 [guess] was disproved. Returns updated ai.*)
@@ -331,11 +331,10 @@ let rec step ai state =
             make_accusation new_state ai
           end
           else begin
-            {new_state with
-                        ais     = new_ai_list;
-                        past_guesses = (guess, ai.character, prof_option)::state.past_guesses
+            { new_state with
+                ais     = new_ai_list;
+                past_guesses = (guess, ai.character, prof_option)::state.past_guesses
             }
-
                   (*{
                     counter=state.counter+1;
                     game_complete= game_complete;
