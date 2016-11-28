@@ -431,3 +431,4 @@ let use_secret_passage map p =
         teleport_professor map p toB
     with
     | _ -> failwith ("No secret passage to take in "^b)
+
