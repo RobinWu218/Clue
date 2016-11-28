@@ -86,7 +86,7 @@ let string_of_card (c:card) : string =
   | Building s -> s ^ " Hall"
   | Language s -> s
 
-(* case_file is the type defining who made the virus in which building with 
+(* case_file is the type defining who made the virus in which building with
  * which programming language. *)
 type case_file = {who: prof; where: building; with_what: language}
 
@@ -148,14 +148,15 @@ type state = {
  * character, then [s] is simply unchanged. *)
 let assign_was_moved (s:state) (p:prof) (b:bool) : state =
   match List.assoc p dictionary with
-  | `AI -> 
-      let newais = List.map 
-                   (fun a -> if a.character = p 
-                             then {a with was_moved = b} 
+  | `AI ->
+      let newais = List.map
+                   (fun a -> if a.character = p
+                             then {a with was_moved = b}
                              else a) s.ais in
       {s with ais = newais}
-  | `User -> 
+  | `User ->
       let newuser = {s.user with was_moved = b} in
       {s with user = newuser}
-  | `No -> 
+  | `No ->
       s
+
