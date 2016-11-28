@@ -5,12 +5,12 @@ open Gmap
 (* utility methods *)
 (*******************)
 
-(* [init p h d] is the AI data structure that represents an AI playing 
+(* [init p h d] is the AI data structure that represents an AI playing
  * character [p] on difficulty level [d], with hand [h].
  *)
-val init: prof -> hand -> difficulty -> ai
+val init_ai: prof -> hand -> difficulty -> ai
 
-(* [get_ai p s] is the AI data structure for the AI playing character [p] in 
+(* [get_ai p s] is the AI data structure for the AI playing character [p] in
  * state [s].
  * Raises: Not_found if [p] is not represented by an AI in [s].
  *)
@@ -20,7 +20,7 @@ val get_ai: prof -> state -> ai
  *)
 val get_difficulty: ai -> difficulty
 
-(* [still_in_game ai] is [true] iff the AI [ai] is still in the game. 
+(* [still_in_game ai] is [true] iff the AI [ai] is still in the game.
  * If that ai is out, s/he can still prove suggestions wrong.
  *)
 val still_in_game: ai -> bool
@@ -34,7 +34,7 @@ val still_in_game: ai -> bool
  * Returns: [Some c] where [c] is a card that [ai] can reveal. Or, if [ai] has
  * none of the cards in [guess], then it will return [None].
  *)
-val disprove: ai -> case_file -> card option
+val ai_disprove: ai -> case_file -> card option
 
 (* [step ai state] peforms a turn for [ai]. This involves:
  *   - defining and setting goals by processing knowledge from suggestions and
@@ -43,5 +43,5 @@ val disprove: ai -> case_file -> card option
  *   - forming and making suggestions/accusations
  * Returns: an updated game state.
  *)
-val step:  ai -> state -> state
+val ai_step:  ai -> state -> state
 
