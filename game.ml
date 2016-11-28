@@ -1,7 +1,5 @@
 open Data
 open Gmap
-open Ai
-open User
 
 (******************************)
 (* init_state and its helpers *)
@@ -33,7 +31,7 @@ let select_non_repeat_lst excluded_lst lst size bound =
 let assign_characters prof_chosen (n:int) =
     let char_lst = ref [] in
     select_non_repeat_lst (prof_lst_to_int_lst prof_chosen) char_lst n 6;
-    lst_to_prof_lst (!char_lst)
+    int_lst_to_prof_lst (!char_lst)
 
 (* [choose_card n] is an list of non-repeating cards.
  * Requires: [n] is an integer between 3 and 6 inclusive.
@@ -86,7 +84,7 @@ let init_ai_lst n d hand_lst character_lst =
     let nth = List.length !ai_lst in
     let character = List.nth character_lst nth in
     let hand = List.nth hand_lst nth in
-    let ai = AI.init character d hand in
+    let ai = Ai.init character hand d in
     ai_lst := (!ai_lst) @ [ai]
   ) done;
   !ai_lst
@@ -110,6 +108,7 @@ let rec generate_dictionary prof_lst user_char ai_char_lst =
  * between 1 and 3 inclusive. *)
 let init_state (n:int) (d:int) : state =
   if (n >= 2) && (n <= 5) then
+    begin
     let fact_file = generate_case_file () in
     let fact_cards = [Prof fact_file.who; Building fact_file.where; Language fact_file.with_what];
     let character_lst = assign_characters (fact_file.who) n in
@@ -122,15 +121,18 @@ let init_state (n:int) (d:int) : state =
     let dictionary = generate_dictionary
                       ["Bracy";"Clarkson";"Fan";"Gries";"Halpern";"White"]
                       user_character ai_characters_lst in
-    {counter = 0;
-     game_complete = false;
-     map = make_map();
-     user = {character = user_character; hand = user_hand; was_moved = false};
-     ais = ai_lst;
-     fact_file = fact_file;
-     dictionary = dictionary;
-     }
-    else failwith "This should not happen in init_state in game.ml"
+    {
+    counter = 0;
+    game_complete = false;
+    map = make_map ();
+    user = {character = user_character; hand = user_hand; was_moved = false};
+    ais = ai_lst;
+    fact_file = fact_file;
+    dictionary = dictionary;
+    }
+    end
+  else
+    failwith "This should not happen in init_state in game.ml"
 
 (************************)
 (* step and its helpers *)
@@ -153,10 +155,10 @@ and step_helper (p:prof) (s:state) : state =
   match List.assoc p s.dictionary with
   | `AI ->
       let ai = List.find (fun a -> a.character = p) s.ais in
-      let news = ai_step s ai in
+      let news = if ai.is_in_game then Ai.step ai s else s in
       step {news with counter = news.counter + 1}
   | `User ->
-      let news = user_step s in
+      let news = User.step s in
       step {news with counter = news.counter + 1}
   | `None ->
       step {s with counter = s.counter + 1}

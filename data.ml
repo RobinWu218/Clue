@@ -131,11 +131,11 @@ let string_of_card (c:card) : string =
   | Building s -> s ^ " Hall"
   | Language s -> s
 
-(* [lst_to_prof_lst lst] is a prof list corresponding to int list [lst]. *)
-let rec lst_to_prof_lst (lst:string list) : prof list =
+(* [int_lst_to_prof_lst lst] is a prof list corresponding to int list [lst]. *)
+let rec int_lst_to_prof_lst (lst:int list) : prof list =
   match lst with
   | [] -> []
-  | h::t -> (prof_of_int h)::(lst_to_prof_lst t)
+  | h::t -> (prof_of_int h)::(int_lst_to_prof_lst t)
 
 (* [prof_lst_to_int_lst lst] is an int list corresponding to prof list
  * [lst]. *)
