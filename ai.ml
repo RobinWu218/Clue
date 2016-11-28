@@ -110,7 +110,10 @@ let make_suggestion building ai =
     let loc    = building in
     let perp   = easy_helper_who  ai.possible_cards in
     let weapon = easy_helper_what ai.possible_cards in
-    {who = perp; where = loc; with_what = weapon}
+    (Printf.printf "%s has guessed that the culprit was %s using %s in %s Hall.\n
+                    We will now go around and attempt to disprove the guess."
+      ai.character, perp, weapon, loc
+    ;{who = perp; where = loc; with_what = weapon})
   |Medium -> failwith "unimplemented"
   |Hard   ->failwith "unimplemented"
 
@@ -131,18 +134,23 @@ let make_accusation state ai =
     let perp   = easy_helper_who   ai.possible_cards in
     let weapon = easy_helper_what  ai.possible_cards in
     let guess  = {who=perp; where=loc; with_what=weapon} in
-    if guess = state.fact_file
+    (Printf.printf "%s has made an accusation that the culprit was %s using
+                    %s in %s Hall!\n"
+                     ai.character, perp, weapon, loc;
+    (if guess = state.fact_file
     then
-      (print_endline "Uh oh, the AI has won! You have lost the game.";
+      (print_endline "Uh oh, the AI has won! That accusation was correct.
+                          You have lost the game. :(";
        state = {state with game_complete=true})
     else
-      (print_endline "The AI has made the wrong guess! This AI is now
+      (print_endline "The AI has made the wrong accusation! This AI is now
         out of of the game, though it can still prove your suggestions
         wrong/right, it can no longer win and will not move. ";
         let new_ai      = {ai with is_in_game=false} in
         let new_ai_list = replace_ai_with_new new_ai state.ais in
           state = {state with ais = new_ai_list})
-
+    )
+)
 (*[easy_want_to_accuse] is true when there are only three possible cards left
  * so the ai knows the right answer and thus wants to accuse. *)
 let easy_want_to_accuse ai =
@@ -219,14 +227,22 @@ let update_possible ai guess =
               then ai.possible_cards
               else if (List.mem where ai.hand)&&(List.mem what ai.hand) then
                 helper_update_prof ai.possible_cards who
-              else if
-
-
-
-
-
-
-
+              else if (List.mem where ai.hand)&&(List.mem who ai.hand) then
+                helper_update_lang ai.possible_cards what
+              else if (List.mem what ai.hand)&&(List.mem who ai.hand) then
+                helper_update_building ai.possible_cards where
+              else (List.mem where ai.hand) then
+                helper_update_lang (helper_update_prof ai.possible_cards who) what
+              else (List.mem what ai.hand) then
+                helper_update_building (helper_update_prof ai.possible_cards who) where
+              else (List.mem who ai.hand) then
+                helper_update_building (helper_update_lang ai.possible_cards what) where
+              else
+                helper_update_building
+                      (helper_update_lang
+                              (helper_update_prof ai.possible_cards who)
+                                            what)
+                                                where
 
 (*[update_ai_not_disproved ai guess] updates the [ai] based on the fact that
 [guess] was disproved. Returns updated ai.*)
@@ -235,8 +251,7 @@ let update_possible ai guess =
 let update_ai_not_disproved ai guess =
 print_endline "No one was able to disprove the AI.";
 {ai with past_guesses=(guess, ai.character, None)::ai.past_guesses;
-          possible_cards=(*TODO*))}
-
+          possible_cards=update_possible ai guess}
 
 (*[update_ai_disproved ai guess player] takes the card [c] that was returned by
 [player] who disproved [guess] and updates [ai].*)
