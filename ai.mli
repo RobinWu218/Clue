@@ -51,4 +51,4 @@ val ai_step: state -> ai -> state
  * Returns: [Some c] where [c] is a card that [ai] can reveal. Or, if [ai] has
  * none of the cards in [guess], then it will return [None].
  *)
-val ai_disprove: ai -> card list -> card option
+val ai_disprove: ai -> case_file -> card option

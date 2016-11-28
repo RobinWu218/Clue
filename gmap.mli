@@ -18,7 +18,7 @@ val print_map: map -> unit
 (* [get_exits map] returns an association list of exit coordinates to their
  * respective buildings.
  *)
-val get_exits: map ->  coord * building list
+val get_exits: map -> (coord * building) list
 
 (* [is_exit_blocked map coord] returns true if the exit at location [coord] is 
  * blocked in by another professor. Does not check that [coord] is a valid exit. 
@@ -65,10 +65,16 @@ val get_secret_passage: map -> building -> building option
  *)
 val get_current_location: map -> prof -> coord
 
+(* [get_closest_exit lst (r,c)] returns the closest exit coordinate in [lst] to 
+ * the location[(r,c)] based on manhattan distance (not actual steps it takes to
+ * reach).
+ *)
+val get_closest_exit : (int * coord) list -> coord -> coord
+
 (* [closest_buildings map p] 
  * Returns: a list of buildings n order of closeness to professor [p]
  *)
-val closest_buildings: map -> prof -> building list
+val closest_buildings: map -> prof -> (int * building) list
 
 
 (*******************************************
@@ -102,7 +108,7 @@ val move: map -> prof -> string -> int -> int * map
  *   [map2] is the updated map.
  * Raises: InvalidLocation if [c] is off the map or inside a building. 
  *)
-val move_toward_coord: map -> prof -> coord -> int -> bool * map
+val move_towards_coord: map -> prof -> coord -> int -> bool * map
 
 (* [move_towards_building map p b n] tries to move professor [p] on the [map] 
  * [n] steps towards the building [b].

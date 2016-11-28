@@ -33,7 +33,7 @@ let select_non_repeat_lst excluded_lst lst size bound =
 let assign_characters prof_chosen (n:int) =
     let char_lst = ref [] in
     select_non_repeat_lst (prof_lst_to_int_lst prof_chosen) char_lst n 6;
-    lst_to_prof_lst (!char_lst)
+    int_lst_to_prof_lst (!char_lst)
 
 (* [choose_card n] is an list of non-repeating cards.
  * Requires: [n] is an integer between 3 and 6 inclusive. 
@@ -110,6 +110,7 @@ let rec generate_dictionary prof_lst user_char ai_char_lst =
  * between 1 and 3 inclusive. *)
 let init_state (n:int) (d:int) : state =
   if (n >= 2) && (n <= 5) then
+    begin
     let fact_file = generate_case_file () in 
     let fact_cards = [Prof fact_file.who; Building fact_file.where; Language fact_file.with_what];
     let character_lst = assign_characters (fact_file.who) n in
@@ -122,15 +123,18 @@ let init_state (n:int) (d:int) : state =
     let dictionary = generate_dictionary 
                       ["Bracy";"Clarkson";"Fan";"Gries";"Halpern";"White"] 
                       user_character ai_characters_lst in 
-    {counter = 0;
-     game_complete = false;
-     map = make_map();
-     user = {character = user_character; hand = user_hand; was_moved = false};
-     ais = ai_lst;
-     fact_file = fact_file;
-     dictionary = dictionary;
-     }
-    else failwith "This should not happen in init_state in game.ml"
+    {
+    counter = 0;
+    game_complete = false;
+    map = make_map ();
+    user = {character = user_character; hand = user_hand; was_moved = false};
+    ais = ai_lst;
+    fact_file = fact_file;
+    dictionary = dictionary;
+    }
+    end
+  else 
+    failwith "This should not happen in init_state in game.ml"
 
 (************************)
 (* step and its helpers *)

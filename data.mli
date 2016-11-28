@@ -46,8 +46,8 @@ val int_of_card : card -> int
 (* [string_of_card c] is the string representation of a card. *)
 val string_of_card : card -> string
 
-(* [lst_to_prof_lst lst] is a prof list corresponding to int list [lst]. *)
-val lst_to_prof_lst : string list -> prof list
+(* [int_lst_to_prof_lst lst] is a prof list corresponding to int list [lst]. *)
+val int_lst_to_prof_lst : int list -> prof list
 
 (* [prof_lst_to_int_lst lst] is an int list corresponding to prof list 
  * [lst]. *)

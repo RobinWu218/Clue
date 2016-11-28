@@ -16,8 +16,12 @@ let int_option_of_string (s:string) : int option =
 let rec get_choice_two () : int =
   let str = print_string  "> "; read_line () in
   let str' = String.(str |> trim) in
-  if String.length str' = 0 then
-    print_endline "Please at least type something!"; get_choice_two ()
+  if String.length str' = 0 
+  then
+    begin
+    print_endline "Please at least type something!"; 
+    get_choice_two ()
+    end
   else 
     match str'.[0] with 
     | '1' -> 1
@@ -29,8 +33,12 @@ let rec get_choice_two () : int =
 let rec get_choice_three () : int =
   let str = print_string  "> "; read_line () in
   let str' = String.(str |> trim) in
-  if String.length str' = 0 then
-    print_endline "Please at least type something!"; get_choice_three ()
+  if String.length str' = 0 
+  then
+    begin
+    print_endline "Please at least type something!"; 
+    get_choice_three ()
+    end
   else 
     match str'.[0] with 
     | '1' -> 1
@@ -50,8 +58,8 @@ let choose_from_two (c1:card) (c2:card) : card option =
 (* [choose_from_three c1 c2 c3] is [Some c1] or [Some c2] or [Some c3] as 
  * determined by user. *)
 let choose_from_three (c1:card) (c2:card) (c3:card) : card option =
-  Printf.printf ("You can reveal one of the three cards: \n" ^
-                 "card 1: %s, card 2: %s, or card 3: %s. [1/2/3]\n")
+  print_endline "You can reveal one of the three cards: \n";
+  Printf.printf "card 1: %s, card 2: %s, or card 3: %s. [1/2/3]\n"
                 (string_of_card c1) (string_of_card c2) (string_of_card c3);
   match get_choice_three () with 
   | 1 -> Some c1
@@ -65,8 +73,12 @@ let rec get_who () : string =
   print_endline "Who did it? [Bracy/Clarkson/Fan/Gries/Halpern/White]";
   let str = print_string  "> "; read_line () in
   let str' = String.(str |> trim |> lowercase_ascii) in
-  if String.length str' = 0 then
-    print_endline "Please at least type something!"; get_who ()
+  if String.length str' = 0 
+  then
+    begin
+    print_endline "Please at least type something!"; 
+    get_who ()
+    end
   else 
     match str'.[0] with 
     | 'b' -> "Bracy"
@@ -85,7 +97,10 @@ let rec get_where () : string =
   let str = print_string  "> "; read_line () in
   let str' = String.(str |> trim |> lowercase_ascii) in
   if String.length str' = 0 then
-    print_endline "Please at least type something!"; get_where ()
+    begin
+    print_endline "Please at least type something!"; 
+    get_where ()
+    end
   else 
     match str'.[0] with 
     | 'b' -> "Baker"
@@ -105,8 +120,12 @@ let rec get_with_what () : string =
   print_endline "With what language? [Bash/C/Java/MATLAB/OCaml/Python]";
   let str = print_string  "> "; read_line () in
   let str' = String.(str |> trim |> lowercase_ascii) in
-  if String.length str' = 0 then
-    print_endline "Please at least type something!"; get_with_what ()
+  if String.length str' = 0 
+  then
+    begin
+    print_endline "Please at least type something!"; 
+    get_with_what ()
+    end
   else 
     match str'.[0] with 
     | 'b' -> "Bash"
@@ -131,24 +150,29 @@ let user_accuse (s:state) : state =
     then (true, (teleport_professor s.map who where)) (* Gmap *)
     else (false, s.map) in
   let accusation = 
-    {who = Prof who; 
-     where = Building where; 
-     with_what = Language with_what} in
-  if accusation = s.fact_file then
+    {who = who; 
+     where = where; 
+     with_what = with_what} in
+  if accusation = s.fact_file 
+  then
+    begin
     print_endline "Awesome! You got the right accusation.";
     print_endline "YOU WIN!!!";
     print_endline "Clue will exit automatically. Do come again!";
     let news = {s with game_complete = true; map = map} in
     assign_was_moved news who moved_or_not (* Gmap *)
+    end
   else
-    print_endline "Uh-oh, wrong accusation."
-    print_endline "Unfortunately, you have just lost the game. :("
-    print_endline "The real case file is: \n"
-    Printf.printf "Prof. %s created the virus with %s in %s Hall.\n" 
+    begin
+    print_endline "Uh-oh, wrong accusation.";
+    print_endline "Unfortunately, you have just lost the game. :(";
+    print_endline "The real case file is: \n";
+    Printf.printf "Prof. %s created the virus with %s in %s Hall.\n"
                   who with_what where;
     print_endline "Clue will exit automatically. Do come again!";
     let news = {s with game_complete = true; map = map} in
     assign_was_moved news who moved_or_not (* Gmap *)
+    end
 
 (* [accuse_or_not s] asks the user whether s/he wants to make an accusation or
  * not, and if so, updates the current state [s] by calling [accuse s]. *)
@@ -187,13 +211,13 @@ and disprove_helper_case (p:prof) (n:int) (guess:case_file) (s:state)
   | `AI -> 
       let ai = List.find (fun a -> a.character = p) s.ais in
       begin
-      match Ai.ai_disprove ai guess with_what
+      match Ai.ai_disprove ai guess with
       | Some card -> Some (p, card)
       | None -> disprove_helper (n+1) guess s
       end
   | `User -> 
       failwith "This should not happen in disprove_helper_case in user.ml"
-  | `None -> 
+  | `No -> 
       disprove_helper (n+1) guess s
 
 (* [user_suggest s] prompts the user for his/her suggestion and calls 
@@ -203,7 +227,7 @@ and disprove_helper_case (p:prof) (n:int) (guess:case_file) (s:state)
 let user_suggest (s:state) : state =
   print_endline "Please make a suggestion about the current building now.";
   let who = get_who () in
-  let where_option = get_current_building s1.map s1.user.character in(* Gmap *)
+  let where_option = get_current_building s.map s.user.character in (* Gmap *)
   let with_what = get_with_what () in
   match where_option with
   | Some where ->
@@ -214,18 +238,18 @@ let user_suggest (s:state) : state =
       let news = {s with game_complete = true; map = map} in
       let news' = assign_was_moved news who moved_or_not in (* Gmap *)
       let guess = 
-        {who = Prof who; 
-         where = Building where; 
-         with_what = Language with_what} in
+        {who = who; 
+         where = where; 
+         with_what = with_what} in
       let nuser = int_of_card (Prof s.user.character) in
       begin
-      match disprove_helper (n+1) guess s with
+      match disprove_helper (nuser+1) guess s with
       | Some (p, c) -> 
           Printf.printf "Prof. %s disproved your suggestion with card %s." 
                         p (string_of_card c);
           let news'' = 
             {news' with past_guesses = (*TODO possibly have a helper.ml?*)
-              (guess, s.user.character, Some prof)::news'.past_guesses} in
+              (guess, s.user.character, Some p)::news'.past_guesses} in
           accuse_or_not news''
       | None -> 
           print_endline "No one can disprove your suggestion."; 
@@ -266,11 +290,13 @@ let rec get_movement (n:int) : string * int =
 let rec user_move (n:int) (s:state) : state =
   if n < 0 then 
     failwith "This should not happen in user_move"
-  if n = 0 then 
+  else if n = 0 then 
+    begin
     print_endline "You cannot move anymore.";
     if is_in_building s.map s.user.character (* Gmap *)
     then user_suggest s
     else s
+    end
   else
     let (dir, x) = get_movement n in
     let (y, map) = move s.map s.user.character dir x in (* Gmap *)
@@ -288,8 +314,8 @@ let use_secret (s:state) : state =
  * suggestion and using the secret passage to enter building [b], and returns 
  * the updated state. *)
 let suggest_or_secret (b:building) (s:state) : state =
-  Printf.printf ("You can either 1 make a suggestion now or 2 use the " ^
-                 "secret passage to get into %s Hall. [1/2]\n") b;
+  print_endline "You can either 1 make a suggestion now or ";
+  Printf.printf "2 use the secret passage to get into %s Hall. [1/2]\n" b;
   match get_choice_two () with 
   | 1 -> user_suggest s
   | 2 -> use_secret s
@@ -299,17 +325,17 @@ let suggest_or_secret (b:building) (s:state) : state =
  * passage to enter building [b] and rolling the dice to move out, and returns 
  * the updated state. *)
 let secret_or_roll (b:building) (s:state) : state =
-  Printf.printf ("You can either 1 use the secret passage to get into %s " ^
-                 "Hall or 2 roll the dice and move out. [1/2]\n") b;
+  print_endline "You can either 1 roll the dice and move out or";
+  Printf.printf "2 use the secret passage to get into %s Hall. [1/2]\n" b;
   match get_choice_two () with 
-  | 1 -> use_secret s
-  | 2 -> user_move (roll_two_dice ()) s
+  | 1 -> user_move (roll_two_dice ()) s
+  | 2 -> use_secret s
   | _ -> failwith "This should not happen in secret_or_roll in user.ml"
 
 (* [suggest_or_roll s] prompts the user to choose between making a suggestion
  * and rolling the dice to move out, and returns the updated state. *)
 let suggest_or_roll (s:state) : state =
-  Printf.printf ("You can either 1 make a suggestion now or 2 roll the " ^
+  print_endline ("You can either 1 make a suggestion now or 2 roll the " ^
                  "dice and move out. [1/2]\n");
   match get_choice_two () with 
   | 1 -> user_suggest s
@@ -320,9 +346,9 @@ let suggest_or_roll (s:state) : state =
  * passage, or roll the dice to move out, or make a suggestion, and returns
  * the updated state. *)
 let secret_or_roll_or_suggest (b:building) (s:state) : state =
-  Printf.printf ("You can either 1 make a suggestion now, or 2 roll the " ^
-                 "dice and move out, or 3 use the secret passage to get " ^
-                 "into %b Hall. [1/2/3]\n") b;
+  print_endline "You can either 1 make a suggestion now, or ";
+  print_endline "2 roll the dice and move out, or ";
+  Printf.printf "3 use the secret passage to get into %s Hall. [1/2/3]\n" b;
   match get_choice_three () with 
   | 1 -> user_suggest s
   | 2 -> user_move (roll_two_dice ()) s

@@ -440,7 +440,7 @@ let use_secret_passage map p =
  * whoever playing the character of prof [p] in state [s]. If no one plays that
  * character, then [s] is simply unchanged. *)
 let assign_was_moved (s:state) (p:prof) (b:bool) : state =
-  match List.assoc p dictionary with
+  match List.assoc p s.dictionary with
   | `AI -> 
       let newais = List.map 
         (fun a -> if a.character = p 
