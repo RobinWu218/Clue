@@ -1,74 +1,76 @@
-(* [InvalidLocation] is an exception raised by methods in the Map module *)
+(* [InvalidLocation] is raised by functions in the Map module. *)
 exception InvalidLocation
+
+(* [InvalidOperation] is raised by functions in the Map module. *)
 exception InvalidOperation
 
-(* [Difficulty] are variants describing the different levels of AI play. *)
+(* [difficulty] represents the difficulty level of each AI player. *)
 type difficulty = Easy | Medium | Expert
 
-(*****************************************************************************)
-
-(* types for the game *)
-(* professor who started the virus *)
+(* [prof] represents one of the six professors in game. *)
 type prof = string
 
-(* building in where the virus started *)
+(* [building] represents one of the nine buildings in game. *)
 type building = string
 
-(* language that the perpetrator used *)
+(* [language] represents one of the six languages in game. *)
 type language = string
 
-(* card is the type that player can show to prove others' suggestions.
- * It can be a card describing a prof or a building or a language. *)
+(* [card] represents a professor or a building or a language. *)
 type card =
   | Prof of prof
   | Building of building
   | Language of language
 
-(*The hand of what cards a person currently possesses. *)
+(* [hand] represents the cards that a player has. *)
 type hand = card list
 
-let int_to_prof i =
-    match i with
-    | 0 -> "Bracy"
-    | 1 -> "Clarkson"
-    | 2 -> "Fan"
-    | 3 -> "Gries"
-    | 4 -> "Halpern"
-    | 5 -> "White"
-    | _ -> failwith "illegal int"
+(* [prof_of_int i] is the prof corresponding to an integer from 0 to 5. *)
+let prof_of_int (i:int) : prof =
+  match i with
+  | 0 -> "Bracy"
+  | 1 -> "Clarkson"
+  | 2 -> "Fan"
+  | 3 -> "Gries"
+  | 4 -> "Halpern"
+  | 5 -> "White"
+  | _ -> failwith "Illegal int representation of a prof"
 
-let prof_to_int s =
-  match s with 
-  | "Bracy" -> 0
+(* [int_of_prof i] is the integer corresponding to a prof. *)
+let int_of_prof (p:prof) : int =
+  match p with 
+  | "Bracy"     -> 0
   | "Clarkson"  -> 1
-  | "Fan"  -> 2
-  | "Gries" -> 3
-  | "Halpern" -> 4
-  | "White" -> 5
-  | _ -> failwith "Illegal string"
+  | "Fan"       -> 2
+  | "Gries"     -> 3
+  | "Halpern"   -> 4
+  | "White"     -> 5
+  | _           -> failwith "Illegal string representation of a prof"
 
-let int_to_building i =
-    match i with
-    | 0 -> "Baker"
-    | 1 -> "Carpenter"
-    | 2 -> "Duffield"
-    | 3 -> "Gates"
-    | 4 -> "Klarman"
-    | 5 -> "Olin"
-    | 6 -> "Phillips"
-    | 7 -> "Rhodes"
-    | 8 -> "Statler"
-    | _ -> failwith "illegal int"
+(* [building_of_int i] is the integer corresponding to a building. *)
+let building_of_int (i:int) : building =
+  match i with
+  | 0 -> "Baker"
+  | 1 -> "Carpenter"
+  | 2 -> "Duffield"
+  | 3 -> "Gates"
+  | 4 -> "Klarman"
+  | 5 -> "Olin"
+  | 6 -> "Phillips"
+  | 7 -> "Rhodes"
+  | 8 -> "Statler"
+  | _ -> failwith "Illegal int representation of a building"
 
-let int_to_lang i =
-    match i with
-    | 0 -> "Bash"
-    | 1 -> "C"
-    | 2 -> "Java"
-    | 3 -> "MATLAB"
-    | 4 -> "OCaml"
-    | 5 -> "Python"
-    | _ -> failwith "illegal int"
+(* [lang_of_int i] is the integer corresponding to a language. *)
+let lang_of_int (i:int) : language =
+  match i with
+  | 0 -> "Bash"
+  | 1 -> "C"
+  | 2 -> "Java"
+  | 3 -> "MATLAB"
+  | 4 -> "OCaml"
+  | 5 -> "Python"
+  | _ -> failwith "Illegal int representation of a language"
 
 (* [card_of_int i] is the card representation of an integer from 0 to 20. *)
 let card_of_int (i:int) : card =
@@ -94,7 +96,7 @@ let card_of_int (i:int) : card =
   | 18 -> Language "MATLAB"
   | 19 -> Language "OCaml"
   | 20 -> Language "Python"
-  | _  -> failwith "Illegal int representation of card"
+  | _  -> failwith "Illegal int representation of a card"
 
 (* [int_of_card c] is the integer representation of a card. *)
 let int_of_card (c:card) : int =
@@ -129,86 +131,92 @@ let string_of_card (c:card) : string =
   | Building s -> s ^ " Hall"
   | Language s -> s
 
-(* [lst_to_prof_lst] is a string list indicting professors given by an int list*)
-let rec lst_to_prof_lst lst =
-    match lst with
-    | [] -> []
-    | h::t -> (int_to_prof h)::(lst_to_prof_lst t)
+(* [lst_to_prof_lst lst] is a prof list corresponding to int list [lst]. *)
+let rec lst_to_prof_lst (lst:string list) : prof list =
+  match lst with
+  | [] -> []
+  | h::t -> (prof_of_int h)::(lst_to_prof_lst t)
 
-(* [prof_lst_to_int_lst] is an int list given by the correcponding list of profs*)
-let rec prof_lst_to_int_lst prof_lst =
-    match prof_lst with
-    | [] -> []
-    | h::t -> (prof_to_int h)::(prof_lst_to_int_lst t)
+(* [prof_lst_to_int_lst lst] is an int list corresponding to prof list 
+ * [lst]. *)
+let rec prof_lst_to_int_lst (lst:prof list) : int list =
+  match lst with
+  | [] -> []
+  | h::t -> (int_of_prof h)::(prof_lst_to_int_lst t)
 
-(* [lst_to_card_lst] is a string list indicting cards given by an int list*)
-let rec lst_to_card_lst lst =
-    match lst with
-    | [] -> []
-    | h::t -> (card_of_int h)::(lst_to_card_lst t)
+(* [int_lst_to_card_lst lst] is a card list corresponding to int list [lst]. *)
+let rec int_lst_to_card_lst (lst:int list) : card list =
+  match lst with
+  | [] -> []
+  | h::t -> (card_of_int h)::(int_lst_to_card_lst t)
 
-(* [card_lst_to_int_lst] is an int list given by the correcponding list of cards*)
-let rec card_lst_to_int_lst card_lst =
-    match card_lst with
-    | [] -> []
-    | h::t -> (int_of_card h)::(card_lst_to_int_lst t)
+(* [card_lst_to_int_lst lst] is an int list corresponding to card list [lst]. *)
+let rec card_lst_to_int_lst (lst:card list) : int list =
+  match lst with
+  | [] -> []
+  | h::t -> (int_of_card h)::(card_lst_to_int_lst t)
 
-(* case_file is the type defining who made the virus in which building with 
- * which programming language. *)
+(* [case_file] represents the fact file, a suggestion, or an accusation, which 
+ * includes information of who started the virus in which building with which 
+ * programming language. *)
 type case_file = {who: prof; where: building; with_what: language}
 
-(* integer pair representing a (row, column) on the map. *)
+(* [coord] represents a (row, column) coordinate on the map. *)
 type coord = int * int
 
-(* dir is the type representing player movement *)
+(* [dir] represents the direction and number of steps of a player's movement 
+ * on the map. *)
 type dir = Up of int | Down of int | Left of int | Right of int
 
-(* map is the type that holds information about the map. *)
+(* [map] stores information about the map. *)
 type map = {
-  num_rows:      int;
-  num_cols:      int;
-  map_values:    string option array array;
-  exits:        (building * ((int * coord) list)) list; 
-             (* ("Gates",   [ (1, (0,0)); (2,(5,5)) ] *)
-  buildings:     building list;
-  in_building:  (prof * building)list;
-  location:     (prof * coord) list;
-  waiting_spots:(building * (coord list)) list;
-  secrets:      (building * building) list;
+  num_rows:       int;
+  num_cols:       int;
+  exits:         (building * ((int * coord) list)) list; 
+       (* e.g., [("Gates",   [(1,    (0,0)); 
+                             (2,    (5,5))     ])     ] *)
+  buildings:      building list;
+  waiting_spots: (building * (coord list)) list;
+  secrets:       (building * building) list;
+  (* Below are fields that can change throughout the game. *)
+  map_values:     string option array array;
+  in_building:   (prof * building)list;
+  location:      (prof * coord) list;
 }
 
-(* user stores the information about the user's character, number of turns,
- * specific location and the language that s/he uses.*)
+(* [user] stores information about the user. *)
 type user = {
   character: prof;
   hand:      hand;
+  (* Below is a field that can change throughout the game. *)
   was_moved: bool;
 }
 
-(* ai and player are almost the same except for that ai also has a list of
- * case_file that he obtains*)
+(* [ai] stores information about an ai. *)
 type ai = {
-  character :   prof;
-  hand:         hand;
-  was_moved:    bool;
-  is_in_game:   bool;
-  difficulty:   difficulty;
-  destination:  coord option;
-  known_cards:  card list;
+  character :     prof;
+  hand:           hand;
+  difficulty:     difficulty;
+  (* Below are fields that can change throughout the game. *)
+  was_moved:      bool;
+  is_in_game:     bool;
+  destination:    coord option;
+  known_cards:    card list;
   possible_cards: card list;
-  past_guesses:  (case_file * prof * (prof option)) list;
 }
 
-(* state is the type specifying the currect map situation and player's and ais' information.
- * Also, it includes a fact_file which was initiated at the init phase of the game.*)
+(* [state] stores information about the entire game, including user's and ais'
+ * information. *)
 type state = {
-  counter:  int;
+  fact_file:     case_file;
+  dictionary:    (prof * [ `AI | `User | `No ]) list;
+  (* Below are fields that can change throughout the game. *)
   game_complete: bool;
-  map:      map;
-  user:     user;
-  ais:      ai list;
-  fact_file:   case_file;
-  dictionary: (prof * [ `AI | `User | `No ]) list;
+  counter:       int;
+  map:           map;
+  user:          user;
+  ais:           ai list;
+  past_guesses:  (case_file * prof * (prof option)) list;
 }
 
 (* [assign_was_moved s p b] assigns bool [b] to the [was_moved] field of

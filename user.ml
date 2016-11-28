@@ -187,7 +187,7 @@ and disprove_helper_case (p:prof) (n:int) (guess:case_file) (s:state)
   | `AI -> 
       let aib = List.find (fun a -> a.character = p) s.ais in
       begin
-      match ai_disprove aib guess with_what
+      match Ai.ai_disprove aib guess with_what
       | Some card -> Some (p, card)
       | None -> disprove_helper (n+1) guess s
       end
