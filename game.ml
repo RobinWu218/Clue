@@ -1,7 +1,5 @@
 open Data
 open Gmap
-open Ai
-open User
 
 (******************************)
 (* init_state and its helpers *)
@@ -86,7 +84,7 @@ let init_ai_lst n d hand_lst character_lst =
     let nth = List.length !ai_lst in 
     let character = List.nth character_lst nth in 
     let hand = List.nth hand_lst nth in 
-    let ai = init_ai character hand d in (* Ai *)
+    let ai = Ai.init character hand d in
     ai_lst := (!ai_lst) @ [ai]
   ) done;
   !ai_lst
@@ -157,10 +155,10 @@ and step_helper (p:prof) (s:state) : state =
   match List.assoc p s.dictionary with
   | `AI -> 
       let ai = List.find (fun a -> a.character = p) s.ais in
-      let news = ai_step s ai in
+      let news = if ai.is_in_game then Ai.step ai s else s in
       step {news with counter = news.counter + 1}
   | `User -> 
-      let news = user_step s in
+      let news = User.step s in
       step {news with counter = news.counter + 1}
   | `None -> 
       step {s with counter = s.counter + 1}

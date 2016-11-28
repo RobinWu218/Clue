@@ -131,7 +131,7 @@ let get_closest_exit lst (r,c) =
   let (d, p) = List.hd sorted in p
 
 (* [closest_buildings map p]
- * Returns: a list of buildings n order of closeness to professor [p]
+ * Returns: a list of buildings in order of closeness to professor [p]
  * If the professor is inside a building, the professor's waiting location is
  * used.
  *)
@@ -198,10 +198,10 @@ let leave_building map p n =
 
 (*[enter_building map p b] handles professor [p] entering into building [b] by
  * updating the necessary values in [map] and returning the newly updated map
- * requires: [p] is a valid professor name, [b] is a valid building name.
+ * Requires: [p] is a valid professor name, [b] is a valid building name.
  *)
 let rec enter_building map p b =
-  print_endline ("Entering building "^b);
+  Printf.printf "Prof. %s is entering %s Hall" p b;
   let m     = map.map_values in
   let wl    = List.assoc b map.waiting_spots in
   let (r,c) = get_open_spot m wl in
@@ -213,8 +213,7 @@ and get_open_spot m lst = match lst with
   | (r,c)::t -> if m.(r).(c) = None 
     then (r,c) 
     else get_open_spot m t
-  | [] -> failwith "No open waiting spots!"
-
+  | [] -> failwith "No open waiting spots! which should not happen."
 
 (* [move map p dir n] tries to move professor [p] on the [map] [n] steps in 
  * [dir] direction.
