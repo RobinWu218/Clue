@@ -176,10 +176,20 @@ and step_helper (p:prof) (s:state) : state =
   match List.assoc p s.dictionary with
   | `AI ->
       let ai = List.find (fun a -> a.character = p) s.ais in
-      let news = if ai.is_in_game then Ai.step ai s else s in
+      let news = 
+        if ai.is_in_game 
+        then 
+          begin
+          Printf.printf "Prof. %s's turn..." p;
+          Ai.step ai s 
+          end
+        else s 
+      in
       step {news with counter = news.counter + 1}
   | `User ->
-      let news = User.step s in
+      let news = 
+        Printf.printf "Prof. %s's turn... which is your turn :)\n" p;
+        User.step s in
       step {news with counter = news.counter + 1}
   | `No ->
       step {s with counter = s.counter + 1}
