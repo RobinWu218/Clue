@@ -2,10 +2,6 @@ open Data
 open Gmap
 open Logic
 
-(********************)
-(* helper functions *)
-(********************)
-
 (* [get_who ()] prompts the user for the professor s/he wants to suggest
  * or accuse and returns the corresponding string. *)
 let rec get_who () : string =
@@ -171,16 +167,16 @@ let suggest (s:state) : state =
   let with_what = get_with_what () in
   match where_option with
   | Some where ->
+      let guess = 
+        {who = who; 
+         where = where; 
+         with_what = with_what} in
       let (moved_or_not, map) = 
         if get_current_building s.map who <> (Some where) (* Gmap *)
         then (true, (teleport_professor s.map who where)) (* Gmap *)
         else (false, s.map) in
       let news = {s with map = map} in
       let news' = assign_was_moved news who moved_or_not in (* Gmap *)
-      let guess = 
-        {who = who; 
-         where = where; 
-         with_what = with_what} in
       let nuser = int_of_card (Prof s.user.character) in
       begin
       match disprove_loop (nuser+1) guess s with
@@ -240,7 +236,9 @@ let rec move (n:int) (s:state) : state =
   else
     let (dir, x) = get_movement n in
     let (y, map) = Gmap.move s.map s.user.character dir x in (* Gmap *)
-    move (n-x+y) {s with map = map}
+    if is_in_building map s.user.character (* Gmap *)
+    then suggest {s with map = map}
+    else move (n-x+y) {s with map = map}
 
 (* [use_secret s] is the updated state after the user uses the secret 
  * passage in the current building. 
@@ -351,10 +349,6 @@ let in_building_voluntarily (b:building) (s:state) : state =
       s
   | false, false -> 
       move (roll_two_dice ()) s
-
-(******************)
-(* main functions *)
-(******************)
 
 (* [step s] is the new state after the user finishes his/her turn when
  * the current state is [s]. *)

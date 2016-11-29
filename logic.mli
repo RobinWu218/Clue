@@ -1,6 +1,15 @@
 open Data
 open Gmap
 
+(* [assign_was_moved s p b] assigns bool [b] to the [was_moved] field of
+ * whoever playing the character of prof [p] in state [s]. If no one plays that
+ * character, then [s] is simply unchanged. *)
+val assign_was_moved : state -> prof -> bool -> state
+
+(* [roll_two_dice ()] simulates rolling two dice, prints the results, and 
+ * returns the sum. *)
+val roll_two_dice : unit -> int
+
 (* [get_choice ()] is [1] if the user selects the first choice and [2] if
  * the user selects the second choice. *)
 val get_choice_two : unit -> int
@@ -12,22 +21,6 @@ val get_choice_three : unit -> int
 (* [get_choice_num_ai ()] is [2] up till [5] if the user chooses to play with 
  * [2] to [5] AI's. *)
 val get_choice_num_ai : unit -> int
-
-(* [choose_from_two c1 c2] is [Some c1] or [Some c2] as determined by user. *)
-val choose_from_two : card -> card -> card option
-
-(* [choose_from_three c1 c2 c3] is [Some c1] or [Some c2] or [Some c3] as 
- * determined by user. *)
-val choose_from_three : card -> card -> card -> card option
-
-(* [assign_was_moved s p b] assigns bool [b] to the [was_moved] field of
- * whoever playing the character of prof [p] in state [s]. If no one plays that
- * character, then [s] is simply unchanged. *)
-val assign_was_moved : state -> prof -> bool -> state
-
-(* [roll_two_dice ()] simulates rolling two dice, prints the results, and 
- * returns the sum. *)
-val roll_two_dice : unit -> int
 
 (* [ai_disprove ai guess] figures out which card to reveal in response
  * to a suggestion [guess].
