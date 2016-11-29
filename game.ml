@@ -107,6 +107,9 @@ let rec generate_dictionary prof_lst user_char ai_lst =
  * Requires: [n] is an integer between 2 and 5 inclusive, [d] is an integer
  * between 1 and 3 inclusive. *)
 let init_state (n:int) (d:difficulty) : state =
+  Random.self_init ();  
+                  (*Fix the problem of producing same sequence of nums every
+                   *time we launch utop*)
   if (n >= 2) && (n <= 5) then
     let fact_file = generate_case_file () in
     let fact_cards = [Prof fact_file.who; 
