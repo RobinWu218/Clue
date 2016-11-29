@@ -185,7 +185,7 @@ let suggest (s:state) : state =
       begin
       match disprove_loop (nuser+1) guess s with
       | Some (p, c) -> 
-          Printf.printf "Prof. %s disproved your suggestion with card %s." 
+          Printf.printf "Prof. %s disproved your suggestion with card %s.\n" 
                         p (string_of_card c);
           let news'' = 
             {news' with past_guesses = (*TODO possibly have a helper.ml?*)
@@ -238,9 +238,12 @@ let rec move (n:int) (s:state) : state =
       s
     end
   else
-    let (dir, x) = get_movement n in
-    let (y, map) = Gmap.move s.map s.user.character dir x in (* Gmap *)
-    move (n-x+y) {s with map = map}
+    if is_in_building s.map s.user.character (* Gmap *)
+    then suggest s
+    else
+      let (dir, x) = get_movement n in
+      let (y, map) = Gmap.move s.map s.user.character dir x in (* Gmap *)
+      move (n-x+y) {s with map = map}
 
 (* [use_secret s] is the updated state after the user uses the secret 
  * passage in the current building. 
