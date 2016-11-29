@@ -327,8 +327,10 @@ let rec step ai state =
 (********************************************************************)
 (* alice's scratch XXD *)
 
+(*
+
 (*TODO*)
-(*let accuse (a:ai) (s:state) : state =
+let accuse (a:ai) (s:state) : state =
   failwith "TODO"
 
 (* TODO decides whether to accuse or not in the middle of an AI's turn
@@ -361,7 +363,7 @@ let accuse_or_not_start (a:ai) (s:state) : state =
 (*TODO
  * AI logic:
  *   - Easy: simply chooses the first card. *)
-let choose_from_two (c1:card) (c2:card) : card option =
+let choose_from_two (a:ai) (c1:card) (c2:card) : card option =
   match a.difficulty with
   | Easy   -> Some c1
   | Medium -> failwith "TODO"
@@ -370,7 +372,7 @@ let choose_from_two (c1:card) (c2:card) : card option =
 (*TODO
  * AI logic:
  *   - Easy: simply chooses the first card. *)
-let choose_from_three (c1:card) (c2:card) (c3:card) : card option =
+let choose_from_three (a:ai) (c1:card) (c2:card) (c3:card) : card option =
   match a.difficulty with
   | Easy   -> Some c1
   | Medium -> failwith "TODO"
@@ -388,19 +390,19 @@ let disprove (a:ai) (guess:case_file) : card option =
   match who_or_not, where_or_not, with_what_or_not with
   | true, true, true ->
       Printf.printf "Prof. %s disproved the suggestion.\n" a.character;
-      choose_from_three (Prof who) (Building where) (Language with_what)
+      choose_from_three a (Prof who) (Building where) (Language with_what)
   | true, true, false ->
       Printf.printf "Prof. %s disproved the suggestion.\n" a.character;
-      choose_from_two (Prof who) (Building where)
+      choose_from_two a (Prof who) (Building where)
   | true, false, true ->
       Printf.printf "Prof. %s disproved the suggestion.\n" a.character;
-      choose_from_two (Prof who) (Language with_what)
+      choose_from_two a (Prof who) (Language with_what)
   | true, false, false ->
       Printf.printf "Prof. %s disproved the suggestion.\n" a.character;
       Some (Prof who)
   | false, true, true ->
       Printf.printf "Prof. %s disproved the suggestion.\n" a.character;
-      choose_from_two (Building where) (Language with_what)
+      choose_from_two a (Building where) (Language with_what)
   | false, true, false ->
       Printf.printf "Prof. %s disproved the suggestion.\n" a.character;
       Some (Building where)
@@ -445,7 +447,7 @@ and disprove_case (p:prof) (ncurrent:int) (n:int) (guess:case_file) (s:state)
       end
   | `User ->
       begin
-      match User.disprove s guess with
+      match user_disprove s guess with
       | Some card -> Some (p, card)
       | None -> disprove_loop ncurrent (n+1) guess s
       end
@@ -470,17 +472,19 @@ let suggest (a:ai) (s:state) : state =
       | Easy   -> suggest_easy a s
       | Medium -> failwith "TODO"
       | Hard   -> failwith "TODO"
-      end
+      end in
+    let guess =
+      {who = who;
+       where = where;
+       with_what = with_what} in
+    print_endline "The suggestion is: ";
+    print_case_file guess;
     let (moved_or_not, map) =
       if get_current_building s.map who <> (Some where) (* Gmap *)
       then (true, (teleport_professor s.map who where)) (* Gmap *)
       else (false, s.map) in
     let news = {s with map = map} in
     let news' = assign_was_moved news who moved_or_not in (* Gmap *)
-    let guess =
-      {who = who;
-       where = where;
-       with_what = with_what} in
     let ncurrent = int_of_card (Prof a.character) in
     begin
     match disprove_loop ncurrent (ncurrent+1) guess s with
@@ -495,14 +499,14 @@ let suggest (a:ai) (s:state) : state =
           {news' with ais = newais;
                       past_guesses = (*TODO possibly have a helper.ml?*)
                       (guess, a.character, Some p)::news'.past_guesses;} in
-        accuse_or_not_middle news''
+        accuse_or_not_middle a news''
     | None ->
         Printf.printf "No one can disprove Prof. %s's suggestion.\n"
                       a.character;
         let news'' =
           {news' with past_guesses =
                       (guess, a.character, None)::news'.past_guesses} in
-        accuse_or_not_middle news''
+        accuse_or_not_middle a news''
     end
   | None -> failwith "This should not happen in suggest in ai.ml"
 
@@ -515,16 +519,19 @@ let move_easy (a:ai) (n:int) (s:state) : state =
   then
     suggest a s
   else
+  (*
     let coord =
       begin
       match a.destination with
       | Some c -> c
       | None ->
-          List.hd (closest_buildings s.map a.character) (* Gmap *)
+          update_destination (* TODO *)
       end
     in
+  *)
+    let (_, b) = List.hd (closest_buildings s.map a.character) in
     let (in_building, new_map) =
-      move_towards_building s.map a.character coord n in (* Gmap *)
+      move_towards_building s.map a.character b n in (* Gmap *)
     if in_building
     then suggest a {s with map = new_map} (*TODO print?*)
     else {s with map = new_map} (*TODO print?*)
@@ -547,6 +554,49 @@ let move (a:ai) (n:int) (s:state) : state =
     | Easy   -> move_easy a n s
     | Medium -> failwith "TODO"
     | Hard   -> failwith "TODO"
+
+(* [use_secret a s] is the updated state after ai [a] uses the secret 
+ * passage in the current building. 
+ * Requires: [a] is currently in a building where there is a secret 
+ *           passage. *)
+let use_secret (a:ai) (s:state) : state =
+  let map = use_secret_passage s.map a.character in (* Gmap *)
+  suggest a {s with map = map}
+
+(* [suggest_or_secret a b s] allows ai [a] to choose between making a 
+ * suggestion and using the secret passage to enter building [b], and returns 
+ * the updated state. *)
+let suggest_or_secret (a:ai) (b:building) (s:state) : state =
+  match a.difficulty with
+  | Easy   -> use_secret a s
+  | Medium -> suggest a s (* TODO *)
+  | Hard   -> failwith "TODO"
+
+(* [secret_or_roll a b s] allows ai [a] to choose between using the secret 
+ * passage to enter building [b] and rolling the dice to move out, and returns 
+ * the updated state. *)
+let secret_or_roll (a:ai) (b:building) (s:state) : state =
+  match a.difficulty with
+  | Easy   -> use_secret a s
+  | Medium -> failwith "TODO depends on which is easier to get to destination"
+  | Hard   -> failwith "TODO" (* move a (roll_two_dice ()) s *)
+
+(* [suggest_or_roll a s] allows ai [a] to choose between making a suggestion
+ * and rolling the dice to move out, and returns the updated state. *)
+let suggest_or_roll (a:ai) (s:state) : state =
+  match a.difficulty with
+  | Easy   -> suggest a s
+  | Medium -> failwith "TODO depends on which is easier to get to destination"
+  | Hard   -> failwith "TODO" (* move a (roll_two_dice ()) s *)
+
+(* [secret_or_roll_or_suggest a s] allows ai [a] to choose to use the secret
+ * passage, or roll the dice to move out, or make a suggestion, and returns
+ * the updated state. *)
+let secret_or_roll_or_suggest (a:ai) (b:building) (s:state) : state =
+  match a.difficulty with
+  | Easy   -> use_secret a s
+  | Medium -> failwith "TODO depends on which is easier to get to destination"
+  | Hard   -> failwith "TODO" (* move a (roll_two_dice ()) s *)
 
 (*TODO*)
 let in_building_involuntarily (a:ai) (b:building) (s:state) : state =
@@ -600,4 +650,5 @@ let rec step (a:ai) (s:state) : state =
       else in_building_voluntarily a b s1
   | None ->
       move a (roll_two_dice ()) s1 (* Gmap *)
-    *)
+
+*)

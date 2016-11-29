@@ -1,38 +1,46 @@
-+------+---+-+------------+
-|    +-+  ++.|     s      |
-|   ++.|  |..|    ...     |
-|   |..|  ++.|    ..      |
-|  ++..v   |.v    ..v     |
-|  |...|   |.     ..      |
-++-v...+-hh+..  h ...     |
-++...................     |
-|s....................    |
-+----+.....+---+......hh  |
-|    +-h...|   |.........s|
-|      |...|   |.........++
-|      |...|   |......+--+
-|
-|
-|
-|
-|
-|
-|
-|
-|
-|
-|
-|
-|
-+-------------------------+
+**************************
+*s    ****W****G****    s*
+*     **...****...** OLIN*
+* BAKR*..***  ***..* ??? *
+* ??? *..* KLRN *..* ??? *
+* ??? *..d  ??  d..*     *
+*     *..*  ??  *...d*****
+*****d*..*  ??  *.......B*
+*........*d****d*.......**
+**.................*******
+*********..........d CARP*
+*       *..*****...* ??? *
+* STAT  *..**C**...* ??? *
+* ????  d..**L**...*******
+*  ??   *..**U**........**
+*       *..**E**...*******
+*******d*..*****..* PHIL *
+**.........*****..d ???? *
+*Y................*  ??  *
+**........***d**...*******
+*******d..*    *........P*
+*      *..*GATE*........**
+* DUFF *..* ?? *..d*******
+* ???? *..* ?? *..* RHOD *
+*  ??  *..* ?? *..* ???? *
+*s    **R**    **.*  ?? s*
+**************************
 
-h horizontal door like this -
-v vertical door like this |
-+ corner wall
-- horizontal wall
-| vertical wall
-i inaccessible
-. accessible
-  in-building (s secret passage way; name of building)
-d door
-s starting place; should be replaced by prof initials
+27 rows, 26 cols
+d = door
+S = secret passageway
+? = spot for people
+RYWGBP are starting spots
+* = blocked
+. = path
+  = in building 
+
+BAKR Baker Hall
+CARP Carpenter Hall
+DUFF Duffield Hall 
+GATE Gates Hall
+KLRN Klarman Hall
+OLIN Olin Library 
+PHIL Phillips Hall
+RHOD Rhodes Hall 
+STAT Statler Hall

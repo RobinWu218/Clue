@@ -121,7 +121,7 @@ let init_state (n:int) (d:difficulty) : state =
     let ai_hand_lst = remove_first_el dealt_cards_lst in
     let user_character = List.hd character_lst in
     let ai_characters_lst = remove_first_el character_lst in
-    let ai_lst = init_ai_lst n d ai_hand_lst character_lst in
+    let ai_lst = init_ai_lst n d ai_hand_lst ai_characters_lst in
     let map = construct_map () in
     let dictionary = generate_dictionary
                       ["Bracy";"Clarkson";"Fan";"Gries";"Halpern";"White"]
@@ -180,8 +180,8 @@ and step_helper (p:prof) (s:state) : state =
         if ai.is_in_game 
         then 
           begin
-          Printf.printf "Prof. %s's turn..." p;
-          Ai.step ai s 
+          Printf.printf "Prof. %s's turn...\n" p;
+          Ai.step ai s
           end
         else s 
       in

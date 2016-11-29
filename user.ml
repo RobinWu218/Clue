@@ -97,7 +97,7 @@ let accuse (s:state) : state =
     begin
     print_endline "Awesome! You got the right accusation.";
     print_endline "YOU WIN!!!";
-    print_endline "Clue will exit automatically. Do come again!";
+    print_endline "CLUE will exit automatically. Do come again!";
     let news = {s with game_complete = true; map = map} in
     assign_was_moved news who moved_or_not (* Gmap *)
     end
@@ -108,7 +108,7 @@ let accuse (s:state) : state =
     print_endline "The real case file is:";
     Printf.printf "Prof. %s created the virus with %s in %s Hall.\n"
                   s.fact_file.who s.fact_file.with_what s.fact_file.where;
-    print_endline "Clue will exit automatically. Do come again!";
+    print_endline "CLUE will exit automatically. Do come again!";
     let news = {s with game_complete = true; map = map} in
     assign_was_moved news who moved_or_not (* Gmap *)
     end

@@ -72,7 +72,7 @@ val get_current_location: map -> prof -> coord
 val get_closest_exit : (int * coord) list -> coord -> coord
 
 (* [closest_buildings map p] 
- * Returns: a list of buildings n order of closeness to professor [p]
+ * Returns: a list of buildings in order of closeness to professor [p]
  *)
 val closest_buildings: map -> prof -> (int * building) list
 

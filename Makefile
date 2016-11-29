@@ -3,7 +3,6 @@ play:
 
 clean:
 	ocamlbuild -clean
-	rm -f checktypes.ml
 
 test:
 	ocamlbuild -pkgs oUnit,yojson,str,ANSITerminal game_test.byte && ./game_test.byte

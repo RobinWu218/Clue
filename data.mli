@@ -63,7 +63,7 @@ type user = {
 
 (* [ai] stores information about an ai. *)
 type ai = {
-  character :     prof;
+  character:      prof;
   hand:           hand;
   difficulty:     difficulty;
   (* Below are fields that can change throughout the game. *)
@@ -142,4 +142,7 @@ val int_lst_to_card_lst : int list -> card list
 
 (* [card_lst_to_int_lst lst] is an int list corresponding to card list [lst]. *)
 val card_lst_to_int_lst : card list -> int list
+
+(* [print_case_file cf] prints the case file [cf] in a sentence. *)
+val print_case_file : case_file -> unit
 

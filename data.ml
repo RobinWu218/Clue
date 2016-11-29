@@ -63,7 +63,7 @@ type user = {
 
 (* [ai] stores information about an ai. *)
 type ai = {
-  character :     prof;
+  character:      prof;
   hand:           hand;
   difficulty:     difficulty;
   (* Below are fields that can change throughout the game. *)
@@ -264,4 +264,9 @@ let rec card_lst_to_int_lst (lst:card list) : int list =
   match lst with
   | [] -> []
   | h::t -> (int_of_card h)::(card_lst_to_int_lst t)
+
+(* [print_case_file cf] prints the case file [cf] in a sentence. *)
+let print_case_file (cf:case_file) : unit =
+  Printf.printf "Prof. %s started the virus with %s in %s Hall.\n"
+                cf.who cf.with_what cf.where
 
