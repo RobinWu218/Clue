@@ -29,13 +29,6 @@ val still_in_game: ai -> bool
  * Methods for interacting with game state
  ************************************************)
 
-(* [disprove ai guess] figures out which card to reveal in response
- * to a suggestion [guess].
- * Returns: [Some c] where [c] is a card that [ai] can reveal. Or, if [ai] has
- * none of the cards in [guess], then it will return [None].
- *)
-val disprove: ai -> case_file -> card option
-
 (* [step ai state] peforms a turn for [ai]. This involves:
  *   - defining and setting goals by processing knowledge from suggestions and
  *     making deductions about other players' turns.

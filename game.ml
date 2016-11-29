@@ -1,7 +1,5 @@
 open Data
 open Gmap
-open User 
-open Ai
 
 (******************************)
 (* init_state and its helpers *)
@@ -10,38 +8,37 @@ open Ai
 (* [generate_case_file ()] is the case file containing the answers to the
  * questions: Who? Where? What language? *)
 let generate_case_file () : case_file =
-    let r_prof = prof_of_int(Random.int 6) in
-    let r_building = building_of_int(Random.int 9) in
-    let r_lang = lang_of_int(Random.int 6) in
-    {who = r_prof; where = r_building; with_what = r_lang}
+  let r_prof = prof_of_int(Random.int 6) in
+  let r_building = building_of_int(Random.int 9) in
+  let r_lang = lang_of_int(Random.int 6) in
+  {who = r_prof; where = r_building; with_what = r_lang}
 
 (* [select_non_repeat_lst] is an int list generated randomly given the size
  * and bound and the exclueded elements*)
 let select_non_repeat_lst excluded_lst lst size bound =
-
-    while (List.length !lst < size) do (
-        let r =  Random.int bound in
-        if (List.mem r !lst) || (List.mem r excluded_lst) then
-          lst:= !lst
-        else
-          lst:= (r::!lst)
-    )done
+  while (List.length !lst < size) do (
+      let r =  Random.int bound in
+      if (List.mem r !lst) || (List.mem r excluded_lst) then
+        lst:= !lst
+      else
+        lst:= (r::!lst)
+  )done
 
 (* [assign_characters n] is a list of non-repeating profs.
  * Requires: [n] is an integer between 3 and 6 inclusive.
  *           [prof_chosen] is a string list indicating the chosen professor*)
 let assign_characters prof_chosen (n:int) =
-    let char_lst = ref [] in
-    select_non_repeat_lst (prof_lst_to_int_lst prof_chosen) char_lst n 6;
-    int_lst_to_prof_lst (!char_lst)
+  let char_lst = ref [] in
+  select_non_repeat_lst (prof_lst_to_int_lst prof_chosen) char_lst n 6;
+  int_lst_to_prof_lst (!char_lst)
 
 (* [choose_card n] is an list of non-repeating cards.
  * Requires: [n] is an integer between 3 and 6 inclusive.
  *           [card_chosen] is a card list indicating the chosen cards*)
 let choose_card card_chosen (n:int) =
-    let card_lst = ref [] in
-    select_non_repeat_lst (card_lst_to_int_lst card_chosen) card_lst n 21;
-    int_lst_to_card_lst (!card_lst)
+  let card_lst = ref [] in
+  select_non_repeat_lst (card_lst_to_int_lst card_chosen) card_lst n 21;
+  int_lst_to_card_lst (!card_lst)
 
 (*TODO*)
 let deal_card fact_card n =
@@ -115,20 +112,37 @@ let init_state (n:int) (d:difficulty) : state =
     let fact_cards = [Prof fact_file.who; 
                       Building fact_file.where; 
                       Language fact_file.with_what] in
-    let character_lst = assign_characters [fact_file.who] n in
-    let dealt_cards_lst = deal_card fact_cards n in
+    let character_lst = assign_characters [fact_file.who] (n+1) in
+    let dealt_cards_lst = deal_card fact_cards (n+1) in
     let user_hand = List.hd dealt_cards_lst in
     let ai_hand_lst = remove_first_el dealt_cards_lst in
     let user_character = List.hd character_lst in
     let ai_characters_lst = remove_first_el character_lst in
     let ai_lst = init_ai_lst n d ai_hand_lst character_lst in
+    let map = construct_map () in
     let dictionary = generate_dictionary
                       ["Bracy";"Clarkson";"Fan";"Gries";"Halpern";"White"]
                       user_character ai_characters_lst in
+    print_map map;
+    Printf.printf "The AI bots play the roles of %s.\n" 
+                  (string_of_prof_lst ai_characters_lst);
+    Printf.printf "You play the role of Prof. %s.\n" user_character;
+    print_endline (
+      "You start at the position of your last name initial on the map.\n" ^
+      "You can move to any white dots [.], \n" ^
+      "        enter a building through a door [D], \n" ^
+      "    and teleport to another building if there is a secret passage [s].");
+    print_endline "You have the following cards: ";
+    Printf.printf "    %s.\n" (string_of_card_lst user_hand);
+    print_endline (
+      "To play the game, follow the instructions and type into the command line \n" ^
+      "when prompted [> ]. You may find taking lots of notes helpful for \n" ^
+      "keeping track of cards you have and other players might have. Good luck! \n");
+    print_endline "The game begins now...";
     {
     counter = 0;
     game_complete = false;
-    map = construct_map ();
+    map = map;
     user = {character = user_character; hand = user_hand; was_moved = false};
     ais = ai_lst;
     fact_file = fact_file;
@@ -177,9 +191,5 @@ and step_helper (p:prof) (s:state) : state =
 let main n d =
   let s = init_state n (difficulty_of_int d) in
   (*TODO print out user's character and hand*)
-  print_endline ("The game begins now...\n" ^
-    "To play the game, follow the instructions and type into the command line\n" ^
-    "when it is your turn. You may find a \"detective notebook\" helpful for\n" ^
-    "keeping track of cards you have and other players might have. Good luck!\n");
   ignore (step s)
 

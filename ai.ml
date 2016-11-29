@@ -1,5 +1,6 @@
 open Data
 open Gmap
+open Logic
 
 (*******************)
 (* utility methods *)
@@ -58,13 +59,6 @@ let update_state_guess state prof1 guess prof2 =
   {state with
     past_guesses=(guess, prof1, prof2)::state.past_guesses
   }
-
-(**)
-let card_to_string card=
-  match card with
-  |Prof  p    -> p
-  |Building b -> b
-  |Language l -> l
 
 (*[easy_helper_who possible] takes a list of possible cards and returns the
  * first prof that is in the list. This is a helper function for the easy ai.*)
@@ -157,29 +151,6 @@ let rec character_to_ai prof ai_list =
   |[]    -> failwith "should not occur"
   |h::t  -> if h.character = prof then h else character_to_ai prof t
 
-(*[easy_helper_disprove hand guess] attempts to disprove [guess] with the cards
-they have in their [hand]. Returns Some Card that the player uses to disprove
-or None if no such card exists. *)
-let rec easy_helper_disprove hand guess = match hand with
-  |[]   -> None
-  |h::t -> if (card_to_string h) = guess.who   ||
-              (card_to_string h) = guess.where ||
-              (card_to_string h) = guess.with_what then
-      (Some h) else easy_helper_disprove t guess
-
-(* [disprove ai guess] figures out which card to reveal in response
- * to a suggestion [guess].
- * Returns: [Some c] where [c] is a card that [ai] can reveal. Or, if [ai] has
- * none of the cards in [guess], then it will return [None].
- *)
-let disprove ai (guess: case_file) =
-    easy_helper_disprove ai.hand guess
-  (*|Medium -> failwith "unimplemented"
-  |Hard   -> (*if one of the cards has already been in a past guess, the ai wants to
-   show that one so we give the other players as little information as possible.
-    *)
-    failwith "unimplemented"*)
-
 (*[help_disprove players state guess] takes in [players], a prof list of the
  * current players, and a state and returns (Some card, Some Prof) that some
  * player disproved the guess with or returns (None, None) if the guess is not
@@ -191,13 +162,13 @@ let rec help_disprove players state guess =
       begin
         match (List.assoc h state.dictionary) with
         |`AI   ->
-          let proof = disprove (character_to_ai h state.ais) guess in
+          let proof = ai_disprove (character_to_ai h state.ais) guess in
             if   proof = None
             then (Printf.printf "%s was not able to disprove it. " h;
                         help_disprove t state guess)
             else (Printf.printf "%s was able to disprove it. " h; (proof, Some h))
         |`User ->
-          let proof = User.disprove state guess in
+          let proof = user_disprove state guess in
             if   proof = None
             then (Printf.printf "%s was not able to disprove it. " h;
                         help_disprove t state guess)

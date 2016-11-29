@@ -1,3 +1,5 @@
+open Logic
+
 (* This file prints the game description and rules, prompts the user to choose 
  *   the number of AI bots and level of difficulty, and calls Game.main to 
  *   start the game. The reason this file is factored out from [game.ml] is 
@@ -8,7 +10,9 @@
 let () =
   print_endline (
   	"\n\nWelcome to the text-based detective game CLUE developed by \n"^
-  	"Karen Fang, David Zhao, Robin Wu, and Alice Chen for CS 3110. \n"^
+  	"David Zhao, Karen Fang, Robin Wu, and Alice Chen for CS 3110. \n"^
+    "If you are unfamiliar with the game CLUE, here is the instructions: \n"^
+    "http://www.hasbro.com/common/instruct/Clue_(2002).pdf \n\n"^
   	"A computer virus strikes all the computers on Cornell’s campus! \n"^
   	"It only prints out random camel facts... but don’t let that fool you! \n"^
   	"It’s a dangerous virus and the perpetrator needs to be caught. \n"^
@@ -19,14 +23,13 @@ let () =
   	"              David Gries, Joe Halpern, Walker White\n"^
   	"9 Buildings:  Baker Hall, Carpenter Hall, Duffield Hall, \n"^
   	"              Gates Hall, Klarman Hall, Olin Library, \n"^
-  	"              Phillips Hall, Rhodes Hall, Statler Hall"^
-  	"6 Languages:  Bash, C, Java, MATLAB, OCaml, Python");
+  	"              Phillips Hall, Rhodes Hall, Statler Hall\n"^
+  	"6 Languages:  Bash, C, Java, MATLAB, OCaml, Python\n");
   print_endline 
-    "Please enter the number of AI bots you want to play against (2-5).\n";
-  print_string  "> ";
-  let num_AI = read_int () in (* TODO prereq and robust *)
+    "Please enter the number of AI bots you want to play against (2-5).";
+  let num_AI = get_choice_num_ai () in
   print_endline 
-    "Please enter the level of difficulty (1 easy, 2 medium, 3 hard).\n";
-  print_string  "> ";
-  let dlevel = read_int () in (* TODO prereq and robust *)
+    "Please enter the level of difficulty (1 easy, 2 medium, 3 hard).";
+  let dlevel = get_choice_three () in
   Game.main num_AI dlevel
+

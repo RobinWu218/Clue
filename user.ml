@@ -1,71 +1,10 @@
 open Data
 open Gmap
+open Logic
 
 (********************)
 (* helper functions *)
 (********************)
-
-(* [int_option_of_string s] is [Some i] if [s] can be converted to int [i]
- * using [int_of_string s], and [None] otherwise. *)
-let int_option_of_string (s:string) : int option =
-  try Some (int_of_string s)
-  with Failure _ -> None
-
-(* [get_choice ()] is [1] if the user selects the first choice and [2] if
- * the user selects the second choice. *)
-let rec get_choice_two () : int =
-  let str = print_string  "> "; read_line () in
-  let str' = String.(str |> trim) in
-  if String.length str' = 0 
-  then
-    begin
-    print_endline "Please at least type something!"; 
-    get_choice_two ()
-    end
-  else 
-    match str'.[0] with 
-    | '1' -> 1
-    | '2' -> 2
-    | _   -> print_endline "Please type either 1 or 2!"; get_choice_two ()
-
-(* [get_choice_three ()] is [1] if the user selects the first choice, [2] if
- * the user selects the second choice, and [3] if the third. *)
-let rec get_choice_three () : int =
-  let str = print_string  "> "; read_line () in
-  let str' = String.(str |> trim) in
-  if String.length str' = 0 
-  then
-    begin
-    print_endline "Please at least type something!"; 
-    get_choice_three ()
-    end
-  else 
-    match str'.[0] with 
-    | '1' -> 1
-    | '2' -> 2
-    | '3' -> 3
-    | _   -> print_endline "Please type 1 or 2 or 3!"; get_choice_three ()
-
-(* [choose_from_two c1 c2] is [Some c1] or [Some c2] as determined by user. *)
-let choose_from_two (c1:card) (c2:card) : card option =
-  Printf.printf "You can reveal either card 1: %s, or card 2: %s. [1/2]\n"
-                (string_of_card c1) (string_of_card c2);
-  match get_choice_two () with 
-  | 1 -> Some c1
-  | 2 -> Some c2
-  | _ -> failwith "This should not happen in choose_from_two in user.ml"
-
-(* [choose_from_three c1 c2 c3] is [Some c1] or [Some c2] or [Some c3] as 
- * determined by user. *)
-let choose_from_three (c1:card) (c2:card) (c3:card) : card option =
-  print_endline "You can reveal one of the three cards: \n";
-  Printf.printf "card 1: %s, card 2: %s, or card 3: %s. [1/2/3]\n"
-                (string_of_card c1) (string_of_card c2) (string_of_card c3);
-  match get_choice_three () with 
-  | 1 -> Some c1
-  | 2 -> Some c2
-  | 3 -> Some c3
-  | _ -> failwith "This should not happen in choose_from_three in user.ml"
 
 (* [get_who ()] prompts the user for the professor s/he wants to suggest
  * or accuse and returns the corresponding string. *)
@@ -166,9 +105,9 @@ let accuse (s:state) : state =
     begin
     print_endline "Uh-oh, wrong accusation.";
     print_endline "Unfortunately, you have just lost the game. :(";
-    print_endline "The real case file is: \n";
+    print_endline "The real case file is:";
     Printf.printf "Prof. %s created the virus with %s in %s Hall.\n"
-                  who with_what where;
+                  s.fact_file.who s.fact_file.with_what s.fact_file.where;
     print_endline "Clue will exit automatically. Do come again!";
     let news = {s with game_complete = true; map = map} in
     assign_was_moved news who moved_or_not (* Gmap *)
@@ -211,7 +150,7 @@ and disprove_case (p:prof) (n:int) (guess:case_file) (s:state)
   | `AI -> 
       let ai = List.find (fun a -> a.character = p) s.ais in
       begin
-      match Ai.disprove ai guess with
+      match ai_disprove ai guess with (* Logic *)
       | Some card -> Some (p, card)
       | None -> disprove_loop (n+1) guess s
       end
@@ -270,7 +209,7 @@ let rec get_movement (n:int) : string * int =
   let lst = Str.(str |> split (regexp "[ ]+")) in
   match lst with
   | dir::xstr::[] ->
-      let x = int_option_of_string xstr in
+      let x = int_option_of_string xstr in (* Data *)
       begin
         match dir.[0], x with
         | _  , Some x' when ((x' > n) || (x' <= 0)) ->         
@@ -421,47 +360,4 @@ let step (s:state) : state =
       else in_building_voluntarily b s1
   | None ->
       move (roll_two_dice ()) s1 (* Gmap *)
-
-(* [disprove s guess] is [None] if the user does not have any card
- * to disprove the suggestion [guess] and a card option if the user has the 
- * card(s) and wishes to disprove [guess] with that card. *)
-let disprove (s:state) (guess:case_file) : card option =
-  print_endline "It is your turn to disprove the suggstion:";
-  let hand = s.user.hand in
-  let {who; where; with_what} = guess in
-  let who_or_not       = List.mem (Prof who) hand in
-  let where_or_not     = List.mem (Building where) hand in
-  let with_what_or_not = List.mem (Language with_what) hand in
-  match who_or_not, where_or_not, with_what_or_not with
-  | true, true, true ->
-      print_endline ("You have three cards to disprove the suggestion" ^
-                     "and you have to reveal one of them.");
-      choose_from_three (Prof who) (Building where) (Language with_what)
-  | true, true, false ->
-      print_endline ("You have two cards to disprove the suggestion" ^
-                     "and you have to reveal one of them.");
-      choose_from_two (Prof who) (Building where)
-  | true, false, true ->
-      print_endline ("You have two cards to disprove the suggestion" ^
-                     "and you have to reveal one of them.");
-      choose_from_two (Prof who) (Language with_what)
-  | true, false, false ->
-      print_endline ("You have only one card to disprove the suggestion" ^
-                     "and you have to reveal the card.");
-      Some (Prof who)
-  | false, true, true ->
-      print_endline ("You have two cards to disprove the suggestion" ^
-                     "and you have to reveal one of them.");
-      choose_from_two (Building where) (Language with_what)
-  | false, true, false ->
-      print_endline ("You have only one card to disprove the suggestion" ^
-                     "and you have to reveal the card.");
-      Some (Building where)
-  | false, false, true ->
-      print_endline ("You have only one card to disprove the suggestion" ^
-                     "and you have to reveal the card.");
-      Some (Language with_what)
-  | false, false, false ->
-      print_endline "You do not have any cards to disprove the suggestion.";
-      None
 

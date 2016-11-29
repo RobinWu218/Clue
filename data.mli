@@ -7,10 +7,6 @@ exception InvalidOperation
 (* [difficulty] represents the difficulty level of each AI player. *)
 type difficulty = Easy | Medium | Hard
 
-(*TODO
- * Requires: n is 1 or 2 or 3 *)
-val difficulty_of_int : int -> difficulty
-
 (* [prof] represents one of the six professors in game. *)
 type prof = string
 
@@ -28,40 +24,6 @@ type card =
 
 (* [hand] represents the cards that a player has. *)
 type hand = card list
-
-(* [prof_of_int i] is the prof corresponding to an integer from 0 to 5. *)
-val prof_of_int : int -> prof
-
-(* [int_of_prof i] is the integer corresponding to a prof. *)
-val int_of_prof : prof -> int
-
-(* [building_of_int i] is the integer corresponding to a building. *)
-val building_of_int : int -> building
-
-(* [lang_of_int i] is the integer corresponding to a language. *)
-val lang_of_int : int -> language
-
-(* [card_of_int i] is the card representation of an integer from 0 to 20. *)
-val card_of_int : int -> card
-
-(* [int_of_card c] is the integer representation of a card. *)
-val int_of_card : card -> int
-
-(* [string_of_card c] is the string representation of a card. *)
-val string_of_card : card -> string
-
-(* [int_lst_to_prof_lst lst] is a prof list corresponding to int list [lst]. *)
-val int_lst_to_prof_lst : int list -> prof list
-
-(* [prof_lst_to_int_lst lst] is an int list corresponding to prof list 
- * [lst]. *)
-val prof_lst_to_int_lst : prof list -> int list
-
-(* [int_lst_to_card_lst lst] is a card list corresponding to int list [lst]. *)
-val int_lst_to_card_lst : int list -> card list
-
-(* [card_lst_to_int_lst lst] is an int list corresponding to card list [lst]. *)
-val card_lst_to_int_lst : card list -> int list
 
 (* [case_file] represents the fact file, a suggestion, or an accusation, which 
  * includes information of who started the virus in which building with which 
@@ -125,3 +87,59 @@ type state = {
   ais:           ai list;
   past_guesses:  (case_file * prof * (prof option)) list;
 }
+
+(***** various functions *****)
+
+(* [int_option_of_string s] is [Some i] if [s] can be converted to int [i]
+ * using [int_of_string s], and [None] otherwise. *)
+val int_option_of_string : string -> int option
+
+(*TODO
+ * Requires: n is 1 or 2 or 3 *)
+val difficulty_of_int : int -> difficulty
+
+(* [prof_of_int i] is the prof corresponding to an integer from 0 to 5. *)
+val prof_of_int : int -> prof
+
+(* [int_of_prof i] is the integer corresponding to a prof. *)
+val int_of_prof : prof -> int
+
+(* [building_of_int i] is the integer corresponding to a building. *)
+val building_of_int : int -> building
+
+(* [lang_of_int i] is the integer corresponding to a language. *)
+val lang_of_int : int -> language
+
+(* [card_of_int i] is the card representation of an integer from 0 to 20. *)
+val card_of_int : int -> card
+
+(* [int_of_card c] is the integer representation of a card. *)
+val int_of_card : card -> int
+
+(* [string_of_card c] is the string representation of a card. *)
+val string_of_card : card -> string
+
+(* [card_to_string c] is the string part of a card. *)
+val card_to_string : card -> string
+
+(* [string_of_prof_lst] is a comma-separated string representation of a list
+ * of profs. *)
+val string_of_prof_lst : prof list -> string
+
+(* [string_of_card_lst] is a comma-separated string representation of a list
+ * of cards. *)
+val string_of_card_lst : card list -> string
+
+(* [int_lst_to_prof_lst lst] is a prof list corresponding to int list [lst]. *)
+val int_lst_to_prof_lst : int list -> prof list
+
+(* [prof_lst_to_int_lst lst] is an int list corresponding to prof list 
+ * [lst]. *)
+val prof_lst_to_int_lst : prof list -> int list
+
+(* [int_lst_to_card_lst lst] is a card list corresponding to int list [lst]. *)
+val int_lst_to_card_lst : int list -> card list
+
+(* [card_lst_to_int_lst lst] is an int list corresponding to card list [lst]. *)
+val card_lst_to_int_lst : card list -> int list
+

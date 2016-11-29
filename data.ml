@@ -7,15 +7,6 @@ exception InvalidOperation
 (* [difficulty] represents the difficulty level of each AI player. *)
 type difficulty = Easy | Medium | Hard
 
-(*TODO
- * Requires: n is 1 or 2 or 3 *)
-let difficulty_of_int (n:int) : difficulty =
-  match n with
-  | 1 -> Easy
-  | 2 -> Medium
-  | 3 -> Hard
-  | _ -> failwith "This should not happen in difficulty_of_int"
-
 (* [prof] represents one of the six professors in game. *)
 type prof = string
 
@@ -33,6 +24,86 @@ type card =
 
 (* [hand] represents the cards that a player has. *)
 type hand = card list
+
+(* [case_file] represents the fact file, a suggestion, or an accusation, which
+ * includes information of who started the virus in which building with which
+ * programming language. *)
+type case_file = {who: prof; where: building; with_what: language}
+
+(* [coord] represents a (row, column) coordinate on the map. *)
+type coord = int * int
+
+(* [dir] represents the direction and number of steps of a player's movement
+ * on the map. *)
+type dir = Up of int | Down of int | Left of int | Right of int
+
+(* [map] stores information about the map. *)
+type map = {
+  num_rows:       int;
+  num_cols:       int;
+  exits:         (building * ((int * coord) list)) list;
+       (* e.g., [("Gates",   [(1,    (0,0));
+                             (2,    (5,5))     ])     ] *)
+  buildings:      building list;
+  waiting_spots: (building * (coord list)) list;
+  secrets:       (building * building) list;
+  (* Below are fields that can change throughout the game. *)
+  map_values:     string option array array;
+  in_building:   (prof * building)list;
+  location:      (prof * coord) list;
+}
+
+(* [user] stores information about the user. *)
+type user = {
+  character: prof;
+  hand:      hand;
+  (* Below is a field that can change throughout the game. *)
+  was_moved: bool;
+}
+
+(* [ai] stores information about an ai. *)
+type ai = {
+  character :     prof;
+  hand:           hand;
+  difficulty:     difficulty;
+  (* Below are fields that can change throughout the game. *)
+  was_moved:      bool;
+  is_in_game:     bool;
+  destination:    coord option;
+  known_cards:    card list;
+  possible_cards: card list;
+}
+
+(* [state] stores information about the entire game, including user's and ais'
+ * information. *)
+type state = {
+  fact_file:     case_file;
+  dictionary:    (prof * [`AI |`User |`No ]) list;
+  (* Below are fields that can change throughout the game. *)
+  game_complete: bool;
+  counter:       int;
+  map:           map;
+  user:          user;
+  ais:           ai list;
+  past_guesses:  (case_file * prof * (prof option)) list;
+}
+
+(***** various functions *****)
+
+(* [int_option_of_string s] is [Some i] if [s] can be converted to int [i]
+ * using [int_of_string s], and [None] otherwise. *)
+let int_option_of_string (s:string) : int option =
+  try Some (int_of_string s)
+  with Failure _ -> None
+
+(*TODO
+ * Requires: n is 1 or 2 or 3 *)
+let difficulty_of_int (n:int) : difficulty =
+  match n with
+  | 1 -> Easy
+  | 2 -> Medium
+  | 3 -> Hard
+  | _ -> failwith "This should not happen in difficulty_of_int"
 
 (* [prof_of_int i] is the prof corresponding to an integer from 0 to 5. *)
 let prof_of_int (i:int) : prof =
@@ -140,6 +211,35 @@ let string_of_card (c:card) : string =
   | Building s -> s ^ " Hall"
   | Language s -> s
 
+(* [card_to_string c] is the string part of a card. *)
+let card_to_string (c:card) : string =
+  match c with
+  | Prof s     -> s
+  | Building s -> s
+  | Language s -> s
+
+(* [string_of_prof_lst] is a comma-separated string representation of a list
+ * of profs. *)
+let rec string_of_prof_lst (lst:prof list) : string =
+  match lst with
+  | [] -> ""
+  | [p] -> string_of_card (Prof p)
+  | [p1;p2] -> (string_of_card (Prof p1)) ^ " and " ^ 
+               (string_of_card (Prof p2))
+  | h::t -> (string_of_card (Prof h)) ^ ", " ^ 
+            (string_of_prof_lst t)
+
+(* [string_of_card_lst] is a comma-separated string representation of a list
+ * of cards. *)
+let rec string_of_card_lst (lst:card list) : string =
+  match lst with
+  | [] -> ""
+  | [c] -> string_of_card c
+  | [c1;c2] -> (string_of_card c1) ^ " and " ^ 
+               (string_of_card c2)
+  | h::t -> (string_of_card h) ^ ", " ^ 
+            (string_of_card_lst t)
+
 (* [int_lst_to_prof_lst lst] is a prof list corresponding to int list [lst]. *)
 let rec int_lst_to_prof_lst (lst:int list) : prof list =
   match lst with
@@ -164,67 +264,4 @@ let rec card_lst_to_int_lst (lst:card list) : int list =
   match lst with
   | [] -> []
   | h::t -> (int_of_card h)::(card_lst_to_int_lst t)
-
-(* [case_file] represents the fact file, a suggestion, or an accusation, which
- * includes information of who started the virus in which building with which
- * programming language. *)
-type case_file = {who: prof; where: building; with_what: language}
-
-(* [coord] represents a (row, column) coordinate on the map. *)
-type coord = int * int
-
-(* [dir] represents the direction and number of steps of a player's movement
- * on the map. *)
-type dir = Up of int | Down of int | Left of int | Right of int
-
-(* [map] stores information about the map. *)
-type map = {
-  num_rows:       int;
-  num_cols:       int;
-  exits:         (building * ((int * coord) list)) list;
-       (* e.g., [("Gates",   [(1,    (0,0));
-                             (2,    (5,5))     ])     ] *)
-  buildings:      building list;
-  waiting_spots: (building * (coord list)) list;
-  secrets:       (building * building) list;
-  (* Below are fields that can change throughout the game. *)
-  map_values:     string option array array;
-  in_building:   (prof * building)list;
-  location:      (prof * coord) list;
-}
-
-(* [user] stores information about the user. *)
-type user = {
-  character: prof;
-  hand:      hand;
-  (* Below is a field that can change throughout the game. *)
-  was_moved: bool;
-}
-
-(* [ai] stores information about an ai. *)
-type ai = {
-  character :     prof;
-  hand:           hand;
-  difficulty:     difficulty;
-  (* Below are fields that can change throughout the game. *)
-  was_moved:      bool;
-  is_in_game:     bool;
-  destination:    coord option;
-  known_cards:    card list;
-  possible_cards: card list;
-}
-
-(* [state] stores information about the entire game, including user's and ais'
- * information. *)
-type state = {
-  fact_file:     case_file;
-  dictionary:    (prof * [`AI |`User |`No ]) list;
-  (* Below are fields that can change throughout the game. *)
-  game_complete: bool;
-  counter:       int;
-  map:           map;
-  user:          user;
-  ais:           ai list;
-  past_guesses:  (case_file * prof * (prof option)) list;
-}
 

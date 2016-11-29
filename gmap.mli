@@ -133,18 +133,5 @@ val teleport_professor: map -> prof -> building -> map
  * raises: InvalidOperation when [p] is not in a building. Also fails when the 
  *         room has no secret passage.
  *)
- val use_secret_passage: map -> prof -> map
+val use_secret_passage: map -> prof -> map
 
-
-(**************************)
-(* other useful functions *)
-(**************************)
-
-(* [assign_was_moved s p b] assigns bool [b] to the [was_moved] field of
- * whoever playing the character of prof [p] in state [s]. If no one plays that
- * character, then [s] is simply unchanged. *)
-val assign_was_moved : state -> prof -> bool -> state
-
-(* [roll_two_dice ()] simulates rolling two dice, prints the results, and 
- * returns the sum. *)
-val roll_two_dice : unit -> int
