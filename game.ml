@@ -180,6 +180,7 @@ and step_helper (p:prof) (s:state) : state =
         if ai.is_in_game 
         then 
           begin
+          Unix.sleep 5;
           Printf.printf "Prof. %s's turn...\n" p;
           Ai.step ai s
           end
