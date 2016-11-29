@@ -164,15 +164,17 @@ let rec help_disprove players state guess =
         |`AI   ->
           let proof = ai_disprove (character_to_ai h state.ais) guess in
             if   proof = None
-            then (Printf.printf "%s was not able to disprove it. " h;
-                        help_disprove t state guess)
-            else (Printf.printf "%s was able to disprove it. " h; (proof, Some h))
+            then (Printf.printf "Prof. %s was not able to disprove it.\n" h;
+                   help_disprove t state guess)
+            else (Printf.printf "Prof. %s was able to disprove it.\n" h; 
+                   (proof, Some h))
         |`User ->
           let proof = user_disprove state guess in
             if   proof = None
-            then (Printf.printf "%s was not able to disprove it. " h;
-                        help_disprove t state guess)
-            else (Printf.printf "%s was able to disprove it." h;(proof, Some h))
+            then (Printf.printf "Prof. %s was not able to disprove it.\n" h;
+                   help_disprove t state guess)
+            else (Printf.printf "Prof. %s was able to disprove it.\n" h;
+                   (proof, Some h))
         |`No   -> help_disprove t state guess
       end
 
@@ -246,7 +248,6 @@ print_endline "No one was able to disprove the AI.";
              past guesses.  *)
 
 let update_ai_disproved ai c guess player =
-  print_endline "The AI's guess has been disproved!";
   { ai with known_cards  = c::ai.known_cards }
 
 (* [step a s] peforms a turn for AI player [a]. This involves:
