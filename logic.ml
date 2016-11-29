@@ -153,7 +153,7 @@ let ai_choose_from_three (a:ai) (c1:card) (c2:card) (c3:card) : card option =
 
 (*TODO*)
 let ai_disprove (a:ai) (guess:case_file) : card option =
-  Printf.printf "It is Prof. %s's turn to disprove the suggstion:\n"
+  Printf.printf "It is Prof. %s's turn to disprove the suggestion:\n"
                 a.character;
   let hand = a.hand in
   let {who; where; with_what} = guess in

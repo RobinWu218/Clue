@@ -22,7 +22,7 @@ let () =
   	"6 Professors: Anne Bracy, Michael Clarkson, Daisy Fan, \n"^
   	"              David Gries, Joe Halpern, Walker White\n"^
   	"9 Buildings:  Baker Hall, Carpenter Hall, Duffield Hall, \n"^
-  	"              Gates Hall, Klarman Hall, Olin Library, \n"^
+  	"              Gates Hall, Klarman Hall, Olin Hall, \n"^
   	"              Phillips Hall, Rhodes Hall, Statler Hall\n"^
   	"6 Languages:  Bash, C, Java, MATLAB, OCaml, Python\n");
   print_endline 
