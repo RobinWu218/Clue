@@ -174,11 +174,8 @@ let update_location locs p c =
     (p, c)::locL
 
 
-(* [leave_building map p n] moves professor [p] to exit number [n] of the current
- * building [p] is in, and performs all changes necessary to update the [map].
- * Raises: InvalidOperation if the professor p is not in a room.
- *)
-let leave_building map p n =
+
+let leave_building_helper map p n =
   match get_current_building map p with
   | None   -> raise InvalidOperation
   | Some b -> 
@@ -196,6 +193,15 @@ let leave_building map p n =
     | Not_found -> raise InvalidOperation
 
 
+(* [leave_building map p n] moves professor [p] to exit number [n] of the current
+ * building [p] is in, and performs all changes necessary to update the [map].
+ * Raises: InvalidOperation if the professor p is not in a room.
+ *)
+let leave_building map p n =
+  let umap = leave_building_helper map p n in
+    print_map umap;
+    umap
+
 (*[enter_building map p b] handles professor [p] entering into building [b] by
  * updating the necessary values in [map] and returning the newly updated map
  * Requires: [p] is a valid professor name, [b] is a valid building name.
@@ -208,7 +214,9 @@ let rec enter_building map p b =
     m.(r).(c) <- Some p; 
     let newL = (p, b)::map.in_building in
     let nloc = update_location map.location p (r,c) in
-      {map with location = nloc; in_building = newL }
+    let umap = {map with location = nloc; in_building = newL } in
+      print_map umap;
+      umap
 and get_open_spot m lst = match lst with
   | (r,c)::t -> if m.(r).(c) = None 
     then (r,c) 
@@ -412,14 +420,13 @@ let teleport_professor map p b =
     (* inside a building, [p] needs to leave first if not in building [b]  *)
     | Some curB ->
         if curB <> b 
-        then leave_building map p 1
+        then leave_building_helper map p 1
         else map
     (* not in a building: *)
     | None -> map in
     let (curr, curc) = get_current_location umap p in
       (* replace current spot w/ the original terrain: *)
       replace_tile umap.map_values p curr curc;
-      print_map umap;
       enter_building map p b
 
 (* [use_secret_passage map p] returns the updated map when [p] takes the secret
@@ -433,10 +440,8 @@ let use_secret_passage map p =
   | None   -> raise InvalidOperation
   | Some b -> 
     try
-      let toB = List.assoc b map.secrets in
-      let umap = teleport_professor map p toB in
-        print_map umap;
-        umap
+      let toB  = List.assoc b map.secrets in
+        teleport_professor map p toB
     with
     | _ -> failwith ("No secret passage to take in "^b)
 

@@ -133,8 +133,8 @@ let init_state (n:int) (d:difficulty) : state =
     print_endline (
       "You start at the position of your last name initial on the map.\n" ^
       "You can move to any white dots [.], \n" ^
-      "        enter a building through a door [D], \n" ^
-      "    and teleport to another building if there is a secret passage [s].");
+      "enter a building through a door [D], \n" ^
+      "and teleport to another building if there is a secret passage [s].");
     print_endline "You have the following cards: ";
     Printf.printf "    %s.\n" (string_of_card_lst user_hand);
     print_endline (
