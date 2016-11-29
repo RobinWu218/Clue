@@ -399,9 +399,9 @@ and disprove_case (p:prof) (ncurrent:int) (n:int) (guess:case_file) (s:state)
       disprove_loop ncurrent (n+1) guess s
 
 (*TODO
- * AI logic: very stupid, always makes the same suggestion. *)
+ * AI logic: random. *)
 let suggest_easy (a:ai) (s:state) : (prof * language) =
-  ("Bracy", "Bash")
+  (prof_of_int (Random.int 6), lang_of_int (Random.int 6))
 
 (*TODO*)
 let suggest (a:ai) (s:state) : state =
@@ -496,8 +496,13 @@ let use_secret (a:ai) (s:state) : state =
  * the updated state. *)
 let suggest_or_secret (a:ai) (b:building) (s:state) : state =
   match a.difficulty with
-  | Easy   -> use_secret a s
-  | Medium -> suggest a s (* TODO *)
+  | Easy   -> suggest a s
+  | Medium -> 
+      begin
+      match Random.int 1 with
+      | 0 -> suggest a s
+      | 1 -> use_secret a s
+      end
   | Hard   -> failwith "TODO"
 
 (* [secret_or_roll a b s] allows ai [a] to choose between using the secret 
@@ -522,7 +527,7 @@ let suggest_or_roll (a:ai) (s:state) : state =
  * the updated state. *)
 let secret_or_roll_or_suggest (a:ai) (b:building) (s:state) : state =
   match a.difficulty with
-  | Easy   -> use_secret a s
+  | Easy   -> suggest a s
   | Medium -> failwith "TODO depends on which is easier to get to destination"
   | Hard   -> failwith "TODO" (* move a (roll_two_dice ()) s *)
 

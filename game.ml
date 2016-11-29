@@ -141,7 +141,6 @@ let init_state (n:int) (d:difficulty) : state =
       "To play the game, follow the instructions and type into the command line \n" ^
       "when prompted [> ]. You may find taking lots of notes helpful for \n" ^
       "keeping track of cards you have and other players might have. Good luck! \n");
-    wait_for_user();
     print_endline "The game begins now!";
     {
       counter = 0;
@@ -190,6 +189,7 @@ and step_helper (p:prof) (s:state) : state =
       step {news with counter = news.counter + 1}
   | `User ->
       let news = 
+        wait_for_user();
         Printf.printf "Prof. %s's turn... which is your turn :)\n" p;
         User.step s in
       step {news with counter = news.counter + 1}
