@@ -238,12 +238,9 @@ let rec move (n:int) (s:state) : state =
       s
     end
   else
-    if is_in_building s.map s.user.character (* Gmap *)
-    then suggest s
-    else
-      let (dir, x) = get_movement n in
-      let (y, map) = Gmap.move s.map s.user.character dir x in (* Gmap *)
-      move (n-x+y) {s with map = map}
+    let (dir, x) = get_movement n in
+    let (y, map) = Gmap.move s.map s.user.character dir x in (* Gmap *)
+    move (n-x+y) {s with map = map}
 
 (* [use_secret s] is the updated state after the user uses the secret 
  * passage in the current building. 
