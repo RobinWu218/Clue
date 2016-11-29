@@ -93,7 +93,7 @@ let accuse (s:state) : state =
     begin
     print_endline "Awesome! You got the right accusation.";
     print_endline "YOU WIN!!!";
-    print_endline "CLUE will exit automatically. Do come again!";
+    print_endline "CLUE will exit automatically. Feel free to play again!";
     let news = {s with game_complete = true; map = map} in
     assign_was_moved news who moved_or_not (* Gmap *)
     end
@@ -104,7 +104,7 @@ let accuse (s:state) : state =
     print_endline "The real case file is:";
     Printf.printf "Prof. %s created the virus with %s in %s Hall.\n"
                   s.fact_file.who s.fact_file.with_what s.fact_file.where;
-    print_endline "CLUE will exit automatically. Do come again!";
+    print_endline "CLUE will exit automatically. Feel free to play again!";
     let news = {s with game_complete = true; map = map} in
     assign_was_moved news who moved_or_not (* Gmap *)
     end
@@ -188,7 +188,7 @@ let suggest (s:state) : state =
               (guess, s.user.character, Some p)::news'.past_guesses} in
           accuse_or_not news''
       | None -> 
-          print_endline "No one can disprove your suggestion."; 
+          print_endline "No one could disprove your suggestion."; 
           let news'' = 
             {news' with past_guesses = 
               (guess, s.user.character, None)::news'.past_guesses} in
@@ -226,17 +226,16 @@ let rec get_movement (n:int) : string * int =
 let rec move (n:int) (s:state) : state =
   if n < 0 then 
     failwith "This should not happen in move"
+  else if is_in_building s.map s.user.character then 
+    suggest s
   else if n = 0 then 
     begin
-    print_endline "You cannot move anymore.";
-    if is_in_building s.map s.user.character (* Gmap *)
-    then suggest s
-    else s
+      print_endline "You cannot move anymore.";
+      s
     end
   else
     let (dir, x) = get_movement n in
     let (y, map) = Gmap.move s.map s.user.character dir x in (* Gmap *)
-
     if is_in_building map s.user.character (* Gmap *)
     then suggest {s with map = map}
     else move (n-x+y) {s with map = map}
@@ -253,8 +252,10 @@ let use_secret (s:state) : state =
  * suggestion and using the secret passage to enter building [b], and returns 
  * the updated state. *)
 let suggest_or_secret (b:building) (s:state) : state =
-  print_endline "You can either 1 make a suggestion now or ";
-  Printf.printf "2 use the secret passage to get into %s Hall. [1/2]\n" b;
+  print_endline "You can either";
+  print_endline "  1 make a suggestion now or ";
+  Printf.printf "  2 use the secret passage to get into %s Hall.\n" b;
+  print_endline "Valid responses are: [1/2]";
   match get_choice_two () with 
   | 1 -> suggest s
   | 2 -> use_secret s
@@ -264,8 +265,10 @@ let suggest_or_secret (b:building) (s:state) : state =
  * passage to enter building [b] and rolling the dice to move out, and returns 
  * the updated state. *)
 let secret_or_roll (b:building) (s:state) : state =
-  print_endline "You can either 1 roll the dice and move out or";
-  Printf.printf "2 use the secret passage to get into %s Hall. [1/2]\n" b;
+  print_endline "You can either:";
+  print_endline "  1 roll the dice and move out, or";
+  Printf.printf "  2 use the secret passage to get into %s Hall.\n" b;
+  print_endline "Valid responses are: [1/2]";
   match get_choice_two () with 
   | 1 -> move (roll_two_dice ()) s
   | 2 -> use_secret s
@@ -274,8 +277,10 @@ let secret_or_roll (b:building) (s:state) : state =
 (* [suggest_or_roll s] prompts the user to choose between making a suggestion
  * and rolling the dice to move out, and returns the updated state. *)
 let suggest_or_roll (s:state) : state =
-  print_endline ("You can either 1 make a suggestion now or 2 roll the " ^
-                 "dice and move out. [1/2]\n");
+  print_endline "You can either:";
+  print_endline "  1 make a suggestion now, or";
+  print_endline "  2 roll the dice and move out.";
+  print_endline "Valid responses are: [1/2]";
   match get_choice_two () with 
   | 1 -> suggest s
   | 2 -> move (roll_two_dice ()) s
@@ -285,9 +290,11 @@ let suggest_or_roll (s:state) : state =
  * passage, or roll the dice to move out, or make a suggestion, and returns
  * the updated state. *)
 let secret_or_roll_or_suggest (b:building) (s:state) : state =
-  print_endline "You can either 1 make a suggestion now, or ";
-  print_endline "2 roll the dice and move out, or ";
-  Printf.printf "3 use the secret passage to get into %s Hall. [1/2/3]\n" b;
+  print_endline "You can either:";
+  print_endline "  1 make a suggestion now, or ";
+  print_endline "  2 roll the dice and move out, or ";
+  Printf.printf "  3 use the secret passage to get into %s Hall.\n" b;
+  print_endline "Valid responses are: [1/2/3]";
   match get_choice_three () with 
   | 1 -> suggest s
   | 2 -> move (roll_two_dice ()) s
