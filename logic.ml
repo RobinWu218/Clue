@@ -1,6 +1,33 @@
 open Data
 open Gmap
 
+(* [assign_was_moved s p b] assigns bool [b] to the [was_moved] field of
+ * whoever playing the character of prof [p] in state [s]. If no one plays that
+ * character, then [s] is simply unchanged. *)
+let assign_was_moved (s:state) (p:prof) (b:bool) : state =
+  match List.assoc p s.dictionary with
+  | `AI -> 
+      let newais = List.map 
+        (fun a -> if a.character = p 
+                  then {a with was_moved = b} 
+                  else a) s.ais in
+        {s with ais = newais}
+  | `User -> 
+      let newuser = {s.user with was_moved = b} in
+        {s with user = newuser}
+  | `No -> s
+
+(* [roll_two_dice ()] simulates rolling two dice, prints the results, and 
+ * returns the sum. *)
+let roll_two_dice () : int =
+  let d1 = 1 + Random.int 5 in (*same every game? TODO*)
+  let d2 = 1 + Random.int 5 in
+  let sum = d1 + d2 in
+    print_endline "Rolling two dice...";
+    Printf.printf "Die 1: %d\n" d1;
+    Printf.printf "Die 2: %d\n" d2;
+    sum
+
 (* [get_choice ()] is [1] if the user selects the first choice and [2] if
  * the user selects the second choice. *)
 let rec get_choice_two () : int =
@@ -56,18 +83,19 @@ let rec get_choice_num_ai () : int =
     | _   -> print_endline "Please type an integer between 2 and 5 inclusive!"; 
              get_choice_num_ai ()
 
-(* [choose_from_two c1 c2] is [Some c1] or [Some c2] as determined by user. *)
-let choose_from_two (c1:card) (c2:card) : card option =
+(* [user_choose_from_two c1 c2] is [Some c1] or [Some c2] as determined by 
+ * user. *)
+let user_choose_from_two (c1:card) (c2:card) : card option =
   Printf.printf "You can reveal either card 1: %s, or card 2: %s. [1/2]\n"
                 (string_of_card c1) (string_of_card c2);
   match get_choice_two () with 
   | 1 -> Some c1
   | 2 -> Some c2
-  | _ -> failwith "This should not happen in choose_from_two in user.ml"
+  | _ -> failwith "This should not happen in user_choose_from_two in Logic"
 
-(* [choose_from_three c1 c2 c3] is [Some c1] or [Some c2] or [Some c3] as 
+(* [user_choose_from_three c1 c2 c3] is [Some c1] or [Some c2] or [Some c3] as 
  * determined by user. *)
-let choose_from_three (c1:card) (c2:card) (c3:card) : card option =
+let user_choose_from_three (c1:card) (c2:card) (c3:card) : card option =
   print_endline "You can reveal one of the three cards: \n";
   Printf.printf "card 1: %s, card 2: %s, or card 3: %s. [1/2/3]\n"
                 (string_of_card c1) (string_of_card c2) (string_of_card c3);
@@ -75,8 +103,9 @@ let choose_from_three (c1:card) (c2:card) (c3:card) : card option =
   | 1 -> Some c1
   | 2 -> Some c2
   | 3 -> Some c3
-  | _ -> failwith "This should not happen in choose_from_three in user.ml"
+  | _ -> failwith "This should not happen in user_choose_from_three in Logic"
 
+(*
 (* [easy_helper_disprove hand guess] attempts to disprove [guess] with the cards
 they have in their [hand]. Returns Some Card that the player uses to disprove
 or None if no such card exists. *)
@@ -88,33 +117,6 @@ let rec easy_helper_disprove (hand:hand) (guess:case_file) : card option =
                (card_to_string h) = guess.with_what 
             then (Some h) 
             else easy_helper_disprove t guess
-
-(* [assign_was_moved s p b] assigns bool [b] to the [was_moved] field of
- * whoever playing the character of prof [p] in state [s]. If no one plays that
- * character, then [s] is simply unchanged. *)
-let assign_was_moved (s:state) (p:prof) (b:bool) : state =
-  match List.assoc p s.dictionary with
-  | `AI -> 
-      let newais = List.map 
-        (fun a -> if a.character = p 
-                  then {a with was_moved = b} 
-                  else a) s.ais in
-        {s with ais = newais}
-  | `User -> 
-      let newuser = {s.user with was_moved = b} in
-        {s with user = newuser}
-  | `No -> s
-
-(* [roll_two_dice ()] simulates rolling two dice, prints the results, and 
- * returns the sum. *)
-let roll_two_dice () : int =
-  let d1 = 1 + Random.int 5 in
-  let d2 = 1 + Random.int 5 in
-  let sum = d1 + d2 in
-    print_endline "Rolling two dice...";
-    Printf.printf "Die 1: %d\n" d1;
-    Printf.printf "Die 2: %d\n" d2;
-    sum
 
 (* [ai_disprove ai guess] figures out which card to reveal in response
  * to a suggestion [guess].
@@ -129,6 +131,61 @@ let ai_disprove (ai:ai) (guess: case_file) : card option =
   (* TODO if one of the cards has already been in a past guess, the ai wants to
    show that one so we give the other players as little information as possible.
     *)
+*)
+
+(*TODO
+ * AI logic:
+ *   - Easy: simply chooses the first card. *)
+let ai_choose_from_two (a:ai) (c1:card) (c2:card) : card option =
+  match a.difficulty with
+  | Easy   -> Some c1
+  | Medium -> failwith "TODO"
+  | Hard   -> failwith "TODO"
+
+(*TODO
+ * AI logic:
+ *   - Easy: simply chooses the first card. *)
+let ai_choose_from_three (a:ai) (c1:card) (c2:card) (c3:card) : card option =
+  match a.difficulty with
+  | Easy   -> Some c1
+  | Medium -> failwith "TODO"
+  | Hard   -> failwith "TODO"
+
+(*TODO*)
+let ai_disprove (a:ai) (guess:case_file) : card option =
+  Printf.printf "It is Prof. %s's turn to disprove the suggstion:\n"
+                a.character;
+  let hand = a.hand in
+  let {who; where; with_what} = guess in
+  let who_or_not = List.mem (Prof who) hand in
+  let where_or_not = List.mem (Building where) hand in
+  let with_what_or_not = List.mem (Language with_what) hand in
+  match who_or_not, where_or_not, with_what_or_not with
+  | true, true, true ->
+      Printf.printf "Prof. %s disproved the suggestion.\n" a.character;
+      ai_choose_from_three a (Prof who) (Building where) (Language with_what)
+  | true, true, false ->
+      Printf.printf "Prof. %s disproved the suggestion.\n" a.character;
+      ai_choose_from_two a (Prof who) (Building where)
+  | true, false, true ->
+      Printf.printf "Prof. %s disproved the suggestion.\n" a.character;
+      ai_choose_from_two a (Prof who) (Language with_what)
+  | true, false, false ->
+      Printf.printf "Prof. %s disproved the suggestion.\n" a.character;
+      Some (Prof who)
+  | false, true, true ->
+      Printf.printf "Prof. %s disproved the suggestion.\n" a.character;
+      ai_choose_from_two a (Building where) (Language with_what)
+  | false, true, false ->
+      Printf.printf "Prof. %s disproved the suggestion.\n" a.character;
+      Some (Building where)
+  | false, false, true ->
+      Printf.printf "Prof. %s disproved the suggestion.\n" a.character;
+      Some (Language with_what)
+  | false, false, false ->
+      Printf.printf "Prof. %s was not able to disprove the suggestion.\n"
+                    a.character;
+      None
 
 (* [user_disprove s guess] is [None] if the user does not have any card
  * to disprove the suggestion [guess] and a card option if the user has the 
@@ -142,31 +199,31 @@ let user_disprove (s:state) (guess:case_file) : card option =
   let with_what_or_not = List.mem (Language with_what) hand in
   match who_or_not, where_or_not, with_what_or_not with
   | true, true, true ->
-      print_endline ("You have three cards to disprove the suggestion" ^
+      print_endline ("You have three cards to disprove the suggestion \n" ^
                      "and you have to reveal one of them.");
-      choose_from_three (Prof who) (Building where) (Language with_what)
+      user_choose_from_three (Prof who) (Building where) (Language with_what)
   | true, true, false ->
-      print_endline ("You have two cards to disprove the suggestion" ^
+      print_endline ("You have two cards to disprove the suggestion \n" ^
                      "and you have to reveal one of them.");
-      choose_from_two (Prof who) (Building where)
+      user_choose_from_two (Prof who) (Building where)
   | true, false, true ->
-      print_endline ("You have two cards to disprove the suggestion" ^
+      print_endline ("You have two cards to disprove the suggestion \n" ^
                      "and you have to reveal one of them.");
-      choose_from_two (Prof who) (Language with_what)
+      user_choose_from_two (Prof who) (Language with_what)
   | true, false, false ->
-      print_endline ("You have only one card to disprove the suggestion" ^
+      print_endline ("You have only one card to disprove the suggestion \n" ^
                      "and you have to reveal the card.");
       Some (Prof who)
   | false, true, true ->
-      print_endline ("You have two cards to disprove the suggestion" ^
+      print_endline ("You have two cards to disprove the suggestion \n" ^
                      "and you have to reveal one of them.");
-      choose_from_two (Building where) (Language with_what)
+      user_choose_from_two (Building where) (Language with_what)
   | false, true, false ->
-      print_endline ("You have only one card to disprove the suggestion" ^
+      print_endline ("You have only one card to disprove the suggestion \n" ^
                      "and you have to reveal the card.");
       Some (Building where)
   | false, false, true ->
-      print_endline ("You have only one card to disprove the suggestion" ^
+      print_endline ("You have only one card to disprove the suggestion \n" ^
                      "and you have to reveal the card.");
       Some (Language with_what)
   | false, false, false ->

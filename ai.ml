@@ -50,7 +50,7 @@ let still_in_game (ai:ai) : bool =
 (************************************************
  * Methods for interacting with game state
  ************************************************)
-
+(*
 (* [update_ai state player guess player2] updates the knowledge of [state] when
  * [player] makes a [guess] that got disproved by [player2]. *)
 let update_state_guess state prof1 guess prof2 =
@@ -324,11 +324,10 @@ let rec step ai state =
     end
   end
     else state
+*)
 
 (********************************************************************)
 (* alice's scratch XXD *)
-
-(*
 
 (*TODO*)
 let accuse (a:ai) (s:state) : state =
@@ -361,60 +360,6 @@ let accuse_or_not_start (a:ai) (s:state) : state =
   | Medium -> failwith "TODO"
   | Hard   -> failwith "TODO"
 
-(*TODO
- * AI logic:
- *   - Easy: simply chooses the first card. *)
-let choose_from_two (a:ai) (c1:card) (c2:card) : card option =
-  match a.difficulty with
-  | Easy   -> Some c1
-  | Medium -> failwith "TODO"
-  | Hard   -> failwith "TODO"
-
-(*TODO
- * AI logic:
- *   - Easy: simply chooses the first card. *)
-let choose_from_three (a:ai) (c1:card) (c2:card) (c3:card) : card option =
-  match a.difficulty with
-  | Easy   -> Some c1
-  | Medium -> failwith "TODO"
-  | Hard   -> failwith "TODO"
-
-(*TODO*)
-let disprove (a:ai) (guess:case_file) : card option =
-  Printf.printf "It is Prof. %s's turn to disprove the suggstion:\n"
-                a.character;
-  let hand = a.hand in
-  let {who; where; with_what} = guess in
-  let who_or_not = List.mem (Prof who) hand in
-  let where_or_not = List.mem (Building where) hand in
-  let with_what_or_not = List.mem (Language with_what) hand in
-  match who_or_not, where_or_not, with_what_or_not with
-  | true, true, true ->
-      Printf.printf "Prof. %s disproved the suggestion.\n" a.character;
-      choose_from_three a (Prof who) (Building where) (Language with_what)
-  | true, true, false ->
-      Printf.printf "Prof. %s disproved the suggestion.\n" a.character;
-      choose_from_two a (Prof who) (Building where)
-  | true, false, true ->
-      Printf.printf "Prof. %s disproved the suggestion.\n" a.character;
-      choose_from_two a (Prof who) (Language with_what)
-  | true, false, false ->
-      Printf.printf "Prof. %s disproved the suggestion.\n" a.character;
-      Some (Prof who)
-  | false, true, true ->
-      Printf.printf "Prof. %s disproved the suggestion.\n" a.character;
-      choose_from_two a (Building where) (Language with_what)
-  | false, true, false ->
-      Printf.printf "Prof. %s disproved the suggestion.\n" a.character;
-      Some (Building where)
-  | false, false, true ->
-      Printf.printf "Prof. %s disproved the suggestion.\n" a.character;
-      Some (Language with_what)
-  | false, false, false ->
-      Printf.printf "Prof. %s was not able to disprove the suggestion.\n"
-                    a.character;
-      None
-
 (* [disprove_loop n guess s] is [Some (prof, card)] if [prof] disproved
  * [guess] with [card] and [None] if no one can disprove [guess].
  * It starts with the professor corresponding to integer [n], goes along
@@ -442,7 +387,7 @@ and disprove_case (p:prof) (ncurrent:int) (n:int) (guess:case_file) (s:state)
   | `AI ->
       let ai = List.find (fun a -> a.character = p) s.ais in (*TODO use get_ai?*)
       begin
-      match disprove ai guess with
+      match ai_disprove ai guess with
       | Some card -> Some (p, card)
       | None -> disprove_loop ncurrent (n+1) guess s
       end
@@ -516,26 +461,12 @@ let suggest (a:ai) (s:state) : state =
  * AI logic: finds the closest building and tries to enter that one
  *           if does not already have a destination. *)
 let move_easy (a:ai) (n:int) (s:state) : state =
-  if is_in_building s.map a.character (* Gmap *)
-  then
-    suggest a s
-  else
-  (*
-    let coord =
-      begin
-      match a.destination with
-      | Some c -> c
-      | None ->
-          update_destination (* TODO *)
-      end
-    in
-  *)
-    let (_, b) = List.hd (closest_buildings s.map a.character) in
-    let (in_building, new_map) =
-      move_towards_building s.map a.character b n in (* Gmap *)
-    if in_building
-    then suggest a {s with map = new_map} (*TODO print?*)
-    else {s with map = new_map} (*TODO print?*)
+  let (_, b) = List.hd (closest_buildings s.map a.character) in
+  let (in_building, new_map) =
+    move_towards_building s.map a.character b n in (* Gmap *)
+  if in_building
+  then suggest a {s with map = new_map}
+  else {s with map = new_map}
 
 (* [move a n s] allows the AI [a]'s character to move n steps,
  * or fewer if the character gets into a building
@@ -652,4 +583,3 @@ let rec step (a:ai) (s:state) : state =
   | None ->
       move a (roll_two_dice ()) s1 (* Gmap *)
 
-*)
