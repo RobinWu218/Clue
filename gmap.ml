@@ -215,21 +215,13 @@ and get_open_spot m lst = match lst with
     else get_open_spot m t
   | [] -> failwith "No open waiting spots! which should not happen."
 
-(* [move map p dir n] tries to move professor [p] on the [map] [n] steps in 
- * [dir] direction.
- * requires: [n >= 0], [p] is a valid professor name, [dir] = "up", "down",
- *           "left", or "right".
- * Returns: the pair [(i, map2)], where
- *   [i]    is the steps remaining after going in [dir] direction, and
- *   [map2] is the updated map.
- *)
-let move map p dir n = 
+let move_helper map p dir n =
   let (rd, cd) = match dir with
-    | "up"    -> (-1, 0)
-    | "down"  -> ( 1, 0)
-    | "left"  -> ( 0,-1)
-    | "right" -> ( 0, 1)
-    | _ -> failwith ("Invalid direction to move: "^dir) in
+  | "up"    -> (-1, 0)
+  | "down"  -> ( 1, 0)
+  | "left"  -> ( 0,-1)
+  | "right" -> ( 0, 1)
+  | _ -> failwith ("Invalid direction to move: "^dir) in
   let m = map.map_values in
   let (sr,sc) = get_current_location map p in
     replace_tile m p sr sc;  (* clear out starting location *)
@@ -254,8 +246,22 @@ let move map p dir n =
             m.(!cr).(!cc) <- Some p; (* mark down at new location   *)
             {map with location = nloc}
         in
-          print_map nmap;
           (n-(!i), nmap)
+
+(* [move map p dir n] tries to move professor [p] on the [map] [n] steps in 
+ * [dir] direction.
+ * requires: [n >= 0], [p] is a valid professor name, [dir] = "up", "down",
+ *           "left", or "right".
+ * Returns: the pair [(i, map2)], where
+ *   [i]    is the steps remaining after going in [dir] direction, and
+ *   [map2] is the updated map.
+ *)
+let move map p dir n = 
+  let (steps_left, nmap) = move_helper map p dir n in
+    print_map nmap;
+    (steps_left, nmap)
+
+
 
 (* [move_towards_coord map p coord n] tries to move professor [p] on the [map]
  * [n] steps towards the coordinate [coord].
@@ -281,14 +287,14 @@ let rec move_towards_coord map p coord n =
               let (i, map2) = 
                 if !steps_left < steps then
                   begin
-                    let tmp = move map p dir !steps_left in
+                    let tmp = move_helper map p dir !steps_left in
                       steps_left := 0; 
                       tmp
                   end
                 else
                   begin
                     steps_left := !steps_left - steps;
-                    move map2 p dir steps 
+                    move_helper map2 p dir steps 
                   end
               in map2
             else map2) map dirs in
