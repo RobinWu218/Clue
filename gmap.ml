@@ -235,18 +235,15 @@ let move_helper map p dir n =
         cr := !cr + rd;
         cc := !cc + cd;
       done;
-      (* if you end up a door, automatically enter the building *)
-      let nmap = 
-        if m.(!cr).(!cc) = Some "DOOR" then
-          let b = List.assoc (!cr,!cc) (get_exits map) in
-            i := n; (* no steps left after entering building *)
-            enter_building map p b
-        else
-          let nloc = update_location map.location p (!cr,!cc) in
-            m.(!cr).(!cc) <- Some p; (* mark down at new location   *)
-            {map with location = nloc}
-        in
-          (n-(!i), nmap)
+      (* if you end up a door, automatically enter the building *) 
+      if m.(!cr).(!cc) = Some "DOOR" then
+        let b = List.assoc (!cr,!cc) (get_exits map) in
+          i := n; (* no steps left after entering building *)
+          (0, enter_building map p b)
+      else
+        let nloc = update_location map.location p (!cr,!cc) in
+          m.(!cr).(!cc) <- Some p; (* mark down at new location   *)
+          (n-(!i), {map with location = nloc})
 
 (* [move map p dir n] tries to move professor [p] on the [map] [n] steps in 
  * [dir] direction.

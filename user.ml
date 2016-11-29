@@ -230,12 +230,12 @@ let rec get_movement (n:int) : string * int =
 let rec move (n:int) (s:state) : state =
   if n < 0 then 
     failwith "This should not happen in move"
+  else if is_in_building s.map s.user.character then 
+    suggest s
   else if n = 0 then 
     begin
-    print_endline "You cannot move anymore.";
-    if is_in_building s.map s.user.character (* Gmap *)
-    then suggest s
-    else s
+      print_endline "You cannot move anymore.";
+      s
     end
   else
     let (dir, x) = get_movement n in
