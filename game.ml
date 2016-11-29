@@ -115,8 +115,8 @@ let init_state (n:int) (d:difficulty) : state =
     let fact_cards = [Prof fact_file.who; 
                       Building fact_file.where; 
                       Language fact_file.with_what] in
-    let character_lst = assign_characters [fact_file.who] (n+1) in
-    let dealt_cards_lst = deal_card fact_cards (n+1) in
+    let character_lst = assign_characters [] (n+1) in
+    let dealt_cards_lst = deal_card fact_cards n in
     let user_hand = List.hd dealt_cards_lst in
     let ai_hand_lst = remove_first_el dealt_cards_lst in
     let user_character = List.hd character_lst in
