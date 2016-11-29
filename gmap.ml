@@ -253,7 +253,9 @@ let move map p dir n =
           let nloc = update_location map.location p (!cr,!cc) in
             m.(!cr).(!cc) <- Some p; (* mark down at new location   *)
             {map with location = nloc}
-        in (n-(!i), nmap)
+        in
+          print_map nmap;
+          (n-(!i), nmap)
 
 (* [move_towards_coord map p coord n] tries to move professor [p] on the [map]
  * [n] steps towards the coordinate [coord].
@@ -292,6 +294,7 @@ let rec move_towards_coord map p coord n =
             else map2) map dirs in
         let arrived = (is_in_building map2 p) ||
                       ((get_current_location map2 p) = (destr,destc)) in
+          print_map map2;
           (arrived, map2)
 (* calcuates which steps needed be to taken to get to a certain destination and
  * avoiding all obstacles (so collision doesn't happen when moving) *)
@@ -413,6 +416,7 @@ let teleport_professor map p b =
     let (curr, curc) = get_current_location umap p in
       (* replace current spot w/ the original terrain: *)
       replace_tile umap.map_values p curr curc;
+      print_map umap;
       enter_building map p b
 
 (* [use_secret_passage map p] returns the updated map when [p] takes the secret
@@ -427,7 +431,9 @@ let use_secret_passage map p =
   | Some b -> 
     try
       let toB = List.assoc b map.secrets in
-        teleport_professor map p toB
+      let umap = teleport_professor map p toB in
+        print_map umap;
+        umap
     with
     | _ -> failwith ("No secret passage to take in "^b)
 
