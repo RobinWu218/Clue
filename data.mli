@@ -146,3 +146,5 @@ val card_lst_to_int_lst : card list -> int list
 (* [print_case_file cf] prints the case file [cf] in a sentence. *)
 val print_case_file : case_file -> unit
 
+(* [wait_for_user] waits for the user to hit enter to continue. *)
+val wait_for_user : unit -> unit

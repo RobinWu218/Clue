@@ -258,72 +258,60 @@ let update_ai_disproved ai c guess player =
  * Returns: an updated game state.
  *)
 let rec step ai state =
-  let moves = roll_two_dice () in
-  if ai.is_in_game then
-    begin
-    if is_in_building state.map ai.character
-    then
-      begin
-      ignore (leave_building state.map ai.character 0);
-      step ai state
-      end
-    else
-      begin
-      let (i, dest) = List.hd (closest_buildings state.map ai.character) in
-      let (in_building, new_map) = move_towards_building state.map
-                                            ai.character dest moves in
-      if in_building then begin
-        let players =
-          match ai.character with
-                  |"Bracy"   -> ["Clarkson";  "Fan";  "Gries";
-                                       "Halpern";  "White"]
-                  |"Clarkson"-> [ "Fan";  "Gries";  "Halpern";
-                                       "White";  "Bracy"]
-                  |"Fan"     -> [ "Gries";  "Halpern";  "White";
-                                       "Bracy";  "Clarkson"]
-                  |"Gries"   -> [ "Halpern"; "White";  "Bracy";
-                                       "Clarkson";  "Fan"]
-                  |"Halpern" -> [ "White";  "Bracy"; "Clarkson";
-                                       "Fan";  "Gries"]
-                  |"White"   -> [ "Bracy"; "Clarkson";  "Fan";
-                                       "Gries";  "Halpern"]
+  if not ai.is_in_game then
+  (* out of the game, can't do anything. *)
+    state
+  else 
+    (* still in game, move around and make suggestions *)
+    let moves = roll_two_dice () in
+      if is_in_building state.map ai.character
+      then 
+        begin
+          ignore (leave_building state.map ai.character 0);
+          step ai state
+        end
+      else 
+        begin
+          let (i, dest) = List.hd (closest_buildings state.map ai.character) in
+          let (in_building, new_map) = move_towards_building state.map
+                                       ai.character dest moves in
+            if in_building 
+            then 
+              begin
+                let players = match ai.character with
+                  |"Bracy"   -> ["Clarkson";  "Fan";  "Gries"; "Halpern";  "White"]
+                  |"Clarkson"-> [ "Fan";  "Gries";  "Halpern"; "White";  "Bracy"]
+                  |"Fan"     -> [ "Gries";  "Halpern";  "White"; "Bracy";  "Clarkson"]
+                  |"Gries"   -> [ "Halpern"; "White";  "Bracy"; "Clarkson";  "Fan"]
+                  |"Halpern" -> [ "White";  "Bracy"; "Clarkson"; "Fan";  "Gries"]
+                  |"White"   -> [ "Bracy"; "Clarkson";  "Fan"; "Gries";  "Halpern"]
                   |_   -> failwith "This should not happen in step" in
-          let guess = make_suggestion dest ai in
-          let new_state = updated_state_map state new_map in
-          let (prof_option, new_ai) =
-            match help_disprove players new_state guess with
-                    |(None, None)     ->
-                                (None  , update_ai_not_disproved ai guess)
-                    |(Some c, Some p) ->
-                                (Some p, update_ai_disproved     ai c guess p)
-                    | _ -> failwith "not a valid option" in
-          let new_ai_list = replace_ai_with_new new_ai state.ais in
-          if easy_want_to_accuse ai
-          then begin
-            make_accusation new_state ai
-          end
-          else begin
-            { new_state with
-                ais     = new_ai_list;
-                past_guesses = (guess, ai.character, prof_option)::state.past_guesses
-            }
-                  (*{
-                    counter=state.counter+1;
-                    game_complete= game_complete;
-                    map=state.map;
-                    user=state.user;
-                    ais=state.ais;
-                    fact_file=state.fact_file;
-                    dictionary=state.dictionary;
-                  }*)
-          end
-      end
-    else begin
-      updated_state_map state new_map
-    end
-    end
-  end
-    else state
+                let guess = make_suggestion dest ai in
+                let new_state = updated_state_map state new_map in
+                let (prof_option, new_ai) = 
+                  match help_disprove players new_state guess with
+                  |(None, None)     ->
+                    (None  , update_ai_not_disproved ai guess)
+                  |(Some c, Some p) ->
+                    (Some p, update_ai_disproved ai c guess p)
+                  | _ -> failwith "not a valid option" in
+                  let new_ai_list = replace_ai_with_new new_ai state.ais in
+                    if easy_want_to_accuse ai
+                    then 
+                      begin
+                        make_accusation new_state ai
+                      end
+                    else 
+                      begin
+                        { new_state with
+                            ais     = new_ai_list;
+                            past_guesses = (guess, ai.character, prof_option)::state.past_guesses
+                        }
+                      end
+              end
+            else 
+              updated_state_map state new_map
+        end
 
 (********************************************************************)
 (* alice's scratch XXD *)

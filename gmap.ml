@@ -215,7 +215,6 @@ let rec enter_building map p b =
     let newL = (p, b)::map.in_building in
     let nloc = update_location map.location p (r,c) in
     let umap = {map with location = nloc; in_building = newL } in
-      print_map umap;
       umap
 and get_open_spot m lst = match lst with
   | (r,c)::t -> if m.(r).(c) = None 
@@ -427,7 +426,9 @@ let teleport_professor map p b =
     let (curr, curc) = get_current_location umap p in
       (* replace current spot w/ the original terrain: *)
       replace_tile umap.map_values p curr curc;
-      enter_building map p b
+      let umap = enter_building map p b in
+        print_map umap;
+        umap
 
 (* [use_secret_passage map p] returns the updated map when [p] takes the secret
  * passage inside a room.

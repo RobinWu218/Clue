@@ -141,16 +141,17 @@ let init_state (n:int) (d:difficulty) : state =
       "To play the game, follow the instructions and type into the command line \n" ^
       "when prompted [> ]. You may find taking lots of notes helpful for \n" ^
       "keeping track of cards you have and other players might have. Good luck! \n");
-    print_endline "The game begins now...";
+    wait_for_user();
+    print_endline "The game begins now!";
     {
-    counter = 0;
-    game_complete = false;
-    map = map;
-    user = {character = user_character; hand = user_hand; was_moved = false};
-    ais = ai_lst;
-    fact_file = fact_file;
-    dictionary = dictionary;
-    past_guesses = [];
+      counter = 0;
+      game_complete = false;
+      map = map;
+      user = {character = user_character; hand = user_hand; was_moved = false};
+      ais = ai_lst;
+      fact_file = fact_file;
+      dictionary = dictionary;
+      past_guesses = [];
     }
   else
     failwith "This should not happen in init_state in game.ml"
@@ -180,9 +181,9 @@ and step_helper (p:prof) (s:state) : state =
         if ai.is_in_game 
         then 
           begin
-          Unix.sleep 5;
-          Printf.printf "Prof. %s's turn...\n" p;
-          Ai.step ai s
+            wait_for_user();
+            Printf.printf "Prof. %s's turn...\n" p;
+            Ai.step ai s
           end
         else s 
       in

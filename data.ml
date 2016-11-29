@@ -270,3 +270,7 @@ let print_case_file (cf:case_file) : unit =
   Printf.printf "Prof. %s started the virus with %s in %s Hall.\n"
                 cf.who cf.with_what cf.where
 
+(* [wait_for_user] waits for the user to hit enter to continue. *)
+let wait_for_user () =
+  print_string "Press enter to continue...";
+  let _ = read_line () in ()
