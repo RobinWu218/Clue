@@ -6,6 +6,17 @@ open Logic
 (* utility methods *)
 (*******************)
 
+(*[known_not_possible ai] updates ai.possible_cards to not include the cards
+from ai.known_cards*)
+let known_not_possible ai =
+  let rec helper known possible =
+        match possible with
+        |[]   -> []
+        |h::t -> if List.mem h known then (helper known t) else h::(helper known t)
+  in
+  let new_poss = helper ai.known_cards ai.possible_cards in
+  {ai with possible_cards=new_poss}
+
 (* [init p h d] is the AI data structure that represents an AI playing
  * character [p] on difficulty level [d], with hand [h].
  *)
@@ -18,7 +29,7 @@ let init (p:prof) (h:hand) (d:difficulty) : ai =
     Building "Phillips"; Building "Rhodes";    Building "Statler";
     Language "Bash";     Language "C";         Language "Java";
     Language "MATLAB";   Language "OCaml";     Language "Python"] in
-  {
+  let a1= {
     character      = p;
     hand           = h;
     difficulty     = d;
@@ -27,7 +38,8 @@ let init (p:prof) (h:hand) (d:difficulty) : ai =
     destination    = None;
     known_cards    = h;
     possible_cards = possible;
-  }
+  } in
+  known_not_possible a1
 
 (* [get_ai p s] is the AI data structure for the AI playing character [p] in
  * state [s].
@@ -437,14 +449,17 @@ let suggest ai state =
       %s Hall.\n We will now go around and attempt to disprove the guess."
       ai.character perp weapon loc;
       {who = perp; where = loc; with_what = weapon})
-
-
 *)
-(*TODO
- * AI logic: random. *)
+
+(* AI logic: random. *)
 let suggest_easy (a:ai) (s:state) : (prof * language) =
   (prof_of_int (Random.int 6), lang_of_int (Random.int 6))
 
+(* AI logic: only guesses possible cards, not the ones that it knows exists.*)
+let suggest_medium (ai:ai) (s:state) : (prof * language) =
+  (easy_helper_who ai.possible_cards, easy_helper_what ai.possible_cards)
+
+(*called move towards building while still in building*)
 (*TODO*)
 let suggest (a:ai) (s:state) : state =
   Printf.printf "Prof. %s is making a suggestion about the current building.\n"
@@ -456,7 +471,7 @@ let suggest (a:ai) (s:state) : state =
       begin
       match a.difficulty with
       | Easy   -> suggest_easy a s
-      | Medium -> failwith "TODO"
+      | Medium -> suggest_medium a s
       | Hard   -> failwith "TODO"
       end in
     let guess =
@@ -477,19 +492,19 @@ let suggest (a:ai) (s:state) : state =
     | Some (p, c) ->
         let newais = List.map (fun a' ->
           if a' <> a then a'
-          else {a with known_cards = c::a.known_cards})
+          else known_not_possible {a with known_cards = c>::a.known_cards})
           s.ais in
         let news'' =
           {news' with ais = newais;
                       past_guesses = (*TODO possibly have a helper.ml?*)
-                      (guess, a.character, Some p)::news'.past_guesses;} in
+                      (guess, a.character, Some p)>::news'.past_guesses;} in
         accuse_or_not_middle a news''
     | None ->
         Printf.printf "No one can disprove Prof. %s's suggestion.\n"
                       a.character;
         let news'' =
           {news' with past_guesses =
-                      (guess, a.character, None)::news'.past_guesses} in
+                      (guess, a.character, None)>::news'.past_guesses} in
         accuse_or_not_middle a news''
     end
   | None -> failwith "This should not happen in suggest in ai.ml"
@@ -507,6 +522,15 @@ let move_easy (a:ai) (n:int) (s:state) : state =
   then suggest a {s with map = new_map}
   else {s with map = new_map}
 
+(* Requires: n > 0.
+ * AI logic: wants to go into a building in the possible list *)
+let move_medium a n s : state = failwith "unim"
+
+(* Requires: n > 0.
+ * AI logic: wants to go into a building in the possible list that the
+ai is closest to*)
+
+let move_hard a n s : state = failwith "unim"
 (* [move a n s] allows the AI [a]'s character to move n steps,
  * or fewer if the character gets into a building
  * before using up all the steps. *)
@@ -526,6 +550,24 @@ let move (a:ai) (n:int) (s:state) : state =
     | Medium -> failwith "TODO"
     | Hard   -> failwith "TODO"
 
+(* [get_exit b s] is the id of an exit to building [b] selected by the user. *)
+let rec get_exit (ai:ai)  (b:building) (s:state) : int =
+  let exits = List.assoc b s.map.exits in
+  match List.length exits with
+  | 1 -> 1
+  | 2 -> get_choice_two () (* Logic *)
+  | 4 -> get_choice_four () (* Logic *)
+  | _ -> failwith "This should not happen in get_exit in User given map.json"
+
+(*
+(* [leave_and_move b s] is the updated state after the user moves out of
+ * building [b].
+ * Requires: [s.user] is currently in building [b]. *)
+let leave_and_move (ai:ai)  (b:building) (s:state) : state =
+  let map = leave_building s.map s.user.character (get_exit b s) in
+  move (roll_two_dice ()) {s with map = map}
+*)
+
 (* [use_secret a s] is the updated state after ai [a] uses the secret
  * passage in the current building.
  * Requires: [a] is currently in a building where there is a secret
@@ -533,6 +575,7 @@ let move (a:ai) (n:int) (s:state) : state =
 let use_secret (a:ai) (s:state) : state =
   let map = use_secret_passage s.map a.character in (* Gmap *)
   suggest a {s with map = map}
+
 
 (* [suggest_or_secret a b s] allows ai [a] to choose between making a
  * suggestion and using the secret passage to enter building [b], and returns
@@ -620,6 +663,7 @@ let in_building_voluntarily (a:ai) (b:building) (s:state) : state =
 let rec step (a:ai) (s:state) : state =
   let s1 = accuse_or_not_start a s in
   if s1.game_complete then s1 else
+  if not ai.still_in_game then s1 else
   match get_current_building s1.map a.character with (* Gmap *)
   | Some b ->
       if a.was_moved
