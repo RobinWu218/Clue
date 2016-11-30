@@ -194,7 +194,8 @@ and step_helper (p:prof) (s:state) : state =
         then 
           begin
             wait_for_user();
-            Printf.printf "Prof. %s's turn...\n" p;
+            ANSITerminal.(print_string [Bold] (
+              "-----------------:: Prof. "^p^"'s turn ::-----------------\n"));
             Ai.step ai s
           end
         else s 
@@ -203,7 +204,8 @@ and step_helper (p:prof) (s:state) : state =
   | `User ->
       let news = 
         wait_for_user();
-        Printf.printf "Prof. %s's turn... which is your turn :)\n" p;
+            ANSITerminal.(print_string [Bold] (
+              "-----------------:: Prof. "^p^"'s (You!) turn ::-----------------\n"));
         User.step s in
       step {news with counter = news.counter + 1}
   | `No ->
