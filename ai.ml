@@ -59,7 +59,7 @@ let update_state_guess state prof1 guess prof2 =
   {state with
     past_guesses=(guess, prof1, prof2)::state.past_guesses
   }
-
+*)
 (*[easy_helper_who possible] takes a list of possible cards and returns the
  * first prof that is in the list. This is a helper function for the easy ai.*)
 let rec easy_helper_who possible =
@@ -85,16 +85,16 @@ let rec easy_helper_where possible =
   |[]   -> failwith "there are no possible buildings"
   |h::t -> if (((int_of_card h) > 5) && ((int_of_card h) < 15))
     then card_to_string h else easy_helper_where t
-
+(*
 (*[make_suggestion building ai] produces a [case_file] that the other players
  * will attempt to disprove. *)
 let make_suggestion building ai =
     let loc    = building in
     let perp   = easy_helper_who  ai.possible_cards in
     let weapon = easy_helper_what ai.possible_cards in
-    ( ignore (Printf.printf "%s has guessed that the culprit was %s using %s in 
+    (Printf.printf "%s has guessed that the culprit was %s using %s in
       %s Hall.\n We will now go around and attempt to disprove the guess."
-      ai.character, perp, weapon, loc);
+      ai.character, perp, weapon, loc;
       {who = perp; where = loc; with_what = weapon})
 
 (*[replace_ai_with_new new_ai ai_list] returns an updated list of ais, replacing
@@ -166,7 +166,7 @@ let rec help_disprove players state guess =
             if   proof = None
             then (Printf.printf "Prof. %s was not able to disprove it.\n" h;
                    help_disprove t state guess)
-            else (Printf.printf "Prof. %s was able to disprove it.\n" h; 
+            else (Printf.printf "Prof. %s was able to disprove it.\n" h;
                    (proof, Some h))
         |`User ->
           let proof = user_disprove state guess in
@@ -228,10 +228,10 @@ let update_possible ai guess =
     else if have_who then
       helper_update_building (helper_update_lang ai.possible_cards what) where
     else
-      helper_update_building 
+      helper_update_building
         (helper_update_lang
-          (helper_update_prof ai.possible_cards who) 
-        what) 
+          (helper_update_prof ai.possible_cards who)
+        what)
       where
 
 (*[update_ai_not_disproved ai guess] updates the [ai] based on the fact that
@@ -246,7 +246,6 @@ print_endline "No one was able to disprove the AI.";
 [player] who disproved [guess] and updates [ai].*)
              (*if disproved, add card to known cards. Add this guess to
              past guesses.  *)
-
 let update_ai_disproved ai c guess player =
   { ai with known_cards  = c::ai.known_cards }
 
@@ -261,22 +260,22 @@ let rec step ai state =
   if not ai.is_in_game then
   (* out of the game, can't do anything. *)
     state
-  else 
+  else
     (* still in game, move around and make suggestions *)
     let moves = roll_two_dice () in
       if is_in_building state.map ai.character
-      then 
+      then
         begin
           ignore (leave_building state.map ai.character 0);
           step ai state
         end
-      else 
+      else
         begin
           let (i, dest) = List.hd (closest_buildings state.map ai.character) in
           let (in_building, new_map) = move_towards_building state.map
                                        ai.character dest moves in
-            if in_building 
-            then 
+            if in_building
+            then
               begin
                 let players = match ai.character with
                   |"Bracy"   -> ["Clarkson";  "Fan";  "Gries"; "Halpern";  "White"]
@@ -319,17 +318,48 @@ let rec step ai state =
     else begin
       updated_state_map state new_map
     end
-    end
   end
-    else state
 *)
 
 (********************************************************************)
 (* alice's scratch XXD *)
 
-(*TODO*)
-let accuse (a:ai) (s:state) : state =
-  failwith "TODO"
+
+(*[replace_ai_with_new new_ai ai_list] returns an updated list of ais, replacing
+the old ai with this new one.*)
+let rec replace_ai_with_new new_ai ai_list =
+  match ai_list with
+  |[]-> failwith "not an ai"
+  |h::t-> if h.character=new_ai.character then new_ai::t
+          else h::replace_ai_with_new new_ai t
+
+(*[accuse ai state] produces a state where the accusation has been made
+ * with the case_file that the ai believes is correct. Does not depend on ai
+ * difficulty. The ai only makes an accusation
+ * when it has narrowed down the possible cards to 3. *)
+let accuse ai state : state=
+    let loc    = easy_helper_where ai.possible_cards in
+    let perp   = easy_helper_who   ai.possible_cards in
+    let weapon = easy_helper_what  ai.possible_cards in
+    let guess  = {who=perp; where=loc; with_what=weapon} in
+    Printf.printf "%s has made an accusation that the culprit was %s using
+      %s in %s Hall!\n" ai.character perp weapon loc;
+    if guess = state.fact_file
+    then
+      begin
+      print_endline "Uh oh, the AI has won! That accusation was correct.
+        You have lost the game. :(";
+      {state with game_complete=true}
+      end
+    else
+      begin
+        print_endline "The AI has made the wrong accusation! This AI is now
+          out of of the game, though it can still prove your suggestions
+          wrong/right, it can no longer win and will not move. ";
+        let new_ai      = {ai with is_in_game=false} in
+        let new_ai_list = replace_ai_with_new new_ai state.ais in
+          {state with ais = new_ai_list}
+      end
 
 (* TODO decides whether to accuse or not in the middle of an AI's turn
  * AI logic:
@@ -483,30 +513,31 @@ let move (a:ai) (n:int) (s:state) : state =
     | Medium -> failwith "TODO"
     | Hard   -> failwith "TODO"
 
-(* [use_secret a s] is the updated state after ai [a] uses the secret 
- * passage in the current building. 
- * Requires: [a] is currently in a building where there is a secret 
+(* [use_secret a s] is the updated state after ai [a] uses the secret
+ * passage in the current building.
+ * Requires: [a] is currently in a building where there is a secret
  *           passage. *)
 let use_secret (a:ai) (s:state) : state =
   let map = use_secret_passage s.map a.character in (* Gmap *)
   suggest a {s with map = map}
 
-(* [suggest_or_secret a b s] allows ai [a] to choose between making a 
- * suggestion and using the secret passage to enter building [b], and returns 
+(* [suggest_or_secret a b s] allows ai [a] to choose between making a
+ * suggestion and using the secret passage to enter building [b], and returns
  * the updated state. *)
 let suggest_or_secret (a:ai) (b:building) (s:state) : state =
   match a.difficulty with
   | Easy   -> suggest a s
-  | Medium -> 
+  | Medium ->
       begin
       match Random.int 1 with
       | 0 -> suggest a s
       | 1 -> use_secret a s
+      | _ -> failwith "will never be called"
       end
   | Hard   -> failwith "TODO"
 
-(* [secret_or_roll a b s] allows ai [a] to choose between using the secret 
- * passage to enter building [b] and rolling the dice to move out, and returns 
+(* [secret_or_roll a b s] allows ai [a] to choose between using the secret
+ * passage to enter building [b] and rolling the dice to move out, and returns
  * the updated state. *)
 let secret_or_roll (a:ai) (b:building) (s:state) : state =
   match a.difficulty with
