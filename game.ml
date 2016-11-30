@@ -138,7 +138,6 @@ let init_state (n:int) (d:difficulty) : state =
     let dictionary = generate_dictionary
                       ["Bracy";"Clarkson";"Fan";"Gries";"Halpern";"White"]
                       user_character ai_characters_lst in
-    ANSITerminal.resize 98 50;
     print_map map;
 
     Printf.printf "The AI bots play the roles of %s.\n" 
