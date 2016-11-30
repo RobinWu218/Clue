@@ -424,7 +424,7 @@ and disprove_case (p:prof) (ncurrent:int) (n:int) (guess:case_file) (s:state)
       end
   | `No ->
       disprove_loop ncurrent (n+1) guess s
-
+(*
 (*[suggest_easy building ai] produces a [case_file] that the other players
  * will attempt to disprove. *)
 let suggest ai state =
@@ -435,12 +435,14 @@ let suggest ai state =
       %s Hall.\n We will now go around and attempt to disprove the guess."
       ai.character perp weapon loc;
       {who = perp; where = loc; with_what = weapon})
-(*
+
+
+*)
 (*TODO
  * AI logic: random. *)
 let suggest_easy (a:ai) (s:state) : (prof * language) =
-  (prof_of_int (Random.int 6), lang_of_int (Random.int 6))*)
-(*
+  (prof_of_int (Random.int 6), lang_of_int (Random.int 6))
+
 (*TODO*)
 let suggest (a:ai) (s:state) : state =
   Printf.printf "Prof. %s is making a suggestion about the current building.\n"
@@ -490,7 +492,7 @@ let suggest (a:ai) (s:state) : state =
     end
   | None -> failwith "This should not happen in suggest in ai.ml"
 
-*)
+
 (*TODO
  * Requires: n > 0.
  * AI logic: finds the closest building and tries to enter that one
