@@ -122,6 +122,10 @@ val string_of_card : card -> string
 (* [card_to_string c] is the string part of a card. *)
 val card_to_string : card -> string
 
+(* [string_of_exits exits] is the string representation of all exits to a 
+ * building with their ids and coordinates. *)
+val string_of_exits : (int * coord) list -> string
+
 (* [string_of_prof_lst] is a comma-separated string representation of a list
  * of profs. *)
 val string_of_prof_lst : prof list -> string

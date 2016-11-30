@@ -245,8 +245,20 @@ let rec get_exit (b:building) (s:state) : int =
   let exits = List.assoc b s.map.exits in
   match List.length exits with
   | 1 -> 1
-  | 2 -> get_choice_two () (* Logic *)
-  | 4 -> get_choice_four () (* Logic *)
+  | 2 -> begin
+         Printf.printf 
+           "Please choose one of the two exits to %s Hall to leave\n" b;
+         Printf.printf "%s" (string_of_exits exits);
+         print_endline "Valid responses are: [1/2]";
+         get_choice_two () (* Logic *)
+         end
+  | 4 -> begin
+         Printf.printf 
+           "Please choose one of the four exits to %s Hall to leave\n" b;
+         Printf.printf "%s" (string_of_exits exits);
+         print_endline "Valid responses are: [1/2/3/4]";
+         get_choice_four () (* Logic *)
+         end
   | _ -> failwith "This should not happen in get_exit in User given map.json"
 
 (* [leave_and_move b s] is the updated state after the user moves out of
