@@ -103,6 +103,64 @@ let rec character_to_ai prof ai_list =
 let updated_state_map state new_map : state =
   let s ={state with map = new_map} in s
 
+(*if c is a prof*)
+let rec helper_update_prof poss c=
+      match poss with
+      |[]   -> [c]
+      |h::t -> if int_of_card h > 5 then h::helper_update_prof t c
+               else helper_update_prof t c
+
+(*if c is a building*)
+let rec helper_update_building poss c=
+      match poss with
+      |[]   -> [c]
+      |h::t -> if (int_of_card h < 6)||(int_of_card h > 14) then
+                    h::helper_update_building t c
+               else helper_update_building t c
+
+(*if c is a language*)
+let rec helper_update_lang poss c=
+      match poss with
+      |[]   -> [c]
+      |h::t -> if int_of_card h <15 then h::helper_update_lang t c
+               else helper_update_lang t c
+
+(*[update_possible_not_disproved] returns the updated list of possible cards. If a card was
+ * not able to be disproved and the ai knows that it doesn't possess the card,
+ * then all other cards of that type (building/prof/language) are removed from
+ * the possible cards. If it was not able to be disproved and the ai does
+ * possess it, it just returns the old list of possible cards.
+ *)
+let update_possible_not_disproved ai guess =
+  print_endline "No one was able to disprove the guess: \n";
+  print_case_file guess;
+  let where = Building guess.where in
+  let what  = Language guess.with_what in
+  let who   = Prof guess.who in
+  let have_where = List.mem where ai.hand in
+  let have_what  = List.mem what  ai.hand in
+  let have_who   = List.mem who   ai.hand in
+    if have_where && have_what && have_who
+      then ai.possible_cards
+    else if have_where && have_what then
+      helper_update_prof ai.possible_cards who
+    else if have_where && have_who then
+      helper_update_lang ai.possible_cards what
+    else if have_what && have_who then
+      helper_update_building ai.possible_cards where
+    else if have_where then
+      helper_update_lang (helper_update_prof ai.possible_cards who) what
+    else if have_what then
+      helper_update_building (helper_update_prof ai.possible_cards who) where
+    else if have_who then
+      helper_update_building (helper_update_lang ai.possible_cards what) where
+    else
+      helper_update_building
+        (helper_update_lang
+          (helper_update_prof ai.possible_cards who)
+        what)
+      where
+
 (************************************************
  * Methods for interacting with game state
  ************************************************)
@@ -181,62 +239,6 @@ let rec help_disprove players state guess =
                    (proof, Some h))
         |`No   -> help_disprove t state guess
       end
-
-(*if c is a prof*)
-let rec helper_update_prof poss c=
-      match poss with
-      |[]   -> [c]
-      |h::t -> if int_of_card h > 5 then h::helper_update_prof t c
-               else helper_update_prof t c
-
-(*if c is a building*)
-let rec helper_update_building poss c=
-      match poss with
-      |[]   -> [c]
-      |h::t -> if (int_of_card h < 6)||(int_of_card h > 14) then
-                    h::helper_update_building t c
-               else helper_update_building t c
-
-(*if c is a language*)
-let rec helper_update_lang poss c=
-      match poss with
-      |[]   -> [c]
-      |h::t -> if int_of_card h <15 then h::helper_update_lang t c
-               else helper_update_lang t c
-
-(*[update_possible] returns the updated list of possible cards. If a card was
- * not able to be disproved and the ai knows that it doesn't possess the card,
- * then all other cards of that type (building/prof/language) are removed from
- * the possible cards. If it was not able to be disproved and the ai does
- * possess it, it just returns the old list of possible cards.
- *)
-let update_possible ai guess =
-  let where = Building guess.where in
-  let what  = Language guess.with_what in
-  let who   = Prof guess.who in
-  let have_where = List.mem where ai.hand in
-  let have_what  = List.mem what  ai.hand in
-  let have_who   = List.mem who   ai.hand in
-    if have_where && have_what && have_who
-      then ai.possible_cards
-    else if have_where && have_what then
-      helper_update_prof ai.possible_cards who
-    else if have_where && have_who then
-      helper_update_lang ai.possible_cards what
-    else if have_what && have_who then
-      helper_update_building ai.possible_cards where
-    else if have_where then
-      helper_update_lang (helper_update_prof ai.possible_cards who) what
-    else if have_what then
-      helper_update_building (helper_update_prof ai.possible_cards who) where
-    else if have_who then
-      helper_update_building (helper_update_lang ai.possible_cards what) where
-    else
-      helper_update_building
-        (helper_update_lang
-          (helper_update_prof ai.possible_cards who)
-        what)
-      where
 
 (*[update_ai_not_disproved ai guess] updates the [ai] based on the fact that
 [guess] was disproved. Returns updated ai.*)
