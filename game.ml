@@ -40,7 +40,10 @@ let choose_card card_chosen (n:int) =
   select_non_repeat_lst (card_lst_to_int_lst card_chosen) card_lst n 21;
   int_lst_to_card_lst (!card_lst)
 
-(*TODO*)
+(*[deal_card] gives a list of hands given the number of AI bots and the cards
+ * containing the fact file.
+ * requires: [fact_card] is a list of cards indicating the fact file.
+ *           [n] is an integer between 2 and 5 inclusive.*)
 let deal_card fact_card n =
   match n with
   | 2 ->
@@ -71,13 +74,19 @@ let deal_card fact_card n =
     [lst1; lst2; lst3; lst4; lst5; lst6]
   | _ -> failwith "This shoudl not happen in deal_card in game.ml"
 
-(*TODO*)
+(*[remove_first_el] removes the first element of a list.
+ * requires: [lst] is a list containing at least one element*)
 let remove_first_el lst =
   match lst with
   | [] -> failwith "No elements in the list"
   | h::t -> t
 
-(*TODO*)
+(*[init_ai_lst] is a list of AI bots given the number of AIs in the game,
+ * the difficulty level, list of hands that AI bots have, and list of 
+ * characters of each AI bots.
+ * requires: [n] is an integer between 2 and 5 inclusive.
+ *           [hand_lst] is a list of hands
+ *           [character_lst] is a string list.*)
 let init_ai_lst n d hand_lst character_lst =
   let ai_lst = ref [] in
   while (List.length !ai_lst < n) do (
@@ -89,7 +98,10 @@ let init_ai_lst n d hand_lst character_lst =
   ) done;
   !ai_lst
 
-(*TODO Robin double check? Alice changed ai_char_lst to ai_lst *)
+(*[generate_dictionary] is the dictionary generated given by the list of 
+ * professors, user character, and list of ai's characters.
+ * requires: [prof_lst],[ai_lst] are string lists
+ *           [user_char] is string indicating character*)
 let rec generate_dictionary prof_lst user_char ai_lst =
   match prof_lst with
   | [] -> []
@@ -170,6 +182,7 @@ let rec step (s:state) : state =
   | 4 -> step_helper "Halpern"  s
   | 5 -> step_helper "White"    s
   | _ -> failwith "This should not happen in step in game.ml"
+  
 (* [step_helper p s] is the updated state after the player whose character is
  * prof [p] plays his/her turn. *)
 and step_helper (p:prof) (s:state) : state =
