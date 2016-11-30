@@ -182,7 +182,18 @@ let rec step (s:state) : state =
   | 4 -> step_helper "Halpern"  s
   | 5 -> step_helper "White"    s
   | _ -> failwith "This should not happen in step in game.ml"
-  
+
+(* [check_ai_in_game] is false if all ai bots have lost and is true
+ * if there is at least one bot still in game.
+ * requires: [ai_lst] is a list of ai bots*)
+let rec check_ai_in_game (ai_lst: ai list) : bool = 
+   match ai_lst with 
+   | [] -> false
+   | h::t -> if h.is_in_game then 
+                true 
+             else 
+                false || (check_ai_in_game t) 
+
 (* [step_helper p s] is the updated state after the player whose character is
  * prof [p] plays his/her turn. *)
 and step_helper (p:prof) (s:state) : state =
@@ -199,7 +210,10 @@ and step_helper (p:prof) (s:state) : state =
           end
         else s 
       in
-      step {news with counter = news.counter + 1}
+      if check_ai_in_game state.ais then
+        step {news with counter = news.counter + 1}
+      else 
+        step {news with counter = news.counter + 1; game_complete = true}
   | `User ->
       let news = 
         wait_for_user();
