@@ -1,5 +1,5 @@
 (* [InvalidLocation] is raised by functions in the Map module. *)
-exception InvalidLocation
+exception InvalidLocation of string
 
 (* [InvalidOperation] is raised by functions in the Map module. *)
 exception InvalidOperation
@@ -272,5 +272,5 @@ let print_case_file (cf:case_file) : unit =
 
 (* [wait_for_user] waits for the user to hit enter to continue. *)
 let wait_for_user () =
-  print_string "Press enter to continue......................................";
+  ANSITerminal.print_string [ANSITerminal.red] "Press enter to continue......................................";
   let _ = read_line () in ()
