@@ -213,7 +213,12 @@ and step_helper (p:prof) (s:state) : state =
       if check_ai_in_game s.ais then
         step {news with counter = news.counter + 1}
       else 
+        begin
+        print_endline "Awesome! All the AI bots have lost.";
+        print_endline "YOU WIN!!!";
+        print_endline "CLUE will exit automatically. Feel free to play again!";
         step {news with counter = news.counter + 1; game_complete = true}
+        end
   | `User ->
       let news = 
         wait_for_user();
