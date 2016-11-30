@@ -185,13 +185,13 @@ let suggest (s:state) : state =
                         p (string_of_card c);
           let news'' = 
             {news' with past_guesses = (*TODO possibly have a helper.ml?*)
-              (guess, s.user.character, Some p)::news'.past_guesses} in
+              (guess, s.user.character, Some p) >:: news'.past_guesses} in
           accuse_or_not news''
       | None -> 
           print_endline "No one could disprove your suggestion."; 
           let news'' = 
             {news' with past_guesses = 
-              (guess, s.user.character, None)::news'.past_guesses} in
+              (guess, s.user.character, None) >:: news'.past_guesses} in
           accuse_or_not news''
       end
   | None -> failwith "This should not happen in suggest in user.ml"
