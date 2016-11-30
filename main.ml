@@ -8,6 +8,7 @@ open Logic
  *   launch and would interfere with OUnit.
  *)
 let () =
+  ANSITerminal.resize 98 50;
   ANSITerminal.(
     print_string [yellow] (
     "+--------------------------------------------------------------------+\n"^
