@@ -250,7 +250,7 @@ let move_helper map p dir n =
       else
         let nloc = update_location map.location p (!cr,!cc) in
           m.(!cr).(!cc) <- Some p; (* mark down at new location   *)
-          (n-(!i), {map with location = nloc})
+          (n-(!i), {map with location = nloc; map_values = m})
 
 (* [move map p dir n] tries to move professor [p] on the [map] [n] steps in 
  * [dir] direction.

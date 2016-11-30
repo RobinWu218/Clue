@@ -36,27 +36,18 @@ let () =
     "|        Fan          |         Duffield       |        Java         |\n"^
     "|       Gries         |          Gates         |       MATLAB        |\n"^
     "|      Halpern        |         Klarman        |        OCaml        |\n"^
-    "|       White         |          Olin          |       Python        |\n"^
-    "|                     |        Phillips        |                     |\n"^
-    "|                     |         Rhodes         |                     |\n"^
+    "|       White         |           Olin         |       Python        |\n"^
+    "|                     |         Phillips       |                     |\n"^
+    "|                     |          Rhodes        |                     |\n"^
     "|                     |         Statler        |                     |\n"^
-    "+--------------------------------------------------------------------+\n|"));
-(* 
-
-
-  	"Whoever makes the correct accusation first wins the game.\n\n"^
-  	"6 Professors: Anne Bracy, Michael Clarkson, Daisy Fan, \n"^
-  	"              David Gries, Joe Halpern, Walker White\n"^
-  	"9 Buildings:  Baker Hall, Carpenter Hall, Duffield Hall, \n"^
-  	"              Gates Hall, Klarman Hall, Olin Hall, \n"^
-  	"              Phillips Hall, Rhodes Hall, Statler Hall\n"^
-  	"6 Languages:  Bash, C, Java, MATLAB, OCaml, Python\n");
-  *)
+    "+--------------------------------------------------------------------+\n"));
+  (* allow players to read the information *)
+  Data.wait_for_user ();
   print_endline 
     "Please enter the number of AI bots you want to play against (2-5).";
   let num_AI = get_choice_num_ai () in
   print_endline 
     "Please enter the level of difficulty (1 easy, 2 medium, 3 hard).";
   let dlevel = get_choice_three () in
-  Game.main num_AI dlevel
+    Game.main num_AI dlevel
 
