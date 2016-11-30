@@ -171,6 +171,17 @@ let init_state (n:int) (d:difficulty) : state =
 (* step and its helpers *)
 (************************)
 
+(* [check_ai_in_game] is false if all ai bots have lost and is true
+ * if there is at least one bot still in game.
+ * requires: [ai_lst] is a list of ai bots*)
+let rec check_ai_in_game (ai_lst: ai list) : bool = 
+   match ai_lst with 
+   | [] -> false
+   | h::t -> if h.is_in_game then 
+                true 
+             else 
+                false || (check_ai_in_game t)
+
 (* [step s] is the updated state after one player's turn. *)
 let rec step (s:state) : state =
   if s.game_complete then s else
@@ -182,17 +193,6 @@ let rec step (s:state) : state =
   | 4 -> step_helper "Halpern"  s
   | 5 -> step_helper "White"    s
   | _ -> failwith "This should not happen in step in game.ml"
-
-(* [check_ai_in_game] is false if all ai bots have lost and is true
- * if there is at least one bot still in game.
- * requires: [ai_lst] is a list of ai bots*)
-let rec check_ai_in_game (ai_lst: ai list) : bool = 
-   match ai_lst with 
-   | [] -> false
-   | h::t -> if h.is_in_game then 
-                true 
-             else 
-                false || (check_ai_in_game t) 
 
 (* [step_helper p s] is the updated state after the player whose character is
  * prof [p] plays his/her turn. *)
@@ -210,7 +210,7 @@ and step_helper (p:prof) (s:state) : state =
           end
         else s 
       in
-      if check_ai_in_game state.ais then
+      if check_ai_in_game s.ais then
         step {news with counter = news.counter + 1}
       else 
         step {news with counter = news.counter + 1; game_complete = true}
