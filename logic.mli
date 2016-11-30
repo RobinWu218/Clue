@@ -18,6 +18,10 @@ val get_choice_two : unit -> int
  * the user selects the second choice, and [3] if the third. *)
 val get_choice_three : unit -> int
 
+(* [get_choice_four ()] is [1] if the user selects the first choice, [2] if
+ * the second, [3] if the third, and [4] if the fourth. *)
+val get_choice_four : unit -> int
+
 (* [get_choice_num_ai ()] is [2] up till [5] if the user chooses to play with 
  * [2] to [5] AI's. *)
 val get_choice_num_ai : unit -> int

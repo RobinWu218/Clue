@@ -28,7 +28,7 @@ let roll_two_dice () : int =
     Printf.printf "Die 2: %d\n" d2;
     sum
 
-(* [get_choice ()] is [1] if the user selects the first choice and [2] if
+(* [get_choice_two ()] is [1] if the user selects the first choice and [2] if
  * the user selects the second choice. *)
 let rec get_choice_two () : int =
   let str = print_string  "> "; read_line () in
@@ -62,6 +62,25 @@ let rec get_choice_three () : int =
     | '2' -> 2
     | '3' -> 3
     | _   -> print_endline "Please type 1 or 2 or 3!"; get_choice_three ()
+
+(* [get_choice_four ()] is [1] if the user selects the first choice, [2] if
+ * the second, [3] if the third, and [4] if the fourth. *)
+let rec get_choice_four () : int =
+  let str = print_string  "> "; read_line () in
+  let str' = String.(str |> trim) in
+  if String.length str' = 0 
+  then
+    begin
+    print_endline "Please at least type something!"; 
+    get_choice_four ()
+    end
+  else 
+    match str'.[0] with 
+    | '1' -> 1
+    | '2' -> 2
+    | '3' -> 3
+    | '4' -> 4
+    | _   -> print_endline "Please type 1 or 2 or 3 or 4!"; get_choice_four ()
 
 (* [get_choice_num_ai ()] is [2] up till [5] if the user chooses to play with 
  * [2] to [5] AI's. *)
