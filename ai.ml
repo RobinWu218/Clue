@@ -513,7 +513,8 @@ let suggest (a:ai) (s:state) : state =
 (*TODO
  * Requires: n > 0.
  * AI logic: finds the closest building and tries to enter that one
- *           if does not already have a destination. *)
+ *           if does not already have a destination. If it reaches a building
+ * then it makes a suggestion. *)
 let move_easy (a:ai) (n:int) (s:state) : state =
   let (_, b) = List.hd (closest_buildings s.map a.character) in
   let (in_building, new_map) =
@@ -524,7 +525,13 @@ let move_easy (a:ai) (n:int) (s:state) : state =
 
 (* Requires: n > 0.
  * AI logic: wants to go into a building in the possible list *)
-let move_medium a n s : state = failwith "unim"
+let move_medium a n s : state =
+  let b = easy_helper_where a.possible_cards in
+  let (in_building, new_map) =
+    move_towards_building s.map a.character b n in (* Gmap *)
+  if in_building
+  then suggest a {s with map = new_map}
+  else {s with map = new_map}
 
 (* Requires: n > 0.
  * AI logic: wants to go into a building in the possible list that the
