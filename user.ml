@@ -240,9 +240,25 @@ let rec move (n:int) (s:state) : state =
     then suggest {s with map = map}
     else move (n-x+y) {s with map = map}
 
+(* [get_exit b s] is the id of an exit to building [b] selected by the user. *)
+let rec get_exit (b:building) (s:state) : int =
+  let exits = List.assoc b s.map.exits in
+  match List.length exits with
+  | 1 -> 1
+  | 2 -> get_choice_two () (* Logic *)
+  | 4 -> get_choice_four () (* Logic *)
+  | _ -> failwith "This should not happen in get_exit in User given map.json"
+
+(* [leave_and_move b s] is the updated state after the user moves out of
+ * building [b].
+ * Requires: [s.user] is currently in building [b]. *)
+let leave_and_move (b:building) (s:state) : state =
+  let map = leave_building s.map s.user.character (get_exit b s) in
+  move (roll_two_dice ()) {s with map = map}
+
 (* [use_secret s] is the updated state after the user uses the secret 
  * passage in the current building. 
- * Requires: s.user is currently in a building where there is a secret 
+ * Requires: [s.user] is currently in a building where there is a secret 
  *           passage. *)
 let use_secret (s:state) : state =
   let map = use_secret_passage s.map s.user.character in (* Gmap *)
@@ -270,20 +286,20 @@ let secret_or_roll (b:building) (s:state) : state =
   Printf.printf "  2 use the secret passage to get into %s Hall.\n" b;
   print_endline "Valid responses are: [1/2]";
   match get_choice_two () with 
-  | 1 -> move (roll_two_dice ()) s
+  | 1 -> leave_and_move b s
   | 2 -> use_secret s
   | _ -> failwith "This should not happen in secret_or_roll in user.ml"
 
-(* [suggest_or_roll s] prompts the user to choose between making a suggestion
+(* [suggest_or_roll b s] prompts the user to choose between making a suggestion
  * and rolling the dice to move out, and returns the updated state. *)
-let suggest_or_roll (s:state) : state =
+let suggest_or_roll (b:building) (s:state) : state =
   print_endline "You can either:";
   print_endline "  1 make a suggestion now, or";
   print_endline "  2 roll the dice and move out.";
   print_endline "Valid responses are: [1/2]";
   match get_choice_two () with 
   | 1 -> suggest s
-  | 2 -> move (roll_two_dice ()) s
+  | 2 -> leave_and_move b s
   | _ -> failwith "This should not happen in suggest_or_roll in user.ml"
 
 (* [secret_or_roll_or_suggest s] prompts the user to choose to use the secret
@@ -297,7 +313,7 @@ let secret_or_roll_or_suggest (b:building) (s:state) : state =
   print_endline "Valid responses are: [1/2/3]";
   match get_choice_three () with 
   | 1 -> suggest s
-  | 2 -> move (roll_two_dice ()) s
+  | 2 -> leave_and_move b s
   | 3 -> use_secret s
   | _ -> failwith "This should not happen in secret_or_roll_or_suggest in user"
 
@@ -322,7 +338,7 @@ let in_building_involuntarily (b:building) (s:state) : state =
         print_endline "All exits to the current building are blocked."; 
         suggest s
     | false, false -> 
-        suggest_or_roll s
+        suggest_or_roll b s
     end
   in assign_was_moved news s.user.character false
 
@@ -348,7 +364,7 @@ let in_building_voluntarily (b:building) (s:state) : state =
       print_endline "You have to wait until your next turn.";
       s
   | false, false -> 
-      move (roll_two_dice ()) s
+      leave_and_move b s (*TODO*)
 
 (* [step s] is the new state after the user finishes his/her turn when
  * the current state is [s]. *)

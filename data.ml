@@ -43,7 +43,7 @@ type map = {
   num_cols:       int;
   exits:         (building * ((int * coord) list)) list;
        (* e.g., [("Gates",   [(1,    (0,0));
-                             (2,    (5,5))     ])     ] *)
+                              (2,    (5,5))     ])     ] *)
   buildings:      building list;
   waiting_spots: (building * (coord list)) list;
   secrets:       (building * building) list;
