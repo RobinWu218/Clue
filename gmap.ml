@@ -26,9 +26,9 @@ and string nr nc w =
   Buffer.contents buf
 and display n =
   match n with
-    | None   -> ANSITerminal.sprintf [ANSITerminal.on_black] "%s" "-"
+    | None   -> ANSITerminal.sprintf [ANSITerminal.on_black] "%s" "- "
     | Some i -> ANSITerminal.sprintf 
-                [ANSITerminal.on_black; style_of_str i] "%s" 
+                [ANSITerminal.on_black; style_of_str i] "%s " 
                 (String.make 1 i.[0])
 and style_of_str i =
   let open ANSITerminal in

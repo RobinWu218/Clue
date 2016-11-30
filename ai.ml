@@ -663,7 +663,7 @@ let in_building_voluntarily (a:ai) (b:building) (s:state) : state =
 let rec step (a:ai) (s:state) : state =
   let s1 = accuse_or_not_start a s in
   if s1.game_complete then s1 else
-  if not ai.still_in_game then s1 else
+  if not (still_in_game a) then s1 else
   match get_current_building s1.map a.character with (* Gmap *)
   | Some b ->
       if a.was_moved
