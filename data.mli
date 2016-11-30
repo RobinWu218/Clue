@@ -1,5 +1,5 @@
 (* [InvalidLocation] is raised by functions in the Map module. *)
-exception InvalidLocation
+exception InvalidLocation of string
 
 (* [InvalidOperation] is raised by functions in the Map module. *)
 exception InvalidOperation

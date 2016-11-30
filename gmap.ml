@@ -273,12 +273,11 @@ let move map p dir n =
  * Returns: the pair [(tf, map2)], where
  *   [tf]   is [true] iff [p] succesfully made it to [coord]
  *   [map2] is the updated map.
- * Raises: InvalidLocation if [c] is off the map or inside a building.
  *)
 let rec move_towards_coord map p coord n =
   let (destr, destc) = coord in
     if destr < 0 || destc < 0 || destr >= map.num_rows || destc >= map.num_cols
-    then raise InvalidLocation (* out of bounds *)
+    then raise (InvalidLocation "out of bounds")
     else
       let (sr, sc) = get_current_location map p in
         replace_tile map.map_values p sr sc;
@@ -348,7 +347,7 @@ and calc_path map p destr destc =
         done;
         !path
     else (* destination inside a building or on a professor *)
-      raise InvalidLocation 
+      raise (InvalidLocation "destination not a valid ending spot")
 (* simplifies the calculated path so that it is reduced to a sequence of [move] 
  * commands where each subsequent command is in a different direction.*)
 and simplify_path lst =
@@ -406,7 +405,8 @@ let move_towards_building map p b n =
     let eloc = get_closest_exit el loc in
     move_towards_coord map p eloc n
   with
-  | _ -> raise InvalidLocation  
+  | InvalidLocation s -> failwith ("[move_towards_building]: "^s)
+  | _ -> failwith ("[move_towards_building]: some error on: "^p^", "^b)  
 
 (* [teleport_professor map p b] moves a professor [p] on the [map] to building [b]
  * This event occurs whenever a suggestion or accusation is made; the

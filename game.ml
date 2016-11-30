@@ -171,6 +171,17 @@ let init_state (n:int) (d:difficulty) : state =
 (* step and its helpers *)
 (************************)
 
+(* [check_ai_in_game] is false if all ai bots have lost and is true
+ * if there is at least one bot still in game.
+ * requires: [ai_lst] is a list of ai bots*)
+let rec check_ai_in_game (ai_lst: ai list) : bool = 
+   match ai_lst with 
+   | [] -> false
+   | h::t -> if h.is_in_game then 
+                true 
+             else 
+                false || (check_ai_in_game t)
+
 (* [step s] is the updated state after one player's turn. *)
 let rec step (s:state) : state =
   if s.game_complete then s else
@@ -183,17 +194,6 @@ let rec step (s:state) : state =
   | 5 -> step_helper "White"    s
   | _ -> failwith "This should not happen in step in game.ml"
 
-(* [check_ai_in_game] is false if all ai bots have lost and is true
- * if there is at least one bot still in game.
- * requires: [ai_lst] is a list of ai bots*)
-let rec check_ai_in_game (ai_lst: ai list) : bool = 
-   match ai_lst with 
-   | [] -> false
-   | h::t -> if h.is_in_game then 
-                true 
-             else 
-                false || (check_ai_in_game t) 
-
 (* [step_helper p s] is the updated state after the player whose character is
  * prof [p] plays his/her turn. *)
 and step_helper (p:prof) (s:state) : state =
@@ -205,19 +205,26 @@ and step_helper (p:prof) (s:state) : state =
         then 
           begin
             wait_for_user();
-            Printf.printf "Prof. %s's turn...\n" p;
+            ANSITerminal.(print_string [Bold] (
+              "-----------------:: Prof. "^p^"'s turn ::-----------------\n"));
             Ai.step ai s
           end
         else s 
       in
-      if check_ai_in_game state.ais then
+      if check_ai_in_game s.ais then
         step {news with counter = news.counter + 1}
       else 
+        begin
+        print_endline "Awesome! All the AI bots have lost.";
+        print_endline "YOU WIN!!!";
+        print_endline "CLUE will exit automatically. Feel free to play again!";
         step {news with counter = news.counter + 1; game_complete = true}
+        end
   | `User ->
       let news = 
         wait_for_user();
-        Printf.printf "Prof. %s's turn... which is your turn :)\n" p;
+            ANSITerminal.(print_string [Bold] (
+              "-----------------:: Prof. "^p^"'s (You!) turn ::-----------------\n"));
         User.step s in
       step {news with counter = news.counter + 1}
   | `No ->
