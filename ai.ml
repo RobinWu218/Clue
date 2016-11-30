@@ -433,7 +433,12 @@ and disprove_case (p:prof) (ncurrent:int) (n:int) (guess:case_file) (s:state)
   | `User ->
       begin
       match user_disprove s guess with
-      | Some card -> Some (p, card)
+      | Some card -> 
+          begin
+          Printf.printf "You revealed the card %s to disprove the suggestion." 
+                        (string_of_card card);
+          Some (p, card)
+          end
       | None -> disprove_loop ncurrent (n+1) guess s
       end
   | `No ->
@@ -511,11 +516,35 @@ let suggest (a:ai) (s:state) : state =
 
 
 (*TODO
+ * Requires: lst is non-empty. *)
+let top_three (lst:'a list) : 'a =
+  match lst with
+  | [] -> 
+      failwith "An empty list is passed into top_three in Ai, wrong!"
+  | [elt] -> 
+      elt
+  | [elt1;elt2] -> 
+      begin
+      match Random.int 1 with
+      | 0 -> elt1
+      | 1 -> elt2
+      | _ -> failwith "This should not happen in top_three in Ai"
+      end
+  | elt1::elt2::elt3::_ ->
+      begin
+      match Random.int 2 with
+      | 0 -> elt1
+      | 1 -> elt2
+      | 2 -> elt3
+      | _ -> failwith "This should not happen in top_three in Ai"
+      end
+
+(*TODO
  * Requires: n > 0.
  * AI logic: finds the closest building and tries to enter that one
  *           if does not already have a destination. *)
 let move_easy (a:ai) (n:int) (s:state) : state =
-  let (_, b) = List.hd (closest_buildings s.map a.character) in
+  let (_, b) = top_three (closest_buildings s.map a.character) in
   let (in_building, new_map) =
     move_towards_building s.map a.character b n in (* Gmap *)
   if in_building
@@ -524,13 +553,15 @@ let move_easy (a:ai) (n:int) (s:state) : state =
 
 (* Requires: n > 0.
  * AI logic: wants to go into a building in the possible list *)
-let move_medium a n s : state = failwith "unim"
+let move_medium (a:ai) (n:int) (s:state) : state =
+  failwith "TODO"
 
 (* Requires: n > 0.
  * AI logic: wants to go into a building in the possible list that the
 ai is closest to*)
+let move_hard (a:ai) (n:int) (s:state) : state =
+  failwith "TODO"
 
-let move_hard a n s : state = failwith "unim"
 (* [move a n s] allows the AI [a]'s character to move n steps,
  * or fewer if the character gets into a building
  * before using up all the steps. *)
@@ -547,42 +578,50 @@ let move (a:ai) (n:int) (s:state) : state =
   else
     match a.difficulty with
     | Easy   -> move_easy a n s
-    | Medium -> failwith "TODO"
-    | Hard   -> failwith "TODO"
+    | Medium -> move_medium a n s
+    | Hard   -> move_hard a n s
 
-(* [get_exit b s] is the id of an exit to building [b] selected by the user. *)
-let rec get_exit (ai:ai)  (b:building) (s:state) : int =
+(* [get_exit a b s] is the id of an exit to building [b] selected by ai [a]. *)
+let rec get_exit (a:ai) (b:building) (s:state) : int =
   let exits = List.assoc b s.map.exits in
   match List.length exits with
   | 1 -> 1
-  | 2 -> get_choice_two () (* Logic *)
-  | 4 -> get_choice_four () (* Logic *)
-  | _ -> failwith "This should not happen in get_exit in User given map.json"
+  | 2 -> begin
+         match a.difficulty with
+         | Easy   -> Random.int 1 + 1
+         | Medium -> failwith "TODO"
+         | Hard   -> failwith "TODO"
+         end
+  | 4 -> begin
+         match a.difficulty with
+         | Easy   -> Random.int 4 + 1
+         | Medium -> failwith "TODO"
+         | Hard   -> failwith "TODO"
+         end
+  | _ -> failwith "This should not happen in get_exit in Ai given map.json"
 
-(*
-(* [leave_and_move b s] is the updated state after the user moves out of
+(* [leave_and_move a b s] is the updated state after ai [a] moves out of
  * building [b].
- * Requires: [s.user] is currently in building [b]. *)
-let leave_and_move (ai:ai)  (b:building) (s:state) : state =
-  let map = leave_building s.map s.user.character (get_exit b s) in
-  move (roll_two_dice ()) {s with map = map}
-*)
+ * Requires: [a] is currently in building [b]. *)
+let leave_and_move (a:ai) (b:building) (s:state) : state =
+  let map = leave_building s.map a.character (get_exit a b s) in
+  move a (roll_two_dice ()) {s with map = map}
 
 (* [use_secret a s] is the updated state after ai [a] uses the secret
  * passage in the current building.
  * Requires: [a] is currently in a building where there is a secret
  *           passage. *)
 let use_secret (a:ai) (s:state) : state =
+  Printf.printf "Prof. %s used the secret passage." a.character;
   let map = use_secret_passage s.map a.character in (* Gmap *)
   suggest a {s with map = map}
 
-
 (* [suggest_or_secret a b s] allows ai [a] to choose between making a
- * suggestion and using the secret passage to enter building [b], and returns
+ * suggestion and using the secret passage to leave building [b], and returns
  * the updated state. *)
 let suggest_or_secret (a:ai) (b:building) (s:state) : state =
   match a.difficulty with
-  | Easy   -> suggest a s
+  | Easy   -> suggest a s (* always help user get more info *)
   | Medium ->
       begin
       match Random.int 1 with
@@ -593,21 +632,21 @@ let suggest_or_secret (a:ai) (b:building) (s:state) : state =
   | Hard   -> failwith "TODO"
 
 (* [secret_or_roll a b s] allows ai [a] to choose between using the secret
- * passage to enter building [b] and rolling the dice to move out, and returns
+ * passage to leave building [b] and rolling the dice to move out, and returns
  * the updated state. *)
 let secret_or_roll (a:ai) (b:building) (s:state) : state =
   match a.difficulty with
   | Easy   -> use_secret a s
   | Medium -> failwith "TODO depends on which is easier to get to destination"
-  | Hard   -> failwith "TODO" (* move a (roll_two_dice ()) s *)
+  | Hard   -> failwith "TODO" (* leave_and_move a b s *)
 
 (* [suggest_or_roll a s] allows ai [a] to choose between making a suggestion
  * and rolling the dice to move out, and returns the updated state. *)
-let suggest_or_roll (a:ai) (s:state) : state =
+let suggest_or_roll (a:ai) (b:building) (s:state) : state =
   match a.difficulty with
   | Easy   -> suggest a s
   | Medium -> failwith "TODO depends on which is easier to get to destination"
-  | Hard   -> failwith "TODO" (* move a (roll_two_dice ()) s *)
+  | Hard   -> failwith "TODO" (* leave_and_move a b s *)
 
 (* [secret_or_roll_or_suggest a s] allows ai [a] to choose to use the secret
  * passage, or roll the dice to move out, or make a suggestion, and returns
@@ -616,7 +655,7 @@ let secret_or_roll_or_suggest (a:ai) (b:building) (s:state) : state =
   match a.difficulty with
   | Easy   -> suggest a s
   | Medium -> failwith "TODO depends on which is easier to get to destination"
-  | Hard   -> failwith "TODO" (* move a (roll_two_dice ()) s *)
+  | Hard   -> failwith "TODO" (* leave_and_move a b s *)
 
 (*TODO*)
 let in_building_involuntarily (a:ai) (b:building) (s:state) : state =
@@ -632,7 +671,7 @@ let in_building_involuntarily (a:ai) (b:building) (s:state) : state =
     | false, true  ->
         suggest a s
     | false, false ->
-        suggest_or_roll a s (*TODO*)
+        suggest_or_roll a b s (*TODO*)
     end
   in assign_was_moved news a.character false
 
@@ -642,16 +681,16 @@ let in_building_voluntarily (a:ai) (b:building) (s:state) : state =
   let blocked = is_building_blocked s.map b in (* Gmap *)
   match secret, blocked with
   | true,  true  ->
-      print_endline "AI has to use the secret passage.";
+      Printf.printf "Prof. %s has to use the secret passage." a.character;
       use_secret a s (*TODO*)
   | true,  false ->
       print_endline "There is a secret passage available.";
       secret_or_roll a b s (*TODO*)
   | false, true  ->
-      print_endline "AI has to wait until your next turn.";
+      Printf.printf "Prof. %s has to wait until next turn." a.character;
       s
   | false, false ->
-      move a (roll_two_dice ()) s
+      leave_and_move a b s
 
 (* [step a s] peforms a turn for AI player [a]. This involves:
  *   - defining and setting goals by processing knowledge from suggestions and
@@ -659,11 +698,11 @@ let in_building_voluntarily (a:ai) (b:building) (s:state) : state =
  *   - moving the AI around the map
  *   - forming and making suggestions/accusations
  * Returns: an updated game state.
+ * Requires: ai [a] is still in game, i.e., [a.is_in_game] is [true].
  *)
 let rec step (a:ai) (s:state) : state =
   let s1 = accuse_or_not_start a s in
   if s1.game_complete then s1 else
-  if not ai.still_in_game then s1 else
   match get_current_building s1.map a.character with (* Gmap *)
   | Some b ->
       if a.was_moved
