@@ -171,6 +171,8 @@ let suggest (s:state) : state =
         {who = who; 
          where = where; 
          with_what = with_what} in
+      print_endline "Your suggestion is: ";
+      print_case_file guess;
       let (moved_or_not, map) = 
         if get_current_building s.map who <> (Some where) (* Gmap *)
         then (true, (teleport_professor s.map who where)) (* Gmap *)
@@ -184,7 +186,7 @@ let suggest (s:state) : state =
           Printf.printf "Prof. %s showed you the card %s.\n" 
                         p (string_of_card c);
           let news'' = 
-            {news' with past_guesses = (*TODO possibly have a helper.ml?*)
+            {news' with past_guesses =
               (guess, s.user.character, Some p) >:: news'.past_guesses} in
           accuse_or_not news''
       | None -> 
@@ -226,12 +228,10 @@ let rec get_movement (n:int) : string * int =
 let rec move (n:int) (s:state) : state =
   if n < 0 then 
     failwith "This should not happen in move"
-  else if is_in_building s.map s.user.character then 
-    suggest s
   else if n = 0 then 
     begin
-      print_endline "You cannot move anymore.";
-      s
+    print_endline "You cannot move anymore.";
+    s
     end
   else
     let (dir, x) = get_movement n in
@@ -245,8 +245,20 @@ let rec get_exit (b:building) (s:state) : int =
   let exits = List.assoc b s.map.exits in
   match List.length exits with
   | 1 -> 1
-  | 2 -> get_choice_two () (* Logic *)
-  | 4 -> get_choice_four () (* Logic *)
+  | 2 -> begin
+         Printf.printf 
+           "Please choose one of the two exits to %s Hall to leave\n" b;
+         Printf.printf "%s" (string_of_exits exits);
+         print_endline "Valid responses are: [1/2]";
+         get_choice_two () (* Logic *)
+         end
+  | 4 -> begin
+         Printf.printf 
+           "Please choose one of the four exits to %s Hall to leave\n" b;
+         Printf.printf "%s" (string_of_exits exits);
+         print_endline "Valid responses are: [1/2/3/4]";
+         get_choice_four () (* Logic *)
+         end
   | _ -> failwith "This should not happen in get_exit in User given map.json"
 
 (* [leave_and_move b s] is the updated state after the user moves out of
@@ -265,12 +277,13 @@ let use_secret (s:state) : state =
   suggest {s with map = map}
 
 (* [suggest_or_secret b s] prompts the user to choose between making a 
- * suggestion and using the secret passage to enter building [b], and returns 
+ * suggestion and using the secret passage to leave building [b], and returns 
  * the updated state. *)
 let suggest_or_secret (b:building) (s:state) : state =
   print_endline "You can either";
   print_endline "  1 make a suggestion now or ";
-  Printf.printf "  2 use the secret passage to get into %s Hall.\n" b;
+  Printf.printf "  2 use the secret passage to get into %s Hall.\n"
+                (List.assoc b s.map.secrets);
   print_endline "Valid responses are: [1/2]";
   match get_choice_two () with 
   | 1 -> suggest s
@@ -283,7 +296,8 @@ let suggest_or_secret (b:building) (s:state) : state =
 let secret_or_roll (b:building) (s:state) : state =
   print_endline "You can either:";
   print_endline "  1 roll the dice and move out, or";
-  Printf.printf "  2 use the secret passage to get into %s Hall.\n" b;
+  Printf.printf "  2 use the secret passage to get into %s Hall.\n" 
+                (List.assoc b s.map.secrets); (* must not fail *)
   print_endline "Valid responses are: [1/2]";
   match get_choice_two () with 
   | 1 -> leave_and_move b s
@@ -309,7 +323,8 @@ let secret_or_roll_or_suggest (b:building) (s:state) : state =
   print_endline "You can either:";
   print_endline "  1 make a suggestion now, or ";
   print_endline "  2 roll the dice and move out, or ";
-  Printf.printf "  3 use the secret passage to get into %s Hall.\n" b;
+  Printf.printf "  3 use the secret passage to get into %s Hall.\n"
+                (List.assoc b s.map.secrets);
   print_endline "Valid responses are: [1/2/3]";
   match get_choice_three () with 
   | 1 -> suggest s
@@ -364,7 +379,7 @@ let in_building_voluntarily (b:building) (s:state) : state =
       print_endline "You have to wait until your next turn.";
       s
   | false, false -> 
-      leave_and_move b s (*TODO*)
+      leave_and_move b s
 
 (* [step s] is the new state after the user finishes his/her turn when
  * the current state is [s]. *)
