@@ -181,7 +181,7 @@ let suggest (s:state) : state =
       begin
       match disprove_loop (nuser+1) guess s with
       | Some (p, c) -> 
-          Printf.printf "Prof. %s disproved your suggestion with card %s.\n" 
+          Printf.printf "Prof. %s showed you the card %s.\n" 
                         p (string_of_card c);
           let news'' = 
             {news' with past_guesses = (*TODO possibly have a helper.ml?*)
