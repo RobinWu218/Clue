@@ -272,5 +272,6 @@ let print_case_file (cf:case_file) : unit =
 
 (* [wait_for_user] waits for the user to hit enter to continue. *)
 let wait_for_user () =
-  ANSITerminal.print_string [ANSITerminal.red] "Press enter to continue......................................";
+  ANSITerminal.print_string [ANSITerminal.red] 
+    "\nPress enter to continue......................................\n";
   let _ = read_line () in ()

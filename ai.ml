@@ -512,7 +512,7 @@ let move_easy (a:ai) (n:int) (s:state) : state =
  * before using up all the steps. *)
 let move (a:ai) (n:int) (s:state) : state =
   if n < 0 then
-    failwith "This should not happen in user_move"
+    failwith "This should not happen in ai_move"
   else if n = 0 then
     begin
     Printf.printf "Prof. %s cannot move anymore.\n" a.character;
