@@ -218,6 +218,19 @@ let card_to_string (c:card) : string =
   | Building s -> s
   | Language s -> s
 
+(* [string_of_coord (r, c)] is the string representation of coord [(r, c)]. *)
+let string_of_coord ((r,c):coord) : string =
+  Printf.sprintf "(%d, %d)" r c
+
+(* [string_of_exits exits] is the string representation of all exits to a 
+ * building with their ids and coordinates. *)
+let rec string_of_exits (exits:(int * coord) list) : string =
+  match exits with
+  | [] -> ""
+  | (id,coord)::t -> ((Printf.sprintf "  exit %d: %s\n" 
+                                      id (string_of_coord coord)) ^
+             (string_of_exits t))
+
 (* [string_of_prof_lst] is a comma-separated string representation of a list
  * of profs. *)
 let rec string_of_prof_lst (lst:prof list) : string =
