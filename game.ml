@@ -138,23 +138,50 @@ let init_state (n:int) (d:difficulty) : state =
     let dictionary = generate_dictionary
                       ["Bracy";"Clarkson";"Fan";"Gries";"Halpern";"White"]
                       user_character ai_characters_lst in
-    print_map map;
+    print_endline 
+      "\n**********************************************************************\n";
 
-    Printf.printf "The AI bots play the roles of %s.\n" 
-                  (string_of_prof_lst ai_characters_lst);
-    Printf.printf "You play the role of Prof. %s.\n" user_character;
-    print_endline (
-      "You start at the position of your last name initial on the map.\n" ^
-      "You can move to any white dots [.], \n" ^
-      "enter a building through a door [D], \n" ^
-      "and teleport to another building if there is a secret passage [s].");
-    print_endline "You have the following cards: ";
-    Printf.printf "    %s.\n" (string_of_card_lst user_hand);
-    print_endline (
-      "To play the game, follow the instructions and type into the command line \n" ^
-      "when prompted [> ]. You may find taking lots of notes helpful for \n" ^
-      "keeping track of cards you have and other players might have. Good luck! \n");
-    print_endline "The game begins now!";
+    (* print roles *)
+    ANSITerminal.(
+      print_string [Bold] "The AI bots play the roles of: \n"; 
+      print_string [] ((string_of_prof_lst ai_characters_lst)^".");
+      print_string [Bold; Underlined; cyan;] 
+        ("\n\nYou play the role of Prof. "^user_character^".\n");
+    );
+    wait_for_user();
+
+    (* print map and legend *)
+    ANSITerminal.(
+      print_string [yellow] "You location is tracked on the map by your last ";
+      print_string [on_black; Bold; red] "I";
+      print_string [yellow] (
+        "nitial.\n"^
+        "You can move on any spot marked by ");
+      print_string [on_black; Bold; white] "."; 
+      print_string [yellow] ",\nEnter a building through a door ";
+      print_string [on_black; Bold; green] "D";
+      print_string [yellow] ", and \nUse a secret passage ";
+      print_string [on_black; Bold; green] "s";
+      print_string [yellow] " to get to the building diagonally across the map.\n\n";
+      print_string [yellow] 
+        "Note: the map is on a coordinate system, with (0,0) at the top left corner.\n"
+    );
+    print_map map;
+    wait_for_user();
+
+    (* print starting hands *)
+    ANSITerminal.(
+      print_string [] "You have the following cards: \n";
+      print_string [cyan; Bold] ((string_of_card_lst user_hand)^".\n");
+      print_string [yellow] (
+        "\nTo play the game, follow the instructions and type into the command\n"^
+        "line when prompted by ");
+      print_string [] ">";
+      print_string [yellow] (
+        ". You may find having a sheet of paper and a \n"^
+        "writing utensil handy when playing the game. Good luck!\n\n");
+      print_string [Bold; green] "The game begins now!\n";
+    );
     {
       counter = 0;
       game_complete = false;
