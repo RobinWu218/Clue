@@ -1,6 +1,10 @@
 open Data
 open Gmap
 
+(* [a >:: lst] is the updated list after inserting [a] to [lst] if [a] is not 
+ * already in [lst]. *)
+val (>::) : 'a -> 'a list -> 'a list
+
 (* [assign_was_moved s p b] assigns bool [b] to the [was_moved] field of
  * whoever playing the character of prof [p] in state [s]. If no one plays that
  * character, then [s] is simply unchanged. *)
