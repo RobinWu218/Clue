@@ -224,9 +224,9 @@ let rec string_of_prof_lst (lst:prof list) : string =
   match lst with
   | [] -> ""
   | [p] -> string_of_card (Prof p)
-  | [p1;p2] -> (string_of_card (Prof p1)) ^ " and " ^ 
+  | [p1;p2] -> (string_of_card (Prof p1)) ^ ", and\n" ^ 
                (string_of_card (Prof p2))
-  | h::t -> (string_of_card (Prof h)) ^ ", " ^ 
+  | h::t -> (string_of_card (Prof h)) ^ ",\n" ^ 
             (string_of_prof_lst t)
 
 (* [string_of_card_lst] is a comma-separated string representation of a list
@@ -235,9 +235,9 @@ let rec string_of_card_lst (lst:card list) : string =
   match lst with
   | [] -> ""
   | [c] -> string_of_card c
-  | [c1;c2] -> (string_of_card c1) ^ " and " ^ 
+  | [c1;c2] -> (string_of_card c1) ^ ", and \n" ^ 
                (string_of_card c2)
-  | h::t -> (string_of_card h) ^ ", " ^ 
+  | h::t -> (string_of_card h) ^ ",\n" ^ 
             (string_of_card_lst t)
 
 (* [int_lst_to_prof_lst lst] is a prof list corresponding to int list [lst]. *)
@@ -273,5 +273,5 @@ let print_case_file (cf:case_file) : unit =
 (* [wait_for_user] waits for the user to hit enter to continue. *)
 let wait_for_user () =
   ANSITerminal.print_string [ANSITerminal.red] 
-    "\nPress enter to continue......................................\n";
+    "\nPress enter to continue...............................................\n";
   let _ = read_line () in ()

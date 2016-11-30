@@ -28,7 +28,8 @@ and display n =
   match n with
     | None   -> ANSITerminal.sprintf [ANSITerminal.on_black] "%s" "-"
     | Some i -> ANSITerminal.sprintf 
-                [ANSITerminal.on_black; style_of_str i] "%s" (String.make 1 i.[0])
+                [ANSITerminal.on_black; style_of_str i] "%s" 
+                (String.make 1 i.[0])
 and style_of_str i =
   let open ANSITerminal in
     match i with
