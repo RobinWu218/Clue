@@ -440,7 +440,9 @@ let top_three (lst:'a list) : 'a =
       end
 
 let check_building bop b =
-  if bop = Some b then false else true
+  (* if bop = Some b then false else true 
+  simplifies to: *)
+  bop <> Some b
 
 (* one of closest three buildings *)
 let rec move_where_easy (a:ai) (bop:building option) (s:state) : building =
