@@ -192,33 +192,35 @@ let rec replace_ai_with_new new_ai ai_list =
   |h::t-> if h.character=new_ai.character then new_ai::t
           else h::replace_ai_with_new new_ai t
 
-(*[accuse ai state] produces a state where the accusation has been made
+(*[accuse a s] produces a state where the accusation has been made
  * with the case_file that the ai believes is correct. Does not depend on ai
  * difficulty. The ai only makes an accusation
  * when it has narrowed down the possible cards to 3. *)
-let accuse ai state : state=
-  let where      = easy_helper_where ai.possible_cards in
-  let who        = easy_helper_who   ai.possible_cards in
-  let with_what  = easy_helper_what  ai.possible_cards in
+let accuse (a:ai) (s:state) : bool * state =
+  let where      = easy_helper_where a.possible_cards in
+  let who        = easy_helper_who   a.possible_cards in
+  let with_what  = easy_helper_what  a.possible_cards in
   let accusation = {who=who; where=where; with_what=with_what} in
-  Printf.printf "Prof. %s's accusation is:\n" ai.character;
+  Printf.printf "Prof. %s is making an accusation:\n" a.character;
   print_case_file accusation;
-  if accusation = state.fact_file
+  if accusation = s.fact_file
   then
     begin
     print_endline "Uh oh, the AI has won! That accusation was correct.";
     print_endline "You have lost this game. :(";
     print_endline "CLUE will exit automatically. Feel free to play again!";
-    {state with game_complete=true}
+    (true, {s with game_complete=true})
     end
   else
     begin
-    print_endline "The AI has made the wrong accusation!";
-    print_endline "This AI is now out of of the game, though it can still disprove, ";
-    print_endline "it can no longer move or win.";
-    let new_ai      = {ai with is_in_game=false} in
-    let new_ai_list = replace_ai_with_new new_ai state.ais in
-    {state with ais = new_ai_list}
+    print_endline ("The AI has made the wrong accusation!\n"^
+      "This AI is now out of of the game.\n"^
+      "Although it can still disprove, it can no longer move or win.\n"^
+      "As punishment, it is forever stuck in the building it accused...");
+    let new_map     = teleport_professor s.map a.character where in (*Gmap*)
+    let new_ai      = {a with is_in_game=false} in
+    let new_ai_list = replace_ai_with_new new_ai s.ais in
+    (true, {s with map = new_map; ais = new_ai_list})
     end
 
 (* TODO decides whether to accuse or not in the middle of an AI's turn
@@ -237,13 +239,13 @@ let accuse_or_not_middle (a:ai) (s:state) : state =
  *   - Easy:   simply not accuse and proceed
  *   - Medium: TODO
  *   - Hard:   TODO *)
-let accuse_or_not_start (a:ai) (s:state) : state =
+let accuse_or_not_start (a:ai) (s:state) : bool * state =
   match a.difficulty with
-  | Easy   ->
+  | Easy   -> 
       begin
       Printf.printf "Prof. %s does not wish to make an accusation right now.\n"
                     a.character;
-      s
+      (false, s)
       end
   | Medium -> failwith "TODO"
   | Hard   -> failwith "TODO"
@@ -571,8 +573,8 @@ let in_building_voluntarily (a:ai) (b:building) (s:state) : state =
  * Requires: ai [a] is still in game, i.e., [a.is_in_game] is [true].
  *)
 let rec step (a:ai) (s:state) : state =
-  let s1 = accuse_or_not_start a s in
-  if s1.game_complete then s1 else
+  let (end_turn, s1) = accuse_or_not_start a s in
+  if end_turn then s1 else
   match get_current_building s1.map a.character with (* Gmap *)
   | Some b ->
       if a.was_moved
