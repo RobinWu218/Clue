@@ -243,24 +243,25 @@ let move_helper map p bop dir n =
       cc := !cc + cd;
     done;
     (* if you end up in front of a door with steps left, enter the building if permitted *) 
-    if (!i < n) && (m.(!cr + rd).(!cc + cd) = Some "DOOR") then
+    if (!i < n) && (m.(!cr + rd).(!cc + cd) = Some "DOOR") 
+    then
       let b = List.assoc (!cr + rd,!cc + cd) (get_exits map) in
-      begin
-        match bop with 
-        | Some b' when b' = b -> (*TODO debug*)
-            begin
-              print_endline "Cannot re-enter the same building in the same turn!";
-              let nloc = update_location map.location p (!cr,!cc) in
-              m.(!cr).(!cc) <- Some p; (* mark down at new location   *)
-              (n-(!i), {map with location = nloc; map_values = m})
-            end
-        | Some _ | None -> (*TODO debug*)
-            begin
-              i := n; (* no steps left after entering building *)
-              Printf.printf "Entering %s Hall debug\n" b; (*TODO*)
-              (0, enter_building map p b)
-            end
-      end
+        begin
+          match bop with 
+          | Some b' when b' = b -> (*TODO debug*)
+              begin
+                print_endline "Cannot re-enter the same building in the same turn!";
+                let nloc = update_location map.location p (!cr,!cc) in
+                m.(!cr).(!cc) <- Some p; (* mark down at new location   *)
+                (n-(!i), {map with location = nloc; map_values = m})
+              end
+          | Some _ | None -> (*TODO debug*)
+              begin
+                i := n; (* no steps left after entering building *)
+                Printf.printf "Entering %s Hall debug\n" b; (*TODO*)
+                (0, enter_building map p b)
+              end
+        end
     else
       let nloc = update_location map.location p (!cr,!cc) in
         (* mark down at new location *)
@@ -299,25 +300,33 @@ let rec move_towards_coord map p coord n =
       let (sr, sc) = get_current_location map p in
       replace_tile map.map_values p sr sc;
       let path = calc_path map p destr destc in
+      print_endline "  path trace:";
+      List.iter (fun (r,c) -> print_endline ("\t("^(string_of_int r)^","^(string_of_int c)^")")) path;
       let dirs = simplify_path path in
+      (*debug path direction*)
+      print_endline "  simplified:";
+      List.iter (fun (dir,n) -> print_endline ("\t"^dir^": "^(string_of_int n))) dirs;
       let steps_left = ref n in
       let map2 =
-        List.fold_left (fun map2 (dir,steps) -> 
-          if (!steps_left > 0) && (not (is_in_building map2 p)) then
-            let (i, map2) = 
-              if !steps_left < steps then
+        List.fold_left (fun accmap (dir,steps) -> 
+          if (!steps_left > 0) then
+          (* has steps left to take, and isn't in a building *)
+            let (_ , accmap) = 
+              if !steps_left < steps 
+              then
                 begin
-                let tmp = move_helper map p None dir !steps_left in
-                steps_left := 0; 
-                tmp
+                  let (s, m) = move_helper accmap p None dir !steps_left in
+                    steps_left := s; 
+                    (s, m)
                 end
               else
                 begin
-                steps_left := !steps_left - steps;
-                move_helper map2 p None dir steps 
+                  let (s, m) = move_helper accmap p None dir steps in
+                    steps_left := !steps_left - steps + s;
+                    (s, m)
                 end
-            in map2
-          else map2) map dirs in
+            in accmap
+          else accmap) map dirs in
       let arrived = (is_in_building map2 p) ||
                     ((get_current_location map2 p) = (destr,destc)) in
       print_map map2;
@@ -333,32 +342,32 @@ and calc_path map p destr destc =
       let foundEnd = ref false in
       let path     = ref [] in
       let queue    = ref [(sr,sc,[])] in
-        (* iteratively flood out one space until you find the destination,
-         * keeping track of our travel history so we have a path. 
+        (* We use flood fill to find the destination.
+         * path = our travel history to a specific location.
+         * queue = our queue of possibly unvisited locations, ordered by increasing distance
          *)
         while not !foundEnd do
           match !queue with
-          | [] -> failwith "somehow empty queue before finding destination"
+          | [] -> failwith ("somehow empty queue before finding destination: ("^(string_of_int destr)^","^(string_of_int destc)^")")
           | (r,c,hist)::t -> 
             if beenHere.(r).(c) then
               queue := t
-            else (* new spot visited *)
+            else (* visiting a new spot *)
               begin
-                (* mark traveled *)
+                (* mark spot as traveled *)
                 beenHere.(r).(c) <- true;
-                if r = destr && c = destc then
-                  (* check if we've arrived *)
+                if r = destr && c = destc 
+                then (* we've arrived *)
                   begin
                     foundEnd := true;
                     path     := (r,c)::hist
                   end
-                else if m.(r).(c) = Some "." then
-                (* valid position, add possible spots to walk into from here *)
+                else if m.(r).(c) = Some "." || m.(r).(c) = Some "DOOR" then
+                  (* valid position, add possible spots to walk into from here *)
                   let nhist = (r,c)::hist in 
                     queue := t@[(r+1,c,nhist); (r,c+1,nhist);
                                 (r-1,c,nhist); (r,c-1,nhist)];
-                else
-                (* can't travel into this space, try other options *)
+                else (* can't travel into this space, try other options *)
                   queue := t                
               end
         done;
@@ -368,9 +377,16 @@ and calc_path map p destr destc =
 (* simplifies the calculated path so that it is reduced to a sequence of [move] 
  * commands where each subsequent command is in a different direction.*)
 and simplify_path lst =
-  if List.length lst = 1 then []
+  if List.length lst <= 1 
+  then 
+    begin
+      print_endline "somehow got <= 1 size of path";
+      []
+    end
   else
     let rec simplify acc dlst =
+      (* acc  = accumulated list of simplified directions 
+       * dlst = remaining list of coordinates to go through *)
       match acc with
       | []       -> 
         begin 
@@ -401,8 +417,7 @@ and simplify_path lst =
                 simplify ((dir, n+1)::dt) ((r2,c2)::t)
               else
                 simplify ((ndir,1)::(dir,n)::dt) ((r2,c2)::t)
-          | (r1,c1)::t -> simplify ((dir,n+1)::dt) t
-          | [] -> acc
+          | _ -> acc
         end
     in 
       simplify [] lst
@@ -420,12 +435,17 @@ let move_towards_building map p b n =
   try
     let loc  = get_current_location map p in
     let el   = List.assoc b map.exits in
-    let eloc = get_closest_exit el loc in
-    move_towards_coord map p eloc n
+    try
+      let eloc = get_closest_exit el loc in
+        move_towards_coord map p eloc n
+      with
+      | InvalidLocation s -> failwith ("[move_towards_building]: "^s)
+      
   with
-  | InvalidLocation s -> failwith ("[move_towards_building]: "^s)
-  | _ -> failwith ("[move_towards_building]: some error on: "^p^", "^b)  
+    | Not_found -> failwith ("[move_towards_building]: could not find professor or building")
+   
 
+    
 (* [teleport_professor map p b] moves a professor [p] on the [map] to building [b]
  * This event occurs whenever a suggestion or accusation is made; the
  * suspect is moved to the "scene of the crime."
