@@ -152,7 +152,7 @@ let init_state (n:int) (d:difficulty) : state =
 
     (* print map and legend *)
     ANSITerminal.(
-      print_string [yellow] "You location is tracked on the map by your last ";
+      print_string [yellow] "Your location is tracked on the map by your last name ";
       print_string [on_black; Bold; red] "I";
       print_string [yellow] (
         "nitial.\n"^

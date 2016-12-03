@@ -17,37 +17,38 @@ let extract_info field f =
 let extract_map json nr nc =
   let strmap = (extract_info "map_diag" to_string) json in
   let m = Array.make_matrix nr nc None in
-    for r = 0 to nr - 1 do 
-      for c = 0 to nc - 1 do
-        let ch = strmap.[r*(nc+1) + c] in
-          if ch = 'd' then 
-            m.(r).(c) <- Some "DOOR" 
-          else if ch <>'?' then
-            m.(r).(c) <- Some (String.make 1 ch)
-      done;
-    done; 
-    m
+  for r = 0 to nr - 1 do 
+    for c = 0 to nc - 1 do
+      let ch = strmap.[r*(nc+1) + c] in
+        if ch = 'd' then 
+          m.(r).(c) <- Some "DOOR" 
+        else if ch <>'?' then
+          m.(r).(c) <- Some (String.make 1 ch)
+    done;
+  done; 
+  m
 
 (* [extract_building_info json m] parses [json] for information regarding:
- *   - building name on map [m], and updates [m] accordingly
+ *   - building names on map [m], and updates [m] accordingly
  *   - exits,
  *   - waiting areas,
  *   - secret passageways.
  *)
 let rec extract_building_info json m =
   let buildings  = extract_info "buildings" to_list json in
-    let quadList = List.map (fun j ->
+  let quadList = List.map (fun j ->
     let b        = extract_info "name"     to_string j in
     let n        = extract_info "nickname" to_string j in
     let exitList = extract_exits         (extract_info "exits" to_list j) in
     let waitList = extract_waiting_spots (extract_info "spots" to_list j) in
     let secretP  = extract_secret_passage b j in
-      write_name_to_map m j n;
-      (b, exitList, waitList, secretP)) 
-      buildings in
-      List.fold_left (fun (bs, es, ws, ss) (b, e, w, s) ->
-        (b::bs, (b,e)::es, (b,w)::ws, ss@s)) 
-        ([],[],[],[]) quadList
+    write_name_to_map m j n;
+    (b, exitList, waitList, secretP)) 
+    buildings in
+  List.fold_left (fun (bs, es, ws, ss) (b, e, w, s) ->
+                  (b::bs, (b,e)::es, (b,w)::ws, ss@s)) 
+                 ([],[],[],[]) 
+                 quadList
 (* [extract_coord j] parses a pair (r,c) value out of [j] *)
 and extract_coord j =
   (extract_info "r" to_int j, extract_info "c" to_int j)
@@ -57,9 +58,9 @@ and extract_coord j =
 and write_name_to_map m j nickname =
   let loc = member "name_location" j in
   let (r,c) = extract_coord loc in
-    for i = 0 to 3 do
-      m.(r).(c+i) <- Some ((String.make 1 nickname.[i])^"-")
-    done
+  for i = 0 to 3 do
+    m.(r).(c+i) <- Some ((String.make 1 nickname.[i])^"-")
+  done
 (* [extract_exits jsonlst] parses [jsonlist] for all exits and returns them
  * as a (door id, coord) list. *)
 and extract_exits jsonlst =
@@ -89,12 +90,12 @@ and extract_waiting_spots jsonlst =
  *)
 let extract_starting_locations m json=
   let sl = extract_info "starting_locations" to_list json in
-    List.fold_left (fun acc j ->
-      let p = extract_info "professor" to_string j in
-      let r = extract_info "r" to_int j in
-      let c = extract_info "c" to_int j in
-        m.(r).(c) <- Some p;
-        (p, (r,c))::acc ) [] sl
+  List.fold_left (fun acc j ->
+    let p = extract_info "professor" to_string j in
+    let r = extract_info "r" to_int j in
+    let c = extract_info "c" to_int j in
+    m.(r).(c) <- Some p;
+    (p, (r,c))::acc ) [] sl
 
 (* [make_map] parses the json file storing information about the map and
  * converts it into a [map].

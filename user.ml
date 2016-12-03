@@ -88,6 +88,8 @@ let accuse (s:state) : state =
     {who = who; 
      where = where; 
      with_what = with_what} in
+  print_endline "Your accusation is: ";
+  print_case_file accusation;
   if accusation = s.fact_file 
   then
     begin
@@ -222,10 +224,11 @@ let rec get_movement (n:int) : string * int =
       end
   | _ -> print_endline "Invalid input; try again please."; get_movement n
 
-(* [move n s] prompts the user to enter commands so that his/her 
+(* [move n bop s] prompts the user to enter commands so that his/her 
  * character moves n steps, or fewer if the character gets into a building
- * before using up all the steps. *)
-let rec move (n:int) (s:state) : state =
+ * before using up all the steps. If [bop] is [Some b'] then user cannot 
+ * move into [b'] since s/he just left that building in the same turn. *)
+let rec move (n:int) (bop:building option) (s:state) : state =
   if n < 0 then 
     failwith "This should not happen in move"
   else if n = 0 then 
@@ -235,10 +238,10 @@ let rec move (n:int) (s:state) : state =
     end
   else
     let (dir, x) = get_movement n in
-    let (y, map) = Gmap.move s.map s.user.character dir x in (* Gmap *)
+    let (y, map) = Gmap.move s.map s.user.character bop dir x in
     if is_in_building map s.user.character (* Gmap *)
     then suggest {s with map = map}
-    else move (n-x+y) {s with map = map}
+    else move (n-x+y) bop {s with map = map}
 
 (* [get_exit b s] is the id of an exit to building [b] selected by the user. *)
 let rec get_exit (b:building) (s:state) : int =
@@ -266,7 +269,7 @@ let rec get_exit (b:building) (s:state) : int =
  * Requires: [s.user] is currently in building [b]. *)
 let leave_and_move (b:building) (s:state) : state =
   let map = leave_building s.map s.user.character (get_exit b s) in
-  move (roll_two_dice ()) {s with map = map}
+  move (roll_two_dice ()) (Some b) {s with map = map}
 
 (* [use_secret s] is the updated state after the user uses the secret 
  * passage in the current building. 
@@ -291,7 +294,7 @@ let suggest_or_secret (b:building) (s:state) : state =
   | _ -> failwith "This should not happen in suggest_or_secret in user.ml"
 
 (* [secret_or_roll b s] prompts the user to choose between using the secret 
- * passage to enter building [b] and rolling the dice to move out, and returns 
+ * passage to leave building [b] and rolling the dice to move out, and returns 
  * the updated state. *)
 let secret_or_roll (b:building) (s:state) : state =
   print_endline "You can either:";
@@ -388,9 +391,10 @@ let step (s:state) : state =
   if s1.game_complete then s1 else 
   match get_current_building s1.map s1.user.character with (* Gmap *)
   | Some b ->
+      Printf.printf "Prof. %s's current building: %s" s.user.character b;(*TODO debug*)
       if s1.user.was_moved 
       then in_building_involuntarily b s1
       else in_building_voluntarily b s1
   | None ->
-      move (roll_two_dice ()) s1 (* Gmap *)
+      move (roll_two_dice ()) None s1 (* Gmap *)
 

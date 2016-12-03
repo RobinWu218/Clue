@@ -93,13 +93,14 @@ val leave_building: map -> prof -> int -> map
  *)
 val enter_building: map -> prof -> building -> map
 
-(* [move map p dir n] tries to move professor [p] on the [map] [n] steps in [dir]
- * direction. 
+(* [move map p bop dir n] tries to move professor [p] on the [map] [n] steps
+ * in [dir] direction. If [bop] is [Some b'] then [p] cannot move into 
+ * [b'] since [p] just left that building in the same turn.
  * Returns: the pair [(i, map2)], where 
  *   [i]    is the steps remaining after going in [dir] direction, and 
  *   [map2] is the updated map. 
  *)
-val move: map -> prof -> string -> int -> int * map
+val move: map -> prof -> building option -> string -> int -> int * map
 
 (* [move_towards_coord map p c n] tries to move professor [p] on the [map] 
  * [n] steps towards the coordinate [c]. 
