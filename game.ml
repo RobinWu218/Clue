@@ -145,7 +145,7 @@ let init_state (n:int) (d:difficulty) : state =
     ANSITerminal.(
       print_string [Bold] "The AI bots play the roles of: \n"; 
       print_string [] ((string_of_prof_lst ai_characters_lst)^".");
-      print_string [Bold; Underlined; cyan;] 
+      print_string [Bold; Underlined; green;] 
         ("\n\nYou play the role of Prof. "^user_character^".\n");
     );
     wait_for_user();

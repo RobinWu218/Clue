@@ -69,7 +69,7 @@ val get_current_location: map -> prof -> coord
  * the location[(r,c)] based on manhattan distance (not actual steps it takes to
  * reach).
  *)
-val get_closest_exit : (int * coord) list -> coord -> coord
+val get_closest_exit : map -> (int * coord) list -> coord -> coord
 
 (* [closest_buildings map p] 
  * Returns: a list of buildings in order of closeness to professor [p]

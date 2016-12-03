@@ -44,11 +44,11 @@ let () =
     "+--------------------------------------------------------------------+\n"));
   (* allow players to read the information *)
   Data.wait_for_user ();
-  print_endline 
-    "Please enter the number of AI bots you want to play against (2-5).";
+  ANSITerminal.(print_string [red]
+    "Please enter the number of AI bots you want to play against (2-5).\n");
   let num_AI = get_choice_num_ai () in
-  print_endline 
-    "Please enter the level of difficulty (1 easy, 2 medium, 3 hard).";
+  ANSITerminal.(print_string [red]
+    "Please enter the level of difficulty (1 easy, 2 medium, 3 hard).\n");
   let dlevel = get_choice_three () in
     Game.main num_AI dlevel
 

@@ -57,16 +57,9 @@ let get_exits map =
  * blocked in by another professor. Does not check that [coord] is a valid exit. 
  *)
 let is_exit_blocked map (r,c) =
-  let res = ref true in
   let m = map.map_values in
-  for cur_r = r -1 to r + 1 do
-    for cur_c = c -1 to c + 1 do
-      if cur_r <> r && cur_c <> c then
-        if m.(cur_r).(cur_c) = Some "." then
-          res := false
-    done;
-  done;
-  !res
+    (m.(r-1).(c) <> Some ".") && (m.(r).(c-1) <> Some ".") &&
+    (m.(r+1).(c) <> Some ".") && (m.(r).(c+1) <> Some ".")
 
 (* [is_building_blocked map b] returns true if all exits out of building [b] is
  * blocked. 
@@ -121,13 +114,18 @@ let get_secret_passage map b =
 let get_current_location map p =
   List.assoc p map.location
 
-(* [get_closest_exit lst (r,c)] returns the closest exit coordinate in [lst] to 
+(* [get_closest_exit map lst (r,c)] returns the closest exit coordinate in [lst] to 
  * the location[(r,c)] based on manhattan distance (not actual steps it takes to
  * reach).
  *)
-let get_closest_exit lst (r,c) =
+let get_closest_exit map lst (r,c) =
   let dists = List.map (fun (_, (r',c')) ->
-    (abs (r - r') + abs (c - c'), (r',c')) ) lst in
+    if is_exit_blocked map (r',c')
+    then 
+      (map.num_rows*map.num_cols, (r',c')) (* effectively infinity for map *)
+    else
+      (abs (r - r') + abs (c - c'), (r',c')) )
+    lst in
   let sorted = List.sort (Pervasives.compare) dists in
   let (d, p) = List.hd sorted in p
 
@@ -140,10 +138,14 @@ let closest_buildings map p =
   let (my_r, my_c) = get_current_location map p in
   (* find closest exit for each building *)
   let exits = List.map (fun (b, el) -> 
-    (get_closest_exit el (my_r,my_c), b)) map.exits in
+    (get_closest_exit map el (my_r,my_c), b)) map.exits in
   (* list of (distance to exit, building name) *)
   let dists = List.map( fun ((r,c), b) ->
-    (abs (r - my_r) + abs (c - my_c), b)) exits in
+    if is_building_blocked map b 
+    then
+      (map.num_rows*map.num_cols, b)
+    else
+      (abs (r - my_r) + abs (c - my_c), b)) exits in
     List.sort_uniq (Pervasives.compare) dists
 
 
@@ -174,7 +176,6 @@ let replace_tile m p r c =
 let update_location locs p c =
   let locL = List.remove_assoc p locs in
   (p, c)::locL
-
 
 
 let leave_building_helper map p n =
@@ -209,7 +210,7 @@ let leave_building map p n =
  * Requires: [p] is a valid professor name, [b] is a valid building name.
  *)
 let rec enter_building map p b =
-  Printf.printf "Prof. %s enters %s Hall.\n" p b;
+  ANSITerminal.(print_string [yellow] ("Prof. "^p^" enters "^b^" Hall.\n"));
   let m     = map.map_values in
   let wl    = List.assoc b map.waiting_spots in
   let (r,c) = get_open_spot m wl in
@@ -300,12 +301,7 @@ let rec move_towards_coord map p coord n =
       let (sr, sc) = get_current_location map p in
       replace_tile map.map_values p sr sc;
       let path = calc_path map p destr destc in
-      print_endline "  path trace:";
-      List.iter (fun (r,c) -> print_endline ("\t("^(string_of_int r)^","^(string_of_int c)^")")) path;
       let dirs = simplify_path path in
-      (*debug path direction*)
-      print_endline "  simplified:";
-      List.iter (fun (dir,n) -> print_endline ("\t"^dir^": "^(string_of_int n))) dirs;
       let steps_left = ref n in
       let map2 =
         List.fold_left (fun accmap (dir,steps) -> 
@@ -344,11 +340,13 @@ and calc_path map p destr destc =
       let queue    = ref [(sr,sc,[])] in
         (* We use flood fill to find the destination.
          * path = our travel history to a specific location.
-         * queue = our queue of possibly unvisited locations, ordered by increasing distance
+         * queue = our queue of possibly unvisited locations, ordered by 
+         *         increasing distance
          *)
         while not !foundEnd do
           match !queue with
-          | [] -> failwith ("somehow empty queue before finding destination: ("^(string_of_int destr)^","^(string_of_int destc)^")")
+          | [] -> failwith ("somehow empty queue before finding destination: ("^
+                           (string_of_int destr)^","^(string_of_int destc)^")")
           | (r,c,hist)::t -> 
             if beenHere.(r).(c) then
               queue := t
@@ -359,6 +357,7 @@ and calc_path map p destr destc =
                 if r = destr && c = destc 
                 then (* we've arrived *)
                   begin
+                    print_endline "\tfound end";
                     foundEnd := true;
                     path     := (r,c)::hist
                   end
@@ -368,7 +367,13 @@ and calc_path map p destr destc =
                     queue := t@[(r+1,c,nhist); (r,c+1,nhist);
                                 (r-1,c,nhist); (r,c-1,nhist)];
                 else (* can't travel into this space, try other options *)
+                begin
+                  print_endline ("\twhat to do with "^(string_of_int r)^","^(string_of_int c));
+                  match m.(r).(c) with
+                  | None -> print_endline("\t  has value of none")
+                  | Some b -> print_endline("\t has value of "^b);
                   queue := t                
+                end
               end
         done;
         !path
@@ -436,16 +441,14 @@ let move_towards_building map p b n =
     let loc  = get_current_location map p in
     let el   = List.assoc b map.exits in
     try
-      let eloc = get_closest_exit el loc in
+      let eloc = get_closest_exit map el loc in
         move_towards_coord map p eloc n
       with
       | InvalidLocation s -> failwith ("[move_towards_building]: "^s)
-      
   with
-    | Not_found -> failwith ("[move_towards_building]: could not find professor or building")
-   
-
-    
+    | Not_found -> 
+      failwith ("[move_towards_building]: could not find professor or building")
+      
 (* [teleport_professor map p b] moves a professor [p] on the [map] to building [b]
  * This event occurs whenever a suggestion or accusation is made; the
  * suspect is moved to the "scene of the crime."
