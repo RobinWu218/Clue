@@ -180,7 +180,36 @@ let ai_choose_from_three (a:ai) (c1:card) (c2:card) (c3:card) : card option =
   | Hard   -> failwith "TODO"
 
 (*TODO*)
-let ai_disprove (a:ai) (guess:case_file) : card option =
+let ais_after_ai_disprove (a:ai) (guess:case_file) 
+                          (ais:ai list) (co:card option) 
+                          : unit =
+  let {who; where; with_what} = guess in
+  let pos = card_lst_to_int_lst 
+            [Prof who; Building where; Language with_what] in
+  match co with
+  | Some _ -> 
+      (* [a] has at least one of the cards in [guess] *)
+      List.iter (fun x -> 
+        let arr = List.assoc a.character x.card_status in
+        if x <> a then
+        begin 
+        List.iter (fun i -> 
+          if arr.(i) = `Blank then 
+            arr.(i) <- `Maybe 
+          else ()) pos
+        end
+        else ()) ais
+  | None -> 
+      (* [a] does not have any cards in [guess] *)
+      List.iter (fun x -> 
+        let arr = List.assoc a.character x.card_status in
+        if x <> a then
+        begin List.iter (fun i -> arr.(i) <- `N) pos end
+        else ()) ais
+
+(*TODO
+ * side effect: update each ai's card_status in ais *)
+let ai_disprove_helper (a:ai) (guess:case_file) (ais:ai list) : card option =
   Printf.printf "It is Prof. %s's turn to disprove the suggestion:\n"
                 a.character;
   let hand = a.hand in
@@ -215,10 +244,39 @@ let ai_disprove (a:ai) (guess:case_file) : card option =
                     a.character;
       None
 
+let ai_disprove (a:ai) (guess:case_file) (ais:ai list) : card option =
+  let co = ai_disprove_helper a guess ais in
+  ais_after_ai_disprove a guess ais co; co
+
+(*TODO*)
+let ais_after_user_disprove (s:state) (guess:case_file) 
+                            (ais:ai list) (co:card option) 
+                            : unit =
+  let {who; where; with_what} = guess in
+  let pos = card_lst_to_int_lst 
+            [Prof who; Building where; Language with_what] in
+  match co with
+  | Some _ -> 
+      (* user has at least one of the cards in [guess] *)
+      List.iter (fun x -> 
+        let arr = List.assoc s.user.character x.card_status in
+        begin 
+        List.iter (fun i -> 
+          if arr.(i) = `Blank then 
+            arr.(i) <- `Maybe 
+          else ()) pos
+        end) ais
+  | None -> 
+      (* user does not have any cards in [guess] *)
+      List.iter (fun x -> 
+        let arr = List.assoc s.user.character x.card_status in
+        List.iter (fun i -> arr.(i) <- `N) pos) ais
+
 (* [user_disprove s guess] is [None] if the user does not have any card
  * to disprove the suggestion [guess] and a card option if the user has the 
  * card(s) and wishes to disprove [guess] with that card. *)
-let user_disprove (s:state) (guess:case_file) : card option =
+let user_disprove_helper (s:state) (guess:case_file) (ais:ai list) 
+                         : card option =
   print_endline "It is your turn to disprove the suggstion:";
   let hand = s.user.hand in
   let {who; where; with_what} = guess in
@@ -257,4 +315,8 @@ let user_disprove (s:state) (guess:case_file) : card option =
   | false, false, false ->
       print_endline "You do not have any cards to disprove the suggestion.";
       None
+
+let user_disprove (s:state) (guess:case_file) (ais:ai list) : card option =
+  let co = user_disprove_helper s guess ais in
+  ais_after_user_disprove s guess ais co; co
 

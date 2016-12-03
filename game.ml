@@ -74,26 +74,19 @@ let deal_card fact_card n =
     [lst1; lst2; lst3; lst4; lst5; lst6]
   | _ -> failwith "This shoudl not happen in deal_card in game.ml"
 
-(*[remove_first_el] removes the first element of a list.
- * requires: [lst] is a list containing at least one element*)
-let remove_first_el lst =
-  match lst with
-  | [] -> failwith "No elements in the list"
-  | h::t -> t
-
 (*[init_ai_lst] is a list of AI bots given the number of AIs in the game,
  * the difficulty level, list of hands that AI bots have, and list of 
  * characters of each AI bots.
  * requires: [n] is an integer between 2 and 5 inclusive.
  *           [hand_lst] is a list of hands
  *           [character_lst] is a string list.*)
-let init_ai_lst n d hand_lst character_lst =
+let init_ai_lst n d hand_lst ai_character_lst character_lst =
   let ai_lst = ref [] in
   while (List.length !ai_lst < n) do (
     let nth = List.length !ai_lst in
-    let character = List.nth character_lst nth in
+    let character = List.nth ai_character_lst nth in
     let hand = List.nth hand_lst nth in
-    let ai = Ai.init character hand d in
+    let ai = Ai.init character hand d character_lst in
     ai_lst := (!ai_lst) @ [ai]
   ) done;
   !ai_lst
@@ -130,10 +123,10 @@ let init_state (n:int) (d:difficulty) : state =
     let character_lst = assign_characters [] (n+1) in
     let dealt_cards_lst = deal_card fact_cards n in
     let user_hand = List.hd dealt_cards_lst in
-    let ai_hand_lst = remove_first_el dealt_cards_lst in
+    let ai_hand_lst = List.tl dealt_cards_lst in
     let user_character = List.hd character_lst in
-    let ai_characters_lst = remove_first_el character_lst in
-    let ai_lst = init_ai_lst n d ai_hand_lst ai_characters_lst in
+    let ai_characters_lst = List.tl character_lst in
+    let ai_lst = init_ai_lst n d ai_hand_lst ai_characters_lst character_lst in
     let map = construct_map () in
     let dictionary = generate_dictionary
                       ["Bracy";"Clarkson";"Fan";"Gries";"Halpern";"White"]

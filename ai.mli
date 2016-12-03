@@ -5,10 +5,11 @@ open Gmap
 (* utility methods *)
 (*******************)
 
-(* [init p h d] is the AI data structure that represents an AI playing
- * character [p] on difficulty level [d], with hand [h].
+(* [init p h d lst] is the AI data structure that represents an AI playing
+ * character [p] on difficulty level [d], with hand [h]. [lst] is a list of 
+ * all players initialized in the game.
  *)
-val init: prof -> hand -> difficulty -> ai
+val init: prof -> hand -> difficulty -> prof list -> ai
 
 (* [get_ai p s] is the AI data structure for the AI playing character [p] in
  * state [s].

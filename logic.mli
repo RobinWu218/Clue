@@ -30,15 +30,15 @@ val get_choice_four : unit -> int
  * [2] to [5] AI's. *)
 val get_choice_num_ai : unit -> int
 
-(* [ai_disprove ai guess] figures out which card to reveal in response
+(* TODO [ai_disprove ai lst guess] figures out which card to reveal in response
  * to a suggestion [guess].
  * Returns: [Some c] where [c] is a card that [ai] can reveal. Or, if [ai] has
  * none of the cards in [guess], then it will return [None].
  *)
-val ai_disprove : ai -> case_file -> card option
+val ai_disprove : ai -> case_file -> ai list -> card option
 
-(* [user_disprove s guess] is [None] if the user does not have any card
+(* TODO [user_disprove s lst guess] is [None] if the user does not have any card
  * to disprove the suggestion [guess] and a card option if the user has the 
  * card(s) and wishes to disprove [guess] with that card. *)
-val user_disprove : state -> case_file -> card option
+val user_disprove : state -> case_file -> ai list -> card option
 
