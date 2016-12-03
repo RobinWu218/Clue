@@ -14,7 +14,7 @@ let known_not_possible ai =
   {ai with possible_cards=new_poss}
 
 (* [init p h d lst] is the AI data structure that represents an AI playing
- * character [p] on difficulty level [d], with hand [h]. [lst] is a list of 
+ * character [p] on difficulty level [d], with hand [h]. [lst] is a list of
  * all players initialized in the game.
  *)
 let init (p:prof) (h:hand) (d:difficulty) (lst:prof list) : ai =
@@ -26,12 +26,15 @@ let init (p:prof) (h:hand) (d:difficulty) (lst:prof list) : ai =
     Building "Phillips"; Building "Rhodes";    Building "Statler";
     Language "Bash";     Language "C";         Language "Java";
     Language "MATLAB";   Language "OCaml";     Language "Python"] in
-  let status = List.map (fun x -> 
+  let status = List.map (fun x ->
     let arr = Array.make 21 `Blank in
     let pos = card_lst_to_int_lst h in
-    if x = p then 
-      begin List.iter (fun i -> arr.(i) <- `Y) pos; (x, arr) end
-    else 
+    if x = p then
+      begin
+        List.iter (fun i -> arr.(i) <- `N) (card_lst_to_int_lst possible);
+        List.iter (fun i -> arr.(i) <- `Y) pos; (x, arr)
+      end
+    else
       begin List.iter (fun i -> arr.(i) <- `N) pos; (x, arr) end) lst in
   let a1 = {
     character      = p;
@@ -191,11 +194,11 @@ let rec one_yes lst : bool =
   | h::t -> h = `Y || one_yes t
 
 (*TODO*)
-let update_pc_helper_no (x:int) (y:int) (a:ai) 
+let update_pc_helper_no (x:int) (y:int) (a:ai)
                         (pc_ref:card list ref) : unit =
   for i = x to y do
-    if all_no (List.map (fun (p,arr) -> arr.(i)) a.card_status) then 
-    pc_ref := List.filter (fun c -> 
+    if all_no (List.map (fun (p,arr) -> arr.(i)) a.card_status) then
+    pc_ref := List.filter (fun c ->
                    let cint = int_of_card c in
                    not (cint <> i && x <= cint && cint <= y))
                  !pc_ref
@@ -203,14 +206,14 @@ let update_pc_helper_no (x:int) (y:int) (a:ai)
   done
 
 (*TODO*)
-let update_pc_helper_yes (x:int) (y:int) (a:ai) 
+let update_pc_helper_yes (x:int) (y:int) (a:ai)
                          (pc_ref:card list ref) : unit =
   for i = x to y do
-    if one_yes (List.map (fun (p,arr) -> arr.(i)) a.card_status) then 
-    pc_ref := if List.mem (card_of_int i) !pc_ref 
-              then 
-                List.filter (fun c -> c <> (card_of_int i)) !pc_ref 
-              else 
+    if one_yes (List.map (fun (p,arr) -> arr.(i)) a.card_status) then
+    pc_ref := if List.mem (card_of_int i) !pc_ref
+              then
+                List.filter (fun c -> c <> (card_of_int i)) !pc_ref
+              else
                 !pc_ref
     else ()
   done
@@ -287,7 +290,7 @@ let accuse_or_not_middle (a:ai) (s:state) : state =
  *   - Hard:   TODO *)
 let accuse_or_not_start (a:ai) (s:state) : bool * state =
   match a.difficulty with
-  | Easy   -> 
+  | Easy   ->
       begin
       Printf.printf "Prof. %s does not wish to make an accusation right now.\n"
                     a.character;
@@ -351,6 +354,9 @@ let suggest_easy (a:ai) (s:state) : (prof * language) =
 let suggest_medium (ai:ai) (s:state) : (prof * language) =
   (easy_helper_who ai.possible_cards, easy_helper_what ai.possible_cards)
 
+let suggest_hard (ai:ai) (s:state) :  (prof * language) =
+  failwith "todo"
+
 (*called move towards building while still in building*)
 (*TODO*)
 let suggest (a:ai) (s:state) : state =
@@ -383,8 +389,8 @@ let suggest (a:ai) (s:state) : state =
     match disprove_loop ncurrent (ncurrent+1) guess s with
     | Some (p, c) ->
         begin
-        List.iter (fun (x,arr) -> 
-          if x = p then 
+        List.iter (fun (x,arr) ->
+          if x = p then
             arr.(int_of_card c) <- `Y
           else
             arr.(int_of_card c) <- `N
@@ -442,33 +448,33 @@ let rec move_where_easy (a:ai) (bop:building option) (s:state) : building =
   if check_building bop b then b
   else move_where_easy a bop s
 
-let rec move_where_medium_helper (lst:building list) 
+let rec move_where_medium_helper (lst:building list)
                         (a:ai) (bop:building option) (s:state) : building =
   match lst with
   | []   -> move_where_easy a bop s
-  | h::t -> if check_building bop h then h 
+  | h::t -> if check_building bop h then h
             else move_where_medium_helper t a bop s
 
 (* one of possible buildings if any, otherwise one of closest three *)
 let move_where_medium (a:ai) (bop:building option) (s:state) : building =
   move_where_medium_helper (card_lst_to_building_lst a.possible_cards) a bop s
 
-let rec move_where_hard_helper (possible:building list) 
-                               (close:building list) 
+let rec move_where_hard_helper (possible:building list)
+                               (close:building list)
                                (a:ai) (bop:building option) (s:state)
                                : building =
   match close with
   | []   -> failwith "This should not happen in move_where_hard_helper in Ai"
   | [b]  -> if check_building bop b then b else move_where_easy a bop s
-  | h::t -> if List.mem h possible && check_building bop h then h 
+  | h::t -> if List.mem h possible && check_building bop h then h
             else move_where_hard_helper possible t a bop s
 
 let move_where_hard (a:ai) (bop:building option) (s:state) : building =
-  move_where_hard_helper (card_lst_to_building_lst a.possible_cards) 
+  move_where_hard_helper (card_lst_to_building_lst a.possible_cards)
                          (List.map snd (closest_buildings s.map a.character))
                          a bop s
 
-let move_where (a:ai) (bop:building option) (s:state) : building = 
+let move_where (a:ai) (bop:building option) (s:state) : building =
   match a.difficulty with
   | Easy   -> move_where_easy a bop s
   | Medium -> move_where_medium a bop s
@@ -476,7 +482,7 @@ let move_where (a:ai) (bop:building option) (s:state) : building =
 
 (* [move a n bop s] allows the AI [a]'s character to move n steps,
  * or fewer if the character gets into a building
- * before using up all the steps. If [bop] is [Some b'] then user cannot 
+ * before using up all the steps. If [bop] is [Some b'] then user cannot
  * move into [b'] since s/he just left that building in the same turn. *)
 let move (a:ai) (n:int) (bop:building option) (s:state) : state =
   if n < 0 then
@@ -492,9 +498,9 @@ let move (a:ai) (n:int) (bop:building option) (s:state) : state =
     let b = move_where a bop s in
     let (in_building, new_map) =
       move_towards_building s.map a.character b n in (* Gmap *)
-    if in_building then 
+    if in_building then
       suggest a {s with map = new_map}
-    else 
+    else
       {s with map = new_map}
 
 (* [get_exit a b s] is the id of an exit to building [b] selected by ai [a]. *)
