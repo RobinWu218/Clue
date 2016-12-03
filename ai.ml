@@ -6,17 +6,18 @@ open Logic
 from ai.known_cards*)
 let known_not_possible ai =
   let rec helper known possible =
-        match possible with
-        |[]   -> []
-        |h::t -> if List.mem h known then (helper known t) else h::(helper known t)
+    match possible with
+    |[]   -> []
+    |h::t -> if List.mem h known then (helper known t) else h::(helper known t)
   in
   let new_poss = helper ai.known_cards ai.possible_cards in
   {ai with possible_cards=new_poss}
 
-(* [init p h d] is the AI data structure that represents an AI playing
- * character [p] on difficulty level [d], with hand [h].
+(* [init p h d lst] is the AI data structure that represents an AI playing
+ * character [p] on difficulty level [d], with hand [h]. [lst] is a list of 
+ * all players initialized in the game.
  *)
-let init (p:prof) (h:hand) (d:difficulty) : ai =
+let init (p:prof) (h:hand) (d:difficulty) (lst:prof list) : ai =
   let possible = [
     Prof "Bracy";        Prof "Clarkson";      Prof "Fan";
     Prof "Gries";        Prof "Halpern";       Prof "White";
@@ -25,7 +26,14 @@ let init (p:prof) (h:hand) (d:difficulty) : ai =
     Building "Phillips"; Building "Rhodes";    Building "Statler";
     Language "Bash";     Language "C";         Language "Java";
     Language "MATLAB";   Language "OCaml";     Language "Python"] in
-  let a1= {
+  let status = List.map (fun x -> 
+    let arr = Array.make 21 `Blank in
+    let pos = card_lst_to_int_lst h in
+    if x = p then 
+      begin List.iter (fun i -> arr.(i) <- `Y) pos; (x, arr) end
+    else 
+      begin List.iter (fun i -> arr.(i) <- `N) pos; (x, arr) end) lst in
+  let a1 = {
     character      = p;
     hand           = h;
     difficulty     = d;
@@ -34,6 +42,7 @@ let init (p:prof) (h:hand) (d:difficulty) : ai =
     destination    = None;
     known_cards    = h;
     possible_cards = possible;
+    card_status    = status;
   } in
   known_not_possible a1
 
@@ -58,21 +67,6 @@ let still_in_game (a:ai) : bool =
 (************************************************
  * Helper Functions
  ************************************************)
-
-let get_possible_profs (a:ai) : prof list =
-  a.possible_cards
-  |> List.filter (fun c -> match c with | Prof _ -> true | _ -> false)
-  |> List.map card_to_string
-
-let get_possible_buildings (a:ai) : building list =
-  a.possible_cards
-  |> List.filter (fun c -> match c with | Building _ -> true | _ -> false)
-  |> List.map card_to_string
-
-let get_possible_languages (a:ai) : language list =
-  a.possible_cards
-  |> List.filter (fun c -> match c with | Language _ -> true | _ -> false)
-  |> List.map card_to_string
 
 (*[easy_helper_who possible] takes a list of possible cards and returns the
  * first prof that is in the list. This is a helper function for the easy ai.*)
@@ -184,6 +178,57 @@ let update_possible_not_disproved ai guess =
         what)
       where
 
+(* TODO all `N *)
+let rec all_no lst : bool =
+  match lst with
+  | [] -> true
+  | h::t -> h = `N && all_no t
+
+(* TODO one `Y *)
+let rec one_yes lst : bool =
+  match lst with
+  | [] -> false
+  | h::t -> h = `Y || one_yes t
+
+(*TODO*)
+let update_pc_helper_no (x:int) (y:int) (a:ai) 
+                        (pc_ref:card list ref) : unit =
+  for i = x to y do
+    if all_no (List.map (fun (p,arr) -> arr.(i)) a.card_status) then 
+    pc_ref := List.filter (fun c -> 
+                   let cint = int_of_card c in
+                   not (cint <> i && x <= cint && cint <= y))
+                 !pc_ref
+    else ()
+  done
+
+(*TODO*)
+let update_pc_helper_yes (x:int) (y:int) (a:ai) 
+                         (pc_ref:card list ref) : unit =
+  for i = x to y do
+    if one_yes (List.map (fun (p,arr) -> arr.(i)) a.card_status) then 
+    pc_ref := if List.mem (card_of_int i) !pc_ref 
+              then 
+                List.filter (fun c -> c <> (card_of_int i)) !pc_ref 
+              else 
+                !pc_ref
+    else ()
+  done
+
+(*TODO*)
+let update_pc_helper x y a : ai =
+  let pc_ref = ref a.possible_cards in
+  update_pc_helper_no x y a pc_ref;
+  update_pc_helper_yes x y a pc_ref;
+  {a with possible_cards = !pc_ref}
+
+(* TODO checks if any card can be removed from possible_cards or determined
+ * to be in the case file and thus known. *)
+let update_possible_cards (a:ai) : ai =
+  a |> update_pc_helper 0 5
+    |> update_pc_helper 6 14
+    |> update_pc_helper 15 20
+
 (*[replace_ai_with_new new_ai ai_list] returns an updated list of ais, replacing
 the old ai with this new one.*)
 let rec replace_ai_with_new new_ai ai_list =
@@ -220,7 +265,8 @@ let accuse (a:ai) (s:state) : bool * state =
     let new_map     = teleport_professor s.map a.character where in (*Gmap*)
     let new_ai      = {a with is_in_game=false} in
     let new_ai_list = replace_ai_with_new new_ai s.ais in
-    (true, {s with map = new_map; ais = new_ai_list})
+    let new_pg      = (accusation, a.character, None)>::s.past_guesses in
+    (true, {s with map = new_map; ais = new_ai_list; past_guesses = new_pg})
     end
 
 (* TODO decides whether to accuse or not in the middle of an AI's turn
@@ -278,13 +324,13 @@ and disprove_case (p:prof) (ncurrent:int) (n:int) (guess:case_file) (s:state)
   | `AI ->
       let ai = List.find (fun a -> a.character = p) s.ais in (*TODO use get_ai?*)
       begin
-      match ai_disprove ai guess with
+      match ai_disprove ai guess s.ais with
       | Some card -> Some (p, card)
       | None -> disprove_loop ncurrent (n+1) guess s
       end
   | `User ->
       begin
-      match user_disprove s guess with
+      match user_disprove s guess s.ais with
       | Some card ->
           begin
           Printf.printf "You revealed the card %s to disprove the suggestion."
@@ -295,18 +341,7 @@ and disprove_case (p:prof) (ncurrent:int) (n:int) (guess:case_file) (s:state)
       end
   | `No ->
       disprove_loop ncurrent (n+1) guess s
-(*
-(*[suggest_easy building ai] produces a [case_file] that the other players
- * will attempt to disprove. *)
-let suggest ai state =
-    let loc    = building in
-    let perp   = easy_helper_who  ai.possible_cards in
-    let weapon = easy_helper_what ai.possible_cards in
-    Printf.printf "%s has guessed that the culprit was %s using %s in
-      %s Hall.\n We will now go around and attempt to disprove the guess."
-      ai.character perp weapon loc;
-      {who = perp; where = loc; with_what = weapon})
-*)
+
 
 (* AI logic: random. *)
 let suggest_easy (a:ai) (s:state) : (prof * language) =
@@ -347,6 +382,13 @@ let suggest (a:ai) (s:state) : state =
     begin
     match disprove_loop ncurrent (ncurrent+1) guess s with
     | Some (p, c) ->
+        begin
+        List.iter (fun (x,arr) -> 
+          if x = p then 
+            arr.(int_of_card c) <- `Y
+          else
+            arr.(int_of_card c) <- `N
+          ) a.card_status;
         let newais = List.map (fun a' ->
           if a' <> a then a'
           else known_not_possible {a with known_cards = c>::a.known_cards})
@@ -356,6 +398,7 @@ let suggest (a:ai) (s:state) : state =
                       past_guesses = (*TODO possibly have a helper.ml?*)
                       (guess, a.character, Some p)>::news'.past_guesses;} in
         accuse_or_not_middle a news''
+        end
     | None ->
         Printf.printf "No one can disprove Prof. %s's suggestion.\n"
                       a.character;
@@ -365,7 +408,6 @@ let suggest (a:ai) (s:state) : state =
         accuse_or_not_middle a news''
     end
   | None -> failwith "This should not happen in suggest in ai.ml"
-
 
 (*TODO
  * Requires: lst is non-empty. *)
@@ -411,20 +453,22 @@ let rec move_where_medium_helper (lst:building list)
 
 (* one of possible buildings if any, otherwise one of closest three *)
 let move_where_medium (a:ai) (bop:building option) (s:state) : building =
-  move_where_medium_helper (get_possible_buildings a) a bop s
+  move_where_medium_helper (card_lst_to_building_lst a.possible_cards) a bop s
 
 let rec move_where_hard_helper (possible:building list) 
                                (close:building list) 
+                               (a:ai) (bop:building option) (s:state)
                                : building =
   match close with
   | []   -> failwith "This should not happen in move_where_hard_helper in Ai"
-  | [b]  -> b
-  | h::t -> if List.mem h possible then h 
-            else move_where_hard_helper possible t
+  | [b]  -> if check_building bop b then b else move_where_easy a bop s
+  | h::t -> if List.mem h possible && check_building bop h then h 
+            else move_where_hard_helper possible t a bop s
 
 let move_where_hard (a:ai) (bop:building option) (s:state) : building =
-  move_where_hard_helper (get_possible_buildings a) 
+  move_where_hard_helper (card_lst_to_building_lst a.possible_cards) 
                          (List.map snd (closest_buildings s.map a.character))
+                         a bop s
 
 let move_where (a:ai) (bop:building option) (s:state) : building = 
   match a.difficulty with
@@ -591,7 +635,18 @@ let rec step (a:ai) (s:state) : state =
 
 
 
-
+(*
+(*[suggest_easy building ai] produces a [case_file] that the other players
+ * will attempt to disprove. *)
+let suggest ai state =
+    let loc    = building in
+    let perp   = easy_helper_who  ai.possible_cards in
+    let weapon = easy_helper_what ai.possible_cards in
+    Printf.printf "%s has guessed that the culprit was %s using %s in
+      %s Hall.\n We will now go around and attempt to disprove the guess."
+      ai.character perp weapon loc;
+      {who = perp; where = loc; with_what = weapon})
+*)
 
 
 (*

@@ -148,7 +148,7 @@ and disprove_case (p:prof) (n:int) (guess:case_file) (s:state)
   | `AI -> 
       let ai = List.find (fun a -> a.character = p) s.ais in
       begin
-      match ai_disprove ai guess with (* Logic *)
+      match ai_disprove ai guess s.ais with (* Logic *)
       | Some card -> Some (p, card)
       | None -> disprove_loop (n+1) guess s
       end

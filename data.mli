@@ -72,6 +72,7 @@ type ai = {
   destination:    coord option;
   known_cards:    card list;
   possible_cards: card list;
+  card_status:    (prof * ([`Y |`N |`Maybe |`Blank] array)) list;
 }
 
 (* [state] stores information about the entire game, including user's and ais'
@@ -146,6 +147,10 @@ val int_lst_to_card_lst : int list -> card list
 
 (* [card_lst_to_int_lst lst] is an int list corresponding to card list [lst]. *)
 val card_lst_to_int_lst : card list -> int list
+
+(* [card_lst_to_building_lst lst] is the building list corresponding to a 
+ * subset of the card list [lst]. *)
+val card_lst_to_building_lst : card list -> building list
 
 (* [print_case_file cf] prints the case file [cf] in a sentence. *)
 val print_case_file : case_file -> unit
