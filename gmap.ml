@@ -232,39 +232,42 @@ let move_helper map p bop dir n =
   | _ -> failwith ("Invalid direction to move: "^dir) in
   let m = map.map_values in
   let (sr,sc) = get_current_location map p in
-  replace_tile m p sr sc;  (* clear out starting location *)
-  let cr = ref sr in
-  let cc = ref sc in
-  let i  = ref 0  in
-  (* move in [dir] direction while you are able to *)
-  while (!i < n) && (m.(!cr + rd).(!cc + cd) = Some ".") do
-    incr i;
-    cr := !cr + rd;
-    cc := !cc + cd;
-  done;
-  (* if you end up in front of a door, enter the building if permitted *) 
-  if (!i < n) && (m.(!cr + rd).(!cc + cd) = Some "DOOR") then
-    let b = List.assoc (!cr + rd,!cc + cd) (get_exits map) in
-    begin
-    match bop with 
-    | Some b' when b' = b -> (*TODO debug*)
-        begin
-        print_endline "Cannot re-enter the same building in a single turn!";
-        let nloc = update_location map.location p (!cr,!cc) in
-        m.(!cr).(!cc) <- Some p; (* mark down at new location   *)
+    replace_tile m p sr sc;  (* clear out starting location *)
+    let cr = ref sr in
+    let cc = ref sc in
+    let i  = ref 0  in
+    (* move in [dir] direction while you are able to*)
+    while (!i < n) && (m.(!cr + rd).(!cc + cd) = Some ".") do
+      incr i;
+      cr := !cr + rd;
+      cc := !cc + cd;
+    done;
+    (* if you end up in front of a door with steps left, enter the building if permitted *) 
+    if (!i < n) && (m.(!cr + rd).(!cc + cd) = Some "DOOR") then
+      let b = List.assoc (!cr + rd,!cc + cd) (get_exits map) in
+      begin
+        match bop with 
+        | Some b' when b' = b -> (*TODO debug*)
+            begin
+              print_endline "Cannot re-enter the same building in the same turn!";
+              let nloc = update_location map.location p (!cr,!cc) in
+              m.(!cr).(!cc) <- Some p; (* mark down at new location   *)
+              (n-(!i), {map with location = nloc; map_values = m})
+            end
+        | Some _ | None -> (*TODO debug*)
+            begin
+              i := n; (* no steps left after entering building *)
+              Printf.printf "Entering %s Hall debug\n" b; (*TODO*)
+              (0, enter_building map p b)
+            end
+      end
+    else
+      let nloc = update_location map.location p (!cr,!cc) in
+        (* mark down at new location *)
+        if m.(!cr).(!cc) = Some "DOOR" 
+        then m.(!cr).(!cc) <- Some (p^"DOOR")
+        else m.(!cr).(!cc) <- Some p; 
         (n-(!i), {map with location = nloc; map_values = m})
-        end
-    | Some _ | None -> (*TODO debug*)
-        begin
-        i := n; (* no steps left after entering building *)
-        Printf.printf "Entering %s Hall debug\n" b; (*TODO*)
-        (0, enter_building map p b)
-        end
-    end
-  else
-    let nloc = update_location map.location p (!cr,!cc) in
-    m.(!cr).(!cc) <- Some p; (* mark down at new location *)
-    (n-(!i), {map with location = nloc; map_values = m})
 
 (* [move map p bop dir n] tries to move professor [p] on the [map] [n] steps
  * in [dir] direction. If [bop] is [Some b'] then [p] cannot move into 
