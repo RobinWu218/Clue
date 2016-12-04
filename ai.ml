@@ -87,7 +87,7 @@ let rec character_to_ai prof ai_list =
 let updated_state_map state new_map : state =
   let s ={state with map = new_map} in s
 
-(*if c is a prof*)
+(*[helper_update_prof poss c] returns the card list of possible cards *)
 let rec helper_update_prof poss c=
       match poss with
       |[]   -> [c]
@@ -381,7 +381,9 @@ let suggest (a:ai) (s:state) : state =
     end
   | None -> failwith "This should not happen in suggest in ai.ml"
 
-(*TODO
+(* [top_three lst] returns a random value from the first three elements of the
+ * list. If the list is only one element long, then that element is returned. If
+ * it is two elements long, then an element is randomly selected.
  * Requires: lst is non-empty. *)
 let top_three (lst:'a list) : 'a =
   match lst with
@@ -405,18 +407,22 @@ let top_three (lst:'a list) : 'a =
       | _ -> failwith "This should not happen in top_three in Ai"
       end
 
+(*[check_building bop b] returns true if bop and is NOT the same as Some b.
+ * Returns true otherwise*)
 let check_building bop b =
-  (* if bop = Some b then false else true
-  simplifies to: *)
   bop <> Some b
 
-(* one of closest three buildings *)
+(*[move_where_easy a bop s] returns a building. It decides on this building by
+ * randomly choosing one of closest three buildings to the ai.
+*)
 let rec move_where_easy (a:ai) (bop:building option) (s:state) : building =
   let b = snd (top_three (closest_buildings s.map a.character)) in
   if check_building bop b then b
   else move_where_easy a bop s
 
-(* moves to the closest building possible*)
+(*[move_where_medium_helper lst a bop s] returns a buildling. Returns the
+ * closest building to the ai.
+*)
 let rec move_where_medium_helper (lst:building list)
                         (a:ai) (bop:building option) (s:state) : building =
   match lst with
@@ -424,11 +430,15 @@ let rec move_where_medium_helper (lst:building list)
   | h::t -> if check_building bop h then h
             else move_where_medium_helper t a bop s
 
-(* one of possible buildings if any, otherwise one of closest three
- * cannot possibly be blocked*)
+(* [move_where_medium] returns a buildling. It decides on this
+ * building by choosing the cloest building to the ai.
+*)
 let move_where_medium (a:ai) (bop:building option) (s:state) : building =
   move_where_medium_helper (card_lst_to_building_lst a.possible_cards) a bop s
 
+(*[move_where_hard_helper possible close a bop s] returns a building. It decides
+ * on what to return by checking for the closest building to the ai which is also
+ * in the a.possible_cards. *)
 let rec move_where_hard_helper (possible:building list)
                                (close:building list)
                                (a:ai) (bop:building option) (s:state)
@@ -439,13 +449,16 @@ let rec move_where_hard_helper (possible:building list)
   | h::t -> if List.mem h possible && check_building bop h then h
             else move_where_hard_helper possible t a bop s
 
-(*only moves to possible cards*)
+(*[move_where_hard a bop s] returns the building to move to that is the closest
+ * in a.possible_cards. *)
 let move_where_hard (a:ai) (bop:building option) (s:state) : building =
   move_where_hard_helper (card_lst_to_building_lst a.possible_cards)
                          (List.map snd (closest_buildings s.map a.character))
                          a bop s
 
-(*ensures that the building is not blocked*)
+(*[move_where a bop s] returns the building to move to depending on the
+ * difficulty of the ai while ensuring that the building is not blocked.
+*)
 let move_where (a:ai) (bop:building option) (s:state) : building =
   match a.difficulty with
   | Easy   -> move_where_easy a bop s
@@ -540,7 +553,13 @@ let suggest_or_secret (a:ai) (b:building) (s:state) : state =
  * the updated state. *)
 let secret_or_roll (a:ai) (b:building) (s:state) : state =
   match a.difficulty with
-  | Easy   -> use_secret a s
+  | Easy   ->
+    begin
+    match Random.int 1 with
+      | 0 -> use_secret a s
+      | 1 -> leave_and_move a b s
+      | _ -> failwith "will never be called: secret or roll"
+    end
   | Medium ->
     begin
     match Random.int 1 with
