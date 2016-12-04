@@ -110,6 +110,12 @@ let rec replace_ai_with_new new_ai ai_list =
 let easy_want_to_accuse ai : bool =
   (List.length ai.possible_cards) = 3
 
+(*[hard_want_to_accuse] is true when there are 3 cards for where the ai knows
+ * that none of the other professors have. Else, it is false.
+*)
+let hard_want_to_accuse ai : bool = failwith "do soon"
+
+
 (*[character_to_ai] prof ai_list] takes in the prof and a list of ais and returns
  * the ai that corresponds to that professor.
  * requires: the prof must match with a ai that is currently in the game*)
@@ -275,28 +281,27 @@ let accuse (a:ai) (s:state) : bool * state =
 (* TODO decides whether to accuse or not in the middle of an AI's turn
  * AI logic:
  *   - Easy:   simply not accuse and proceed
- *   - Medium: TODO
+ *   - Medium: accuses when he has narrowed the possible cards down to only 3
  *   - Hard:   TODO *)
 let accuse_or_not_middle (a:ai) (s:state) : state =
   match a.difficulty with
-  | Easy   -> s
-  | Medium -> failwith "TODO"
-  | Hard   -> failwith "TODO"
+  | Easy   -> s (* will accuse when there are 9 cards left randomly*)
+  | Medium -> if easy_want_to_accuse a then accuse a s else s
+  | Hard   -> if hard_want_to_accuse a then accuse a s else s
 
 (* TODO decides whether to accuse or not at the start of an AI's turn
  * AI logic:
  *   - Easy:   simply not accuse and proceed
- *   - Medium: TODO
+ *   - Medium: simply not accuse and proceed
  *   - Hard:   TODO *)
 let accuse_or_not_start (a:ai) (s:state) : bool * state =
   match a.difficulty with
-  | Easy   ->
+  | Easy | Medium   ->
       begin
       Printf.printf "Prof. %s does not wish to make an accusation right now.\n"
                     a.character;
       (false, s)
       end
-  | Medium -> failwith "TODO"
   | Hard   -> failwith "TODO"
 
 (* [disprove_loop n guess s] is [Some (prof, card)] if [prof] disproved
@@ -440,7 +445,7 @@ let top_three (lst:'a list) : 'a =
       end
 
 let check_building bop b =
-  (* if bop = Some b then false else true 
+  (* if bop = Some b then false else true
   simplifies to: *)
   bop <> Some b
 
