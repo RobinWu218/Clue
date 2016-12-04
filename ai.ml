@@ -250,15 +250,18 @@ let accuse (a:ai) (s:state) : bool * state =
  * to accuse when there are only three possible cards.
  *)
 let accuse_or_not_middle (a:ai) (s:state) : state =
+  let (accused, new_s) = accuse a s in
   match a.difficulty with
   | Easy   ->
-    if a.possible_cards=9 then accuse a s
-  | Medium -> if want_to_accuse a then accuse a s else s
+    if (List.length a.possible_cards)=9 then new_s
+      else s
+  | Medium -> if want_to_accuse a then new_s else s
   | Hard ->
-    let new_ai = update possible cards a in
+    let new_ai = update_possible_cards a in
     let ai_list = replace_ai_with_new new_ai s.ais in
     let new_s = {s with ais=ai_list} in
-    if want_to_accuse new_ai then accuse new_ai new_s else new_s
+    if want_to_accuse new_ai then
+    let (accused', new_s') = accuse new_ai new_s in new_s' else new_s
 
 (* TODO decides whether to accuse or not at the start of an AI's turn
  * AI logic:
@@ -273,7 +276,7 @@ let accuse_or_not_start (a:ai) (s:state) : bool * state =
                     a.character;
       (false, s)
       end
-  | Hard   -> if want_to_accuse a then (true, accuse a s) else (false, s)
+  | Hard   -> if want_to_accuse a then accuse a s else (false, s)
 
 (* [disprove_loop n guess s] is [Some (prof, card)] if [prof] disproved
  * [guess] with [card] and [None] if no one can disprove [guess].
@@ -509,6 +512,17 @@ let use_secret (a:ai) (s:state) : state =
   let map = use_secret_passage s.map a.character in (* Gmap *)
   suggest a {s with map = map}
 
+(*true when we want to use the secret passage*)
+let want_to_secret a b=
+    let dest =
+      match b with
+      |"Baker"    -> "Rhodes"
+      |"Olin"     -> "Duffield"
+      |"Duffield" -> "Olin"
+      |"Rhodes"   -> "Baker"
+      |_-> failwith "only the first four have secret exits"
+    in List.mem (Building dest) a.possible_cards
+
 (* [suggest_or_secret a b s] allows ai [a] to choose between making a
  * suggestion and using the secret passage to leave building [b], and returns
  * the updated state. *)
@@ -523,16 +537,7 @@ let suggest_or_secret (a:ai) (b:building) (s:state) : state =
       | _ -> failwith "will never be called"
       end
   | Hard   -> (*uses the secret passage when the target building is in possible*)
-      begin
-      match b with
-      |"Baker"    -> let dest = "Rhodes"
-      |"Olin"     -> let dest = "Duffield"
-      |"Duffield" -> let dest = "Olin"
-      |"Rhodes"   -> let dest = "Baker"
-      |_-> failwith "only the first four have secret exits"
-      end
-    in List.mem (Building dest) a.possible_cards
-      then use_secret a s
+      if want_to_secret a b then use_secret a s
       else suggest a s
 
 (* [secret_or_roll a b s] allows ai [a] to choose between using the secret
@@ -541,8 +546,15 @@ let suggest_or_secret (a:ai) (b:building) (s:state) : state =
 let secret_or_roll (a:ai) (b:building) (s:state) : state =
   match a.difficulty with
   | Easy   -> use_secret a s
-  | Medium -> failwith "TODO depends on which is easier to get to destination"
-  | Hard   -> failwith "TODO" (* leave_and_move a b s *)
+  | Medium ->
+    begin
+    match Random.int 1 with
+      | 0 -> suggest a s
+      | 1 -> leave_and_move a b s
+      | _ -> failwith "will never be called"
+    end
+  | Hard   -> if want_to_secret a b then use_secret a s
+      else leave_and_move a b s
 
 (* [suggest_or_roll a s] allows ai [a] to choose between making a suggestion
  * and rolling the dice to move out, and returns the updated state. *)
