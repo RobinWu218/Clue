@@ -146,11 +146,12 @@ let init_state (n:int) (d:difficulty) : state =
       print_endline "";
       print_info "You can move on any spot marked by " false;
       print_string [on_black; Bold; white] ".";
-      print_string [on_black; yellow]  ",                                 \n";
+      print_string [on_black; yellow]  ",                                 ";
+      print_endline "";
       print_info "Enter a building through a door " false;
       print_string [on_black; Bold; green] "D";
-      print_string [on_black; yellow] 
-        ", and                                ";
+      print_string [on_black; yellow] ", and                                ";
+      print_endline "";
       print_info "Use a secret passage " false;
       print_string [on_black; Bold; green] "s";
       print_string [on_black; yellow] " to get to the building diagonally across the   ";
@@ -171,7 +172,8 @@ let init_state (n:int) (d:difficulty) : state =
       print_info "To play the game, follow the instructions and type into the command" true;
       print_info "line when prompted by " false;
       print_string [on_black] ">";
-      print_info ". You may find having a sheet of paper and a" true;
+      print_info ". You may find having a sheet of paper and a   " false;
+      print_endline "";
       print_info "writing utensil handy when playing the game. Good luck!" true;
       print_important "The game begins now!" true;
     );
@@ -227,8 +229,8 @@ and step_helper (p:prof) (s:state) : state =
           begin
             wait_for_user();
             ANSITerminal.(print_string [] (sprintf [white; Bold; on_black] "%-70s"
-                ("-----------------:: Prof. "^p^"'s turn ::-----------------")));
-            print_info "";
+                ("----------------:: Prof. "^p^"'s turn ::----------------")));
+            print_endline "";
             Ai.step ai s
           end
         else s
@@ -246,8 +248,8 @@ and step_helper (p:prof) (s:state) : state =
       let news =
         wait_for_user();
         ANSITerminal.(print_string [] ( sprintf [white; Bold; on_black] "%-70s"
-          ("-----------------:: Prof. "^p^"'s (You!) turn ::-----------------\n")));
-        print_info "";
+          ("----------------:: Prof. "^p^"'s (You!) turn ::----------------")));
+        print_endline "";
         User.step s in
       step {news with counter = news.counter + 1}
   | `No ->

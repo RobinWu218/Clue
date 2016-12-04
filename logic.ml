@@ -32,11 +32,10 @@ let roll_two_dice () : int =
   let d1 = 1 + Random.int 5 in
   let d2 = 1 + Random.int 5 in
   let sum = d1 + d2 in
-    print_info (
-      "Rolling two dice...\n"^
-      "Die 1: "^(string_of_int d1)^"\n"^
-      "Die 2: "^(string_of_int d2))
-      true;
+    print_results "Rolling two dice..." true;
+    print_results ("Die 1: "^(string_of_int d1)) true;
+    print_results ("Die 2: "^(string_of_int d2)) true;
+    print_results " " true;
     sum
 
 (* [get_choice_two ()] is [1] if the user selects the first choice and [2] if

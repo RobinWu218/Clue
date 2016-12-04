@@ -21,7 +21,9 @@ and to_string nr nc w =
     for j = 0 to nc-1 do
       Buffer.add_string buf (display w.(i).(j))
     done;
-    Buffer.add_string buf (ANSITerminal.sprintf [ANSITerminal.on_black] "\n")
+    Buffer.add_string buf 
+      (ANSITerminal.sprintf [ANSITerminal.on_black] "                  ");
+    Buffer.add_string buf "\n"
   done;
   Buffer.contents buf
 and display n =
@@ -204,7 +206,7 @@ let leave_building map p n =
  * Requires: [p] is a valid professor name, [b] is a valid building name.
  *)
 let rec enter_building map p b =
-  ANSITerminal.(print_string [yellow] ("Prof. "^p^" enters "^b^" Hall.\n"));
+  print_info ("Prof. "^p^" enters "^b^" Hall.") true;
   let m     = map.map_values in
   let wl    = List.assoc b map.waiting_spots in
   let (r,c) = get_open_spot m wl in

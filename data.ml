@@ -112,7 +112,7 @@ let print_results s e=
   print_help results_style s e
 
 let print s e =
-  print_help [ANSITerminal.on_black] s e
+  print_help [ANSITerminal.white; ANSITerminal.on_black] s e
 
 (* [int_option_of_string s] is [Some i] if [s] can be converted to int [i]
  * using [int_of_string s], and [None] otherwise. *)
@@ -337,8 +337,10 @@ let print_case_file (cf:case_file) : unit =
 (* [wait_for_user] waits for the user to hit enter to continue. *)
 let wait_for_user () =
   print_info " " true;
-  ANSITerminal.print_string [ANSITerminal.red; ANSITerminal.on_black]
-    "Press enter to continue...............................................";
-  print_info " " true;
-  let _ = read_line () in ()
+  ANSITerminal.(
+    print_string [blue; Bold; on_black]
+    "Press enter to continue...............................................");
+  let _ = read_line () in 
+    print_info " " true
+
 
