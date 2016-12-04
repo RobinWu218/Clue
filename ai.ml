@@ -423,7 +423,7 @@ let rec move_where_medium_helper (lst:building list)
   | h::t -> if check_building bop h then h
             else move_where_medium_helper t a bop s
 
-(* one of possible buildings if any, otherwise one of closest three 
+(* one of possible buildings if any, otherwise one of closest three
  * cannot possibly be blocked*)
 let move_where_medium (a:ai) (bop:building option) (s:state) : building =
   move_where_medium_helper (card_lst_to_building_lst a.possible_cards) a bop s
@@ -505,7 +505,8 @@ let use_secret (a:ai) (s:state) : state =
   let map = use_secret_passage s.map a.character in (* Gmap *)
   suggest a {s with map = map}
 
-(*true when we want to use the secret passage*)
+(*[want_to_secret a b] is true if we use the secret passage, we would reach
+ * one of the buildings in a.possible_cards. *)
 let want_to_secret a b=
     let dest =
       match b with
@@ -584,7 +585,7 @@ let secret_or_roll_or_suggest (a:ai) (b:building) (s:state) : state =
                 then leave_and_move a b s
               else suggest a s
 
-(*TODO*)
+(*[in_building_involuntarily a b s] *)
 let in_building_involuntarily (a:ai) (b:building) (s:state) : state =
   let secret = has_secret_passage s.map b in
   let blocked = is_building_blocked s.map b in
