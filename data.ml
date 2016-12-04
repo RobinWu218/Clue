@@ -90,33 +90,29 @@ let results_style   = [ANSITerminal.on_black; ANSITerminal.white]
 
 let card_style () = [ANSITerminal.on_black; ANSITerminal.Bold; ANSITerminal.cyan]
 
-let print_info s e =  
+let print_help style s e =
   ANSITerminal.(
   if e then
   begin
-    print_string [] (sprintf info_style "%-70s" s);
+    print_string [] (sprintf style "%-70s" s);
     print_endline ""
   end
   else print_string info_style s;)
 
-let print_insn s e =
-  ANSITerminal.(print_string []
-    (sprintf insn_style "%-70s" s));
-  if e then print_endline ""
+let print_info s e = 
+  print_help info_style s e
 
-let print_important s e= 
-  ANSITerminal.(print_string []
-    (sprintf important_style "%-70s" s));
-  if e then print_endline ""
+let print_insn s e =
+  print_help insn_style s e
+
+let print_important s e = 
+  print_help important_style s e
 
 let print_results s e=
-  ANSITerminal.(print_string []
-    (sprintf results_style "%-70s" s));
-  if e then print_endline ""
+  print_help results_style s e
 
 let print s e =
-  ANSITerminal.(print_string [on_black] s);
-  if e then print_endline ""
+  print_help [ANSITerminal.on_black] s e
 
 (* [int_option_of_string s] is [Some i] if [s] can be converted to int [i]
  * using [int_of_string s], and [None] otherwise. *)
@@ -251,13 +247,25 @@ let string_of_coord ((r,c):coord) : string =
   Printf.sprintf "(%d, %d)" r c
 
 (* [string_of_exits exits] is the string representation of all exits to a
- * building with their ids and coordinates. *)
+ * building with their ids and coordinates. 
+ * Requires: [exits] has length 2 or 4. *)
 let rec string_of_exits (exits:(int * coord) list) : string =
   match exits with
+  | [e1;e2] -> (* Statler Hall *)
+      ("exit 1: (13, 8) upper right\n" ^
+       "exit 2: (16, 7) lower left")
+  | [e1;e2;e3;e4] -> (* Klarman Hall *)
+      ("exit 1: (5,  9) upper left\n" ^
+       "exit 2: (8, 10) lower left\n" ^
+       "exit 3: (8, 15) lower right\n" ^
+       "exit 4: (5, 16) upper right")
+  | _ -> failwith "This should not happen in string_of_exits in Data"
+(*
   | [] -> ""
   | (id,coord)::t -> ((Printf.sprintf "  exit %d: %s\n"
                                       id (string_of_coord coord)) ^
-             (string_of_exits t))
+                     (string_of_exits t))
+*)
 
 (* [string_of_prof_lst] is a comma-separated string representation of a list
  * of profs. *)

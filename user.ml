@@ -237,8 +237,9 @@ let rec get_movement (n:int) : string * int =
   ANSITerminal.(
     print_string [red] (
       "You can move "^(string_of_int n)^
-      " steps in directions [up/down/left/right]\n");
-    print_string [yellow] "e.g: up 2, right 4, etc.\n";
+      " steps in directions [up/down/left/right].\n"^
+      "Enter commands for one direction at a time.\n");
+    print_string [yellow] "e.g: up 2, r 4, etc.\n";
   );
   let str = print_string  "> "; read_line () |> String.lowercase_ascii in
   let lst = Str.(str |> split (regexp "[ ]+")) in
@@ -284,45 +285,43 @@ let rec move (n:int) (bop:building option) (s:state) : state =
 (* [get_exit b s] is the id of an exit to building [b] selected by the user. *)
 let rec get_exit (b:building) (s:state) : int =
   let exits = List.assoc b s.map.exits in
-  let rec find_valid () = 
-    match List.length exits with
-    | 1 -> 1
-    | 2 -> 
-      begin
-        ANSITerminal.(
-          print_string [red] (
-            "Please choose one of the two exits to "^b^" Hall to leave.\n");
-          print_string [] ((string_of_exits exits)^"\n");
-          print_string [red] "Valid responses are: [1/2]\n");
-        let choice = get_choice_two () in
-          if is_coord_blocked s.map (List.assoc choice exits)
-          then 
-            begin
-              ANSITerminal.print_string [] 
-                "This exit is blocked! Please pick another\n";
-              find_valid ()
-            end
-          else choice
-      end
-    | 4 -> 
-      begin
-        ANSITerminal.(
-          print_string [red] (
-             "Please choose one of the four exits to "^b^" Hall to leave\n");
-          print_string [] ((string_of_exits exits)^"\n");
-          print_string [red] "Valid responses are: [1/2/3/4]\n");
-        let choice = get_choice_four () in
-          if is_coord_blocked s.map (List.assoc choice exits)
-          then 
-            begin
-              ANSITerminal.print_string [] 
-                "This exit is blocked! Please pick another\n";
-              find_valid ()
-            end
-          else choice
-      end
-    | _ -> failwith "This should not happen in get_exit in User given map.json"
-  in find_valid ()
+  match List.length exits with
+  | 1 -> 1
+  | 2 -> 
+    begin
+      ANSITerminal.(
+        print_string [red] (
+          "Please choose one of the two exits to "^b^" Hall to leave.\n");
+        print_string [] ((string_of_exits exits)^"\n");
+        print_string [red] "Valid responses are: [1/2]\n");
+      let choice = get_choice_two () in
+      if is_coord_blocked s.map (List.assoc choice exits)
+      then 
+        begin
+          ANSITerminal.print_string [] 
+            "This exit is blocked! Please pick another.\n";
+          get_exit b s
+        end
+      else choice
+    end
+  | 4 -> 
+    begin
+      ANSITerminal.(
+        print_string [red] (
+           "Please choose one of the four exits to "^b^" Hall to leave\n");
+        print_string [] ((string_of_exits exits)^"\n");
+        print_string [red] "Valid responses are: [1/2/3/4]\n");
+      let choice = get_choice_four () in
+      if is_coord_blocked s.map (List.assoc choice exits)
+      then 
+        begin
+          ANSITerminal.print_string [] 
+            "This exit is blocked! Please pick another.\n";
+          get_exit b s
+        end
+      else choice
+    end
+  | _ -> failwith "This should not happen in get_exit in User given map.json"
 
 (* [leave_and_move b s] is the updated state after the user moves out of
  * building [b].
