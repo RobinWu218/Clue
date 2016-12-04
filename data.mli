@@ -69,8 +69,6 @@ type ai = {
   (* Below are fields that can change throughout the game. *)
   was_moved:      bool;
   is_in_game:     bool;
-  destination:    coord option;
-  known_cards:    card list;
   possible_cards: card list;
   card_status:    (prof * ([`Y |`N |`Maybe |`Blank] array)) list;
 }

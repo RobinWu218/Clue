@@ -75,7 +75,7 @@ let deal_card fact_card n =
   | _ -> failwith "This shoudl not happen in deal_card in game.ml"
 
 (*[init_ai_lst] is a list of AI bots given the number of AIs in the game,
- * the difficulty level, list of hands that AI bots have, and list of 
+ * the difficulty level, list of hands that AI bots have, and list of
  * characters of each AI bots.
  * requires: [n] is an integer between 2 and 5 inclusive.
  *           [hand_lst] is a list of hands
@@ -91,7 +91,7 @@ let init_ai_lst n d hand_lst ai_character_lst character_lst =
   ) done;
   !ai_lst
 
-(*[generate_dictionary] is the dictionary generated given by the list of 
+(*[generate_dictionary] is the dictionary generated given by the list of
  * professors, user character, and list of ai's characters.
  * requires: [prof_lst],[ai_lst] are string lists
  *           [user_char] is string indicating character*)
@@ -112,13 +112,13 @@ let rec generate_dictionary prof_lst user_char ai_lst =
  * Requires: [n] is an integer between 2 and 5 inclusive, [d] is an integer
  * between 1 and 3 inclusive. *)
 let init_state (n:int) (d:difficulty) : state =
-  Random.self_init ();  
+  Random.self_init ();
                   (*Fix the problem of producing same sequence of nums every
                    *time we launch utop*)
   if (n >= 2) && (n <= 5) then
     let fact_file = generate_case_file () in
-    let fact_cards = [Prof fact_file.who; 
-                      Building fact_file.where; 
+    let fact_cards = [Prof fact_file.who;
+                      Building fact_file.where;
                       Language fact_file.with_what] in
     let character_lst = assign_characters [] (n+1) in
     let dealt_cards_lst = deal_card fact_cards n in
@@ -131,14 +131,14 @@ let init_state (n:int) (d:difficulty) : state =
     let dictionary = generate_dictionary
                       ["Bracy";"Clarkson";"Fan";"Gries";"Halpern";"White"]
                       user_character ai_characters_lst in
-    print_endline 
+    print_endline
       "\n**********************************************************************\n";
 
     (* print roles *)
     ANSITerminal.(
-      print_string [Bold] "The AI bots play the roles of: \n"; 
+      print_string [Bold] "The AI bots play the roles of: \n";
       print_string [] ((string_of_prof_lst ai_characters_lst)^".");
-      print_string [Bold; Underlined; green;] 
+      print_string [Bold; Underlined; green;]
         ("\n\nYou play the role of Prof. "^user_character^".\n");
     );
     wait_for_user();
@@ -150,13 +150,13 @@ let init_state (n:int) (d:difficulty) : state =
       print_string [yellow] (
         "nitial.\n"^
         "You can move on any spot marked by ");
-      print_string [on_black; Bold; white] "."; 
+      print_string [on_black; Bold; white] ".";
       print_string [yellow] ",\nEnter a building through a door ";
       print_string [on_black; Bold; green] "D";
       print_string [yellow] ", and \nUse a secret passage ";
       print_string [on_black; Bold; green] "s";
       print_string [yellow] " to get to the building diagonally across the map.\n\n";
-      print_string [yellow] 
+      print_string [yellow]
         "Note: the map is on a coordinate system, with (0,0) at the top left corner.\n"
     );
     print_map map;
@@ -195,12 +195,12 @@ let init_state (n:int) (d:difficulty) : state =
 (* [check_ai_in_game] is false if all ai bots have lost and is true
  * if there is at least one bot still in game.
  * requires: [ai_lst] is a list of ai bots*)
-let rec check_ai_in_game (ai_lst: ai list) : bool = 
-   match ai_lst with 
+let rec check_ai_in_game (ai_lst: ai list) : bool =
+   match ai_lst with
    | [] -> false
-   | h::t -> if h.is_in_game then 
-                true 
-             else 
+   | h::t -> if h.is_in_game then
+                true
+             else
                 false || (check_ai_in_game t)
 
 (* [step s] is the updated state after one player's turn. *)
@@ -221,20 +221,20 @@ and step_helper (p:prof) (s:state) : state =
   match List.assoc p s.dictionary with
   | `AI ->
       let ai = List.find (fun a -> a.character = p) s.ais in
-      let news = 
-        if ai.is_in_game 
-        then 
+      let news =
+        if ai.is_in_game
+        then
           begin
             wait_for_user();
             ANSITerminal.(print_string [Bold] (
               "-----------------:: Prof. "^p^"'s turn ::-----------------\n"));
             Ai.step ai s
           end
-        else s 
+        else s
       in
       if check_ai_in_game s.ais then
         step {news with counter = news.counter + 1}
-      else 
+      else
         begin
         print_endline "Awesome! All the AI bots have lost.";
         print_endline "YOU WIN!!!";
@@ -242,7 +242,7 @@ and step_helper (p:prof) (s:state) : state =
         step {news with counter = news.counter + 1; game_complete = true}
         end
   | `User ->
-      let news = 
+      let news =
         wait_for_user();
             ANSITerminal.(print_string [Bold] (
               "-----------------:: Prof. "^p^"'s (You!) turn ::-----------------\n"));
