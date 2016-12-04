@@ -488,7 +488,7 @@ let move (a:ai) (n:int) (bop:building option) (s:state) : state =
   else
     let b = move_where a bop s in
     let (in_building, new_map) =
-      move_towards_building s.map a.character b n in (* Gmap *)
+      move_towards_building s.map a.character b bop n in (* Gmap *)
     if in_building then
       suggest a {s with map = new_map}
     else

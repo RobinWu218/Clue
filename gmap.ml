@@ -243,7 +243,8 @@ let move_helper map p bop dir n =
       cr := !cr + rd;
       cc := !cc + cd;
     done;
-    (* if you end up in front of a door with steps left, enter the building if permitted *) 
+    (* if you end up in front of a door with steps left, enter the building if 
+     * permitted *) 
     if (!i < n) && (m.(!cr + rd).(!cc + cd) = Some "DOOR") 
     then
       let b = List.assoc (!cr + rd,!cc + cd) (get_exits map) in
@@ -266,9 +267,7 @@ let move_helper map p bop dir n =
     else
       let nloc = update_location map.location p (!cr,!cc) in
         (* mark down at new location *)
-        if m.(!cr).(!cc) = Some "DOOR" 
-        then m.(!cr).(!cc) <- Some (p^"DOOR")
-        else m.(!cr).(!cc) <- Some p; 
+        m.(!cr).(!cc) <- Some p; 
         (n-(!i), {map with location = nloc; map_values = m})
 
 (* [move map p bop dir n] tries to move professor [p] on the [map] [n] steps
@@ -297,7 +296,7 @@ let move map p bop dir n =
  * path. After much discussion, the problem was deemed to occur at too few of a
  * frequency to necessitate a fail-proof automated mover.
  *)
-let rec move_towards_coord map p coord n =
+let rec move_towards_coord map p coord bop n =
   let (destr, destc) = coord in
     if destr < 0 || destc < 0 || destr >= map.num_rows || destc >= map.num_cols
     then raise (InvalidLocation "out of bounds")
@@ -316,15 +315,13 @@ let rec move_towards_coord map p coord n =
               then
                 begin
                   let (s, m) = move_helper accmap p None dir !steps_left in
-                    steps_left := s; 
-                    print_endline (string_of_int s);
+                    steps_left := s; (* should be 0 *)
                     (s, m)
                 end
               else
                 begin
                   let (s, m) = move_helper accmap p None dir steps in
                     steps_left := !steps_left - steps;
-                    print_endline (string_of_int s);
                     (s, m)
                 end
             in accmap
@@ -425,8 +422,61 @@ and simplify_path lst =
     in 
       simplify [] lst
 
-(* [move_towards_building map p b n] tries to move professor [p] on the [map] 
- * [n] steps towards the building [b].
+let random_walk map p bop n =
+  let (sr,sc) = get_current_location map p in
+  let m = map.map_values in
+  replace_tile  m p sr sc;
+  let cr = ref sr in
+  let cc = ref sc in
+  let fb = ref "" in
+  let counter = ref 0 in
+    while !counter < n do
+      let (dr, dc) = match Random.int 4 with
+      | 0 -> ( 1,  0)
+      | 1 -> (-1,  0)
+      | 2 -> ( 0,  1)
+      | 3 -> ( 0, -1)
+      | _ -> failwith "unexpected error in Random.int value"
+      in
+        if m.(!cr+dr).(!cc+dc) = Some "."
+        then
+          begin
+            cr := !cr + dr;
+            cc := !cc + dc;
+            incr counter
+          end
+        else if m.(!cr+dr).(!cc+dc) = Some "DOOR"
+        then
+          let b' = List.assoc (!cr + dr,!cc + dc) (get_exits map) in
+            match bop with 
+            | None ->
+              begin
+                cr := !cr + dr;
+                cc := !cc + dc;
+                counter := n;
+                fb := b'
+              end
+            | Some b when b <> b' ->
+              begin
+                cr := !cr + dr;
+                cc := !cc + dc;
+                counter := n;
+                fb := b'
+              end
+            | _ -> ()        
+    done;
+    if m.(!cr).(!cc) = Some "DOOR"
+    then (false, enter_building map p !fb)
+    else 
+      begin
+        let nloc = update_location map.location p (!cr,!cc) in
+          m.(!cr).(!cc) <- Some p;
+          (false, {map with location = nloc; map_values = m})
+      end
+
+(* [move_towards_building map p b bop n] tries to move professor [p] on the [map] 
+ * [n] steps towards the building [b], safeguarding against reentering the 
+ * building referred by the building option [bop].
  * Requires: [n >= 0], [p] is not in a building already.
  * TODO: called only when [p] can enter [b], i.e., [p] did not just leave [b].
  * Returns: the pair [(tf, map2)], where
@@ -434,15 +484,16 @@ and simplify_path lst =
  *   [map2] is the updated map.
  * Raises: InvalidLocation if [b] is not a valid building id.
  *)
-let move_towards_building map p b n =
+let move_towards_building map p b bop n =
   try
     let loc  = get_current_location map p in
     let el   = List.assoc b map.exits in
     try
       let eloc = get_closest_exit map el loc in
-        move_towards_coord map p eloc n
+        move_towards_coord map p eloc bop n
       with
-      | InvalidLocation s -> failwith ("[move_towards_building]: "^s)
+      (* somehow no path exists...time to run around like a headless chicken *)
+      | InvalidLocation s -> (random_walk map p bop n)
   with
     | Not_found -> 
       failwith ("[move_towards_building]: could not find professor or building")

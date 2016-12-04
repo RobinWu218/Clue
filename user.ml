@@ -86,17 +86,17 @@ let rec get_with_what () : string =
  * player to the suggested building and change that ai's was_moved field to
  * true if ai is not already in the building before being moved. *)
 let accuse (s:state) : state =
-  let who = get_who () in
-  let where = get_where () in
+  let who       = get_who () in
+  let where     = get_where () in
   let with_what = get_with_what () in
   let (moved_or_not, map) =
-    if get_current_building s.map who <> (Some where) (* Gmap *)
-    then (true, (teleport_professor s.map who where)) (* Gmap *)
+    if get_current_building s.map who <> (Some where) 
+    then (true, (teleport_professor s.map who where)) 
     else (false, s.map) in
   let accusation =
-    {who = who;
-     where = where;
-     with_what = with_what} in
+    { who       = who;
+      where     = where;
+      with_what = with_what } in
   print_endline "Your accusation is: ";
   print_case_file accusation;
   if accusation = s.fact_file
@@ -113,10 +113,11 @@ let accuse (s:state) : state =
     |_____| |_____| |_| |_| |_____| |_|     |_| |_|   |_|   |_____| |_|
 
 ";
-      print_string [green] "CLUE will exit automatically. Feel free to play again!\n";
+      print_string [yellow] 
+        "CLUE will exit automatically. Feel free to play again!\n";
   );
     let news = {s with game_complete = true; map = map} in
-    assign_was_moved news who moved_or_not (* Gmap *)
+      assign_was_moved news who moved_or_not (* Gmap *)
     end
   else
     begin
@@ -228,7 +229,12 @@ let suggest (s:state) : state =
  * and, if feasible, returns the corresponding tuple representation of the
  * desired movement. *)
 let rec get_movement (n:int) : string * int =
-  Printf.printf "You can move %d steps... [up/down/left/right i]\n" n;
+  ANSITerminal.(
+    print_string [red] (
+      "You can move "^(string_of_int n)^
+      " steps in directions [up/down/left/right]\n");
+    print_string [yellow] "e.g: up 2, right 4, etc.\n";
+  );
   let str = print_string  "> "; read_line () |> String.lowercase_ascii in
   let lst = Str.(str |> split (regexp "[ ]+")) in
   match lst with
@@ -237,14 +243,16 @@ let rec get_movement (n:int) : string * int =
       begin
         match dir.[0], x with
         | _  , Some x' when ((x' > n) || (x' <= 0)) ->
-            print_endline "Invalid number of steps; try again please.";
-            get_movement n
+          ANSITerminal.(print_string [red] 
+            "Invalid number of steps; try again please.\n");
+          get_movement n
         | 'u', Some x' -> ("up",    x')
         | 'd', Some x' -> ("down",  x')
         | 'l', Some x' -> ("left",  x')
         | 'r', Some x' -> ("right", x')
-        | _ -> print_endline "Invalid input; try again please.";
-               get_movement n
+        | _ -> 
+          ANSITerminal.(print_string [red] "Invalid input; try again please.\n");
+          get_movement n
       end
   | _ -> print_endline "Invalid input; try again please."; get_movement n
 
@@ -257,61 +265,67 @@ let rec move (n:int) (bop:building option) (s:state) : state =
     failwith "This should not happen in move"
   else if n = 0 then
     begin
-    print_endline "You cannot move anymore.";
-    s
+      print_endline "You cannot move anymore.";
+      s
     end
   else
     let (dir, x) = get_movement n in
     let (y, map) = Gmap.move s.map s.user.character bop dir x in
-    if is_in_building map s.user.character (* Gmap *)
-    then suggest {s with map = map}
-    else move (n-x+y) bop {s with map = map}
+      if is_in_building map s.user.character
+      then suggest {s with map = map}
+      else move (n-x+y) bop {s with map = map}
 
 (* [get_exit b s] is the id of an exit to building [b] selected by the user. *)
 let rec get_exit (b:building) (s:state) : int =
   let exits = List.assoc b s.map.exits in
-  match List.length exits with
-  | 1 -> 1
-  | 2 -> begin
-         Printf.printf
-           "Please choose one of the two exits to %s Hall to leave\n" b;
-         Printf.printf "%s" (string_of_exits exits);
-         print_endline "Valid responses are: [1/2]";
-         get_choice_two () (* Logic *)
-         end
-  | 4 -> begin
-         Printf.printf
-           "Please choose one of the four exits to %s Hall to leave\n" b;
-         Printf.printf "%s" (string_of_exits exits);
-         print_endline "Valid responses are: [1/2/3/4]";
-         get_choice_four () (* Logic *)
-         end
-  | _ -> failwith "This should not happen in get_exit in User given map.json"
+    match List.length exits with
+    | 1 -> 1
+    | 2 -> 
+      begin
+        ANSITerminal.(
+          print_string [red] (
+            "Please choose one of the two exits to "^b^" Hall to leave.\n");
+          print_string [] ((string_of_exits exits)^"\n");
+          print_string [red] "Valid responses are: [1/2]\n");
+          get_choice_two () 
+     end
+    | 4 -> 
+      begin
+        ANSITerminal.(
+          print_string [red] (
+             "Please choose one of the four exits to "^b^" Hall to leave\n");
+          print_string [] ((string_of_exits exits)^"\n");
+          print_string [red] "Valid responses are: [1/2/3/4]\n");
+          get_choice_four () 
+       end
+    | _ -> failwith "This should not happen in get_exit in User given map.json"
 
 (* [leave_and_move b s] is the updated state after the user moves out of
  * building [b].
  * Requires: [s.user] is currently in building [b]. *)
 let leave_and_move (b:building) (s:state) : state =
   let map = leave_building s.map s.user.character (get_exit b s) in
-  move (roll_two_dice ()) (Some b) {s with map = map}
+    move (roll_two_dice ()) (Some b) {s with map = map}
 
 (* [use_secret s] is the updated state after the user uses the secret
  * passage in the current building.
  * Requires: [s.user] is currently in a building where there is a secret
- *           passage. *)
+ *           passage.  *)
 let use_secret (s:state) : state =
-  let map = use_secret_passage s.map s.user.character in (* Gmap *)
-  suggest {s with map = map}
+  let map = use_secret_passage s.map s.user.character in
+    suggest {s with map = map}
 
 (* [suggest_or_secret b s] prompts the user to choose between making a
  * suggestion and using the secret passage to leave building [b], and returns
  * the updated state. *)
 let suggest_or_secret (b:building) (s:state) : state =
-  print_endline "You can either";
-  print_endline "  1 make a suggestion now or ";
-  Printf.printf "  2 use the secret passage to get into %s Hall.\n"
-                (List.assoc b s.map.secrets);
-  print_endline "Valid responses are: [1/2]";
+  ANSITerminal.(
+    print_string [red] "You can either:\n";
+    print_string [] (
+      "\t1) make a suggestion now or\n"^
+      "\t2) use the secret passage to get into "^
+      (List.assoc b s.map.secrets)^" Hall.\n");
+    print_string [red] "Valid responses are: [1/2]\n");
   match get_choice_two () with
   | 1 -> suggest s
   | 2 -> use_secret s
@@ -321,11 +335,13 @@ let suggest_or_secret (b:building) (s:state) : state =
  * passage to leave building [b] and rolling the dice to move out, and returns
  * the updated state. *)
 let secret_or_roll (b:building) (s:state) : state =
-  print_endline "You can either:";
-  print_endline "  1 roll the dice and move out, or";
-  Printf.printf "  2 use the secret passage to get into %s Hall.\n"
-                (List.assoc b s.map.secrets); (* must not fail *)
-  print_endline "Valid responses are: [1/2]";
+  ANSITerminal.(
+    print_string [red] "You can either:\n";
+    print_string [] (
+      "\t1) roll the dice and move out, or\n"^
+      "\t2) use the secret passage to get into "^
+      (List.assoc b s.map.secrets)^" Hall.\n");
+    print_string [red] "Valid responses are: [1/2]\n");
   match get_choice_two () with
   | 1 -> leave_and_move b s
   | 2 -> use_secret s
@@ -334,10 +350,12 @@ let secret_or_roll (b:building) (s:state) : state =
 (* [suggest_or_roll b s] prompts the user to choose between making a suggestion
  * and rolling the dice to move out, and returns the updated state. *)
 let suggest_or_roll (b:building) (s:state) : state =
-  print_endline "You can either:";
-  print_endline "  1 make a suggestion now, or";
-  print_endline "  2 roll the dice and move out.";
-  print_endline "Valid responses are: [1/2]";
+  ANSITerminal.(
+    print_string [red] "You can either:\n";
+    print_string [] (
+      "\t1) make a suggestion now, or\n"^
+      "\t2) roll the dice and move out.\n");
+    print_string [red] "Valid responses are: [1/2]");
   match get_choice_two () with
   | 1 -> suggest s
   | 2 -> leave_and_move b s
@@ -347,12 +365,14 @@ let suggest_or_roll (b:building) (s:state) : state =
  * passage, or roll the dice to move out, or make a suggestion, and returns
  * the updated state. *)
 let secret_or_roll_or_suggest (b:building) (s:state) : state =
-  print_endline "You can either:";
-  print_endline "  1 make a suggestion now, or ";
-  print_endline "  2 roll the dice and move out, or ";
-  Printf.printf "  3 use the secret passage to get into %s Hall.\n"
-                (List.assoc b s.map.secrets);
-  print_endline "Valid responses are: [1/2/3]";
+  ANSITerminal.(
+    print_string [red] "You can either:\n";
+    print_string [] (
+      "\t1) make a suggestion now, or \n"^
+      "\t2) roll the dice and move out, or\n"^
+      "\t3) use the secret passage to get into "^(List.assoc b s.map.secrets)^
+      " Hall.\n");
+    print_string [red] "Valid responses are: [1/2/3]\n");
   match get_choice_three () with
   | 1 -> suggest s
   | 2 -> leave_and_move b s
@@ -364,22 +384,25 @@ let secret_or_roll_or_suggest (b:building) (s:state) : state =
  * determines what the user can do given that the user was moved to the
  * building by someone else, and returns the updated state accordingly. *)
 let in_building_involuntarily (b:building) (s:state) : state =
-  let secret = has_secret_passage s.map b in
+  let secret  = has_secret_passage  s.map b in
   let blocked = is_building_blocked s.map b in
   let news =
     begin
-    match secret, blocked with
-    | true,  true  ->
-        print_endline "There is a secret passage available.";
-        print_endline "All exits to the current building are blocked.";
+      match secret, blocked with
+      | true,  true  ->
+        ANSITerminal.(print_string [yellow] (
+          "There is a secret passage available...\n"^
+          "All other exits to the current building are blocked.\n"));
         suggest_or_secret b s
-    | true,  false ->
-        print_endline "There is a secret passage available.";
+      | true,  false ->
+        ANSITerminal.(print_string [yellow] 
+          "There is a secret passage available...\n");
         secret_or_roll_or_suggest b s
-    | false, true  ->
-        print_endline "All exits to the current building are blocked.";
+      | false, true  ->
+        ANSITerminal.(print_string [yellow] 
+          "All exits to the current building are blocked.\n");
         suggest s
-    | false, false ->
+      | false, false ->
         suggest_or_roll b s
     end
   in assign_was_moved news s.user.character false
@@ -389,21 +412,22 @@ let in_building_involuntarily (b:building) (s:state) : state =
  * determines what the user can do given that the user entered the building
  * on his/her own, and returns the updated state accordingly. *)
 let in_building_voluntarily (b:building) (s:state) : state =
-  let secret = has_secret_passage s.map b in (* Gmap *)
-  let blocked = is_building_blocked s.map b in (* Gmap *)
+  let secret  = has_secret_passage  s.map b in 
+  let blocked = is_building_blocked s.map b in 
   match secret, blocked with
   | true,  true  ->
-      print_endline "There is a secret passage available.";
-      print_endline "All exits to the current building are blocked.";
-      print_endline "You have to use the secret passage.";
+    ANSITerminal.(print_string [yellow] (
+      "All exits to the current building are blocked.\n"^
+      "\t--> You have to use the secret passage!\n"));
       use_secret s
   | true,  false ->
-      print_endline "There is a secret passage available.";
+    ANSITerminal.(print_string [yellow] 
+      "There is a secret passage available...\n");
       secret_or_roll b s
   | false, true  ->
-      print_endline "There is no secret passage available.";
-      print_endline "All exits to the current building are blocked.";
-      print_endline "You have to wait until your next turn.";
+    ANSITerminal.(print_string [yellow] (
+      "All exits to the current building are blocked.\n"^
+      "\t--> You have to wait until your next turn!\n"));
       s
   | false, false ->
       leave_and_move b s
@@ -413,7 +437,7 @@ let in_building_voluntarily (b:building) (s:state) : state =
 let step (s:state) : state =
   let s1 = accuse_or_not s in
   if s1.game_complete then s1 else
-  match get_current_building s1.map s1.user.character with (* Gmap *)
+  match get_current_building s1.map s1.user.character with
   | Some b ->
       Printf.printf "Prof. %s's current building: %s" s.user.character b;(*TODO debug*)
       if s1.user.was_moved
@@ -423,4 +447,3 @@ let step (s:state) : state =
       let c = get_current_location s1.map s1.user.character in
       if is_exit_blocked s1.map c then s1 else
       move (roll_two_dice ()) None s1
-
