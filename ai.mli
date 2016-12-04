@@ -1,6 +1,6 @@
 open Data
 open Gmap
-open logic
+open Logic
 
 (* [init p h d lst] is the AI data structure that represents an AI playing
  * character [p] on difficulty level [d], with hand [h]. [lst] is a list of
