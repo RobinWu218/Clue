@@ -297,7 +297,7 @@ let rec get_exit (b:building) (s:state) : int =
           print_string [] ((string_of_exits exits)^"\n");
           print_string [red] "Valid responses are: [1/2]\n");
         let choice = get_choice_two () in
-          if is_exit_blocked s.map (List.assoc choice exits)
+          if is_coord_blocked s.map (List.assoc choice exits)
           then 
             begin
               ANSITerminal.print_string [] 
@@ -314,7 +314,7 @@ let rec get_exit (b:building) (s:state) : int =
           print_string [] ((string_of_exits exits)^"\n");
           print_string [red] "Valid responses are: [1/2/3/4]\n");
         let choice = get_choice_four () in
-          if is_exit_blocked s.map (List.assoc choice exits)
+          if is_coord_blocked s.map (List.assoc choice exits)
           then 
             begin
               ANSITerminal.print_string [] 

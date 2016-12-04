@@ -295,3 +295,4 @@ let wait_for_user () =
   ANSITerminal.print_string [ANSITerminal.red]
     "\nPress enter to continue...............................................\n";
   let _ = read_line () in ()
+
