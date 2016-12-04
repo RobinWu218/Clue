@@ -628,12 +628,12 @@ let in_building_voluntarily (a:ai) (b:building) (s:state) : state =
 let rec step (a:ai) (s:state) : state =
   let (end_turn, s1) = accuse_or_not_start a s in
   if end_turn then s1 else
-  let c = get_current_location s1.map a.character in
-  if is_exit_blocked s1.map c then s1 else
   match get_current_building s1.map a.character with (* Gmap *)
   | Some b ->
       if a.was_moved
       then in_building_involuntarily a b s1
       else in_building_voluntarily a b s1
   | None ->
+      let c = get_current_location s1.map a.character in
+      if is_exit_blocked s1.map c then s1 else
       move a (roll_two_dice ()) None s1 (* Gmap *)

@@ -411,8 +411,6 @@ let in_building_voluntarily (b:building) (s:state) : state =
 let step (s:state) : state =
   let s1 = accuse_or_not s in
   if s1.game_complete then s1 else
-  let c = get_current_location s1.map s1.user.character in
-  if is_exit_blocked s1.map c then s1 else
   match get_current_building s1.map s1.user.character with (* Gmap *)
   | Some b ->
       Printf.printf "Prof. %s's current building: %s" s.user.character b;(*TODO debug*)
@@ -420,5 +418,7 @@ let step (s:state) : state =
       then in_building_involuntarily b s1
       else in_building_voluntarily b s1
   | None ->
-      move (roll_two_dice ()) None s1 (* Gmap *)
+      let c = get_current_location s1.map s1.user.character in
+      if is_exit_blocked s1.map c then s1 else
+      move (roll_two_dice ()) None s1
 
