@@ -105,14 +105,14 @@ let accuse (s:state) : state =
     ANSITerminal.(
       print_string [] "Awesome! You got the right accusation.\n";
       print_string [Bold; green] "YOU WIN!!!";
-      print_string [Bold; cyan] "
+      print_string [Bold; green] "
    _    _     _____   _____   _____   _____   _  __   _____   _____   _____
   (_)  (_)   |  ___| |  _  | | ___ | |  ___| | |/__| |  _  | |__ __| |  ___|
     )  (     | |     | | | | | | | | | | ___ |  /    | |_| |   | |   | |___
    (  _)     | |___  | |_| | | | | | | |__|| | |     | | | |   | |   |____ |
    |/        |_____| |_____| |_| |_| |_____| |_|     |_| |_|   |_|   |_____|
 
-      ";
+";
       print_string [] "CLUE will exit automatically. Feel free to play again!\n";
   );
     let news = {s with game_complete = true; map = map} in
