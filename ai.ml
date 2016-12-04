@@ -462,11 +462,15 @@ let move (a:ai) (n:int) (bop:building option) (s:state) : state =
 (* [get_exit a b s] is the id of an exit to building [b] selected by ai [a]. *)
 let rec get_exit (a:ai) (b:building) (s:state) : int =
   let exits = List.assoc b s.map.exits in
-  match List.length exits with
-  | 1 -> 1
-  | 2 -> Random.int 1 + 1
-  | 4 -> Random.int 4 + 1
-  | _ -> failwith "This should not happen in get_exit in Ai given map.json"
+  let id =
+    match List.length exits with
+    | 1 -> 1
+    | 2 -> Random.int 1 + 1
+    | 4 -> Random.int 4 + 1
+    | _ -> failwith "This should not happen in get_exit in Ai given map.json"
+  in 
+  if not (is_coord_blocked s.map (List.assoc id exits)) then id
+  else get_exit a b s
 
 (* [leave_and_move a b s] is the updated state after ai [a] moves out of
  * building [b].
