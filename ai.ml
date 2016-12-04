@@ -251,12 +251,11 @@ let accuse (a:ai) (s:state) : bool * state =
  * to accuse when there are only three possible cards.
  *)
 let accuse_or_not_middle (a:ai) (s:state) : state =
-  let (accused, new_s) = accuse a s in
   match a.difficulty with
   | Easy   ->
-    if (List.length a.possible_cards)=9 then new_s
+    if (List.length a.possible_cards)<6 then let (accused, new_s) = accuse a s in new_s
       else s
-  | Medium -> if want_to_accuse a then new_s else s
+  | Medium -> if want_to_accuse a then let (accused, new_s) = accuse a s in new_s else s
   | Hard ->
     let new_ai = update_possible_cards a in
     let ai_list = replace_ai_with_new new_ai s.ais in
@@ -317,7 +316,7 @@ and disprove_case (p:prof) (ncurrent:int) (n:int) (guess:case_file) (s:state)
       match user_disprove s guess s.ais with
       | Some card ->
           begin
-          Printf.printf "You revealed the card %s to disprove the suggestion."
+          Printf.printf "You revealed the card %s to disprove the suggestion.\n"
                         (string_of_card card);
           Some (p, card)
           end
@@ -350,7 +349,7 @@ let suggest (a:ai) (s:state) : state =
       {who = who;
        where = where;
        with_what = with_what} in
-    print_endline "The suggestion is: ";
+    print_endline "\nThe suggestion is:";
     print_case_file guess;
     let (moved_or_not, map) =
       if get_current_building s.map who <> (Some where) (* Gmap *)
@@ -613,7 +612,7 @@ let in_building_voluntarily (a:ai) (b:building) (s:state) : state =
       Printf.printf "Prof. %s has to use the secret passage.\n" a.character;
       use_secret a s (*TODO*)
   | true,  false ->
-      print_endline "There is a secret passage available.";
+      print_endline "There is a secret passage available.\n";
       secret_or_roll a b s
   | false, true  ->
       Printf.printf "Prof. %s has to wait until next turn.\n" a.character;
