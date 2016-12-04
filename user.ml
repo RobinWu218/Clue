@@ -5,14 +5,15 @@ open Logic
 (* [get_who ()] prompts the user for the professor s/he wants to suggest
  * or accuse and returns the corresponding string. *)
 let rec get_who () : string =
-  print_endline "Who did it? [Bracy/Clarkson/Fan/Gries/Halpern/White]";
+  ANSITerminal.(print_string [red] 
+    "Who did it? [Bracy/Clarkson/Fan/Gries/Halpern/White]\n");
   let str = print_string  "> "; read_line () in
   let str' = String.(str |> trim |> lowercase_ascii) in
   if String.length str' = 0 
   then
     begin
-    print_endline "Please at least type something!"; 
-    get_who ()
+      ANSITerminal.(print_string [red] "Please at least type something!\n");
+      get_who ()
     end
   else 
     match str'.[0] with 
@@ -22,19 +23,22 @@ let rec get_who () : string =
     | 'g' -> "Gries"
     | 'h' -> "Halpern"
     | 'w' -> "White"
-    | _   -> print_endline "Invalid input; try again please."; get_who ()
+    | _   -> 
+      ANSITerminal.(print_string [red] "Invalid input; try again please."); 
+      get_who ()
 
 (* [get_where ()] prompts the user for the builidng s/he wants to accuse
  * and returns the corresponding string. *)
 let rec get_where () : string =
-  print_endline ("Where? [Baker/Carpenter/Duffield/Gates/Klarman/Olin/" ^
-                          "Phillips/Rhodes/Statler]");
+  ANSITerminal.(print_string [red] 
+    ("Where? [Baker/Carpenter/Duffield/Gates/Klarman/Olin/"^
+             "Phillips/Rhodes/Statler]\n"));
   let str = print_string  "> "; read_line () in
   let str' = String.(str |> trim |> lowercase_ascii) in
   if String.length str' = 0 then
     begin
-    print_endline "Please at least type something!"; 
-    get_where ()
+      ANSITerminal.(print_string [red] "Please at least type something!\n");
+      get_where ()
     end
   else 
     match str'.[0] with 
@@ -47,19 +51,22 @@ let rec get_where () : string =
     | 'p' -> "Phillips"
     | 'r' -> "Rhodes"
     | 's' -> "Statler"
-    | _   -> print_endline "Invalid input; try again please."; get_where ()
+    | _   ->
+      ANSITerminal.(print_string [red] "Invalid input; try again please."); 
+      get_where ()
 
 (* [get_with_what ()] prompts the user for the language s/he wants to suggest
  * or accuse and returns the corresponding string. *)
 let rec get_with_what () : string =
-  print_endline "With what language? [Bash/C/Java/MATLAB/OCaml/Python]";
+  ANSITerminal.(print_string [red] 
+    "With what language? [Bash/C/Java/MATLAB/OCaml/Python]\n");
   let str = print_string  "> "; read_line () in
   let str' = String.(str |> trim |> lowercase_ascii) in
   if String.length str' = 0 
   then
     begin
-    print_endline "Please at least type something!"; 
-    get_with_what ()
+      ANSITerminal.(print_string [red] "Please at least type something!\n");
+      get_with_what ()
     end
   else 
     match str'.[0] with 
@@ -69,7 +76,9 @@ let rec get_with_what () : string =
     | 'm' -> "MATLAB"
     | 'o' -> "OCaml"
     | 'p' -> "Python"
-    | _   -> print_endline "Invalid input; try again please."; get_with_what ()
+    | _   ->
+      ANSITerminal.(print_string [red] "Invalid input; try again please."); 
+      get_with_what ()
 
 (* [accuse s] prompts the user for his/her accusation, determines whether 
  * the user wins or not, and ends the game by returning the updated state.  
@@ -114,12 +123,14 @@ let accuse (s:state) : state =
 (* [accuse_or_not s] asks the user whether s/he wants to make an accusation or
  * not, and if so, updates the current state [s] by calling [accuse s]. *)
 let rec accuse_or_not (s:state) : state =
-  print_endline "Do you want to accuse? [y/n]";
+  ANSITerminal.(print_string [red] "Do you want to accuse? [y/n]\n");
   let str = print_string  "> "; read_line () in
   match String.(str |> trim |> lowercase_ascii) with 
   | "y" -> accuse s
   | "n" -> s
-  | _   -> print_endline "Invalid command; try again please."; accuse_or_not s
+  | _   -> 
+      ANSITerminal.(print_string [red] "Invalid command; try again please."); 
+      accuse_or_not s
 
 (* [disprove_loop n guess s] is [Some (prof, card)] if [prof] disproved 
  * [guess] with [card] and [None] if no one can disprove [guess]. 
@@ -163,7 +174,8 @@ and disprove_case (p:prof) (n:int) (guess:case_file) (s:state)
  * building and change that ai's [was_moved] field to true. 
  * Requires: user is currently in a building. *)
 let suggest (s:state) : state =
-  print_endline "Please make a suggestion about the current building now.";
+  ANSITerminal.(print_string [red] 
+    "Please make a suggestion about the current building now.\n");
   let who = get_who () in
   let where_option = get_current_building s.map s.user.character in (* Gmap *)
   let with_what = get_with_what () in

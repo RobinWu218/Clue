@@ -183,10 +183,10 @@ let leave_building_helper map p n =
   | None   -> raise InvalidOperation
   | Some b -> 
     try
-      let exitL = List.assoc b map.exits in
+      let exitL   = List.assoc b map.exits in
       let (er,ec) = List.assoc n exitL in
-      let (r,c) = get_current_location map p in
-      let buildL = List.remove_assoc p map.in_building in
+      let (r,c)   = get_current_location map p in
+      let buildL  = List.remove_assoc p map.in_building in
       let m = map.map_values in
         m.(r).(c)   <- None;
         m.(er).(ec) <- Some (p^"DOOR");
@@ -345,8 +345,7 @@ and calc_path map p destr destc =
          *)
         while not !foundEnd do
           match !queue with
-          | [] -> failwith ("somehow empty queue before finding destination: ("^
-                           (string_of_int destr)^","^(string_of_int destc)^")")
+          | [] -> failwith ("moving to blocked building");
           | (r,c,hist)::t -> 
             if beenHere.(r).(c) then
               queue := t
@@ -357,7 +356,6 @@ and calc_path map p destr destc =
                 if r = destr && c = destc 
                 then (* we've arrived *)
                   begin
-                    print_endline "\tfound end";
                     foundEnd := true;
                     path     := (r,c)::hist
                   end
@@ -367,13 +365,7 @@ and calc_path map p destr destc =
                     queue := t@[(r+1,c,nhist); (r,c+1,nhist);
                                 (r-1,c,nhist); (r,c-1,nhist)];
                 else (* can't travel into this space, try other options *)
-                begin
-                  print_endline ("\twhat to do with "^(string_of_int r)^","^(string_of_int c));
-                  match m.(r).(c) with
-                  | None -> print_endline("\t  has value of none")
-                  | Some b -> print_endline("\t has value of "^b);
                   queue := t                
-                end
               end
         done;
         !path
@@ -459,15 +451,13 @@ let teleport_professor map p b =
     match get_current_building map p with
     (* inside a building, [p] needs to leave first if not in building [b]  *)
     | Some curB ->
-        if curB <> b 
-        then leave_building_helper map p 1
-        else map
+      leave_building_helper map p 1
     (* not in a building: *)
     | None -> map in
     let (curr, curc) = get_current_location umap p in
       (* replace current spot w/ the original terrain: *)
       replace_tile umap.map_values p curr curc;
-      let umap = enter_building map p b in
+      let umap = enter_building umap p b in
         print_map umap;
         umap
 
