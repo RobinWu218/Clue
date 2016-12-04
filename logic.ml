@@ -167,17 +167,17 @@ let ai_disprove (ai:ai) (guess: case_file) : card option =
 let ai_choose_from_two (a:ai) (c1:card) (c2:card) : card option =
   match a.difficulty with
   | Easy   -> Some c1
-  | Medium -> failwith "TODO"
-  | Hard   -> failwith "TODO"
-
+  | Medium -> Some c2
+  | Hard   -> Some c1
 (*TODO
  * AI logic:
  *   - Easy: simply chooses the first card. *)
 let ai_choose_from_three (a:ai) (c1:card) (c2:card) (c3:card) : card option =
-  match a.difficulty with
+  Some c1
+  (*match a.difficulty with
   | Easy   -> Some c1
   | Medium -> failwith "TODO"
-  | Hard   -> failwith "TODO"
+  | Hard   -> failwith "TODO"*)
 
 (*[ai_two_nos] is called when there are two "N"'s and one maybe - we know
  * that the maybe is a yes.*)
