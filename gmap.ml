@@ -287,11 +287,15 @@ let move map p bop dir n =
 
 (* [move_towards_coord map p coord n] tries to move professor [p] on the [map]
  * [n] steps towards the coordinate [coord].
- * Requires: [n >= 0], [p] is not in a building
- *       TODO: [coord] is [Some .] on map ???
+ * Requires: [n >= 0], [p] is not in a building, building 
+ *  
  * Returns: the pair [(tf, map2)], where
  *   [tf]   is [true] iff [p] succesfully made it to [coord]
  *   [map2] is the updated map.
+ *
+ * Note: fails to account for people clogging up hallways to prevent a valid
+ * path. After much discussion, the problem was deemed to occur at too few of a
+ * frequency to necessitate a fail-proof automated mover.
  *)
 let rec move_towards_coord map p coord n =
   let (destr, destc) = coord in
@@ -300,7 +304,7 @@ let rec move_towards_coord map p coord n =
     else
       let (sr, sc) = get_current_location map p in
       replace_tile map.map_values p sr sc;
-      let path = calc_path map p destr destc in
+      let path = calc_path map p destr destc false in
       let dirs = simplify_path path in
       let steps_left = ref n in
       let map2 =
@@ -313,12 +317,14 @@ let rec move_towards_coord map p coord n =
                 begin
                   let (s, m) = move_helper accmap p None dir !steps_left in
                     steps_left := s; 
+                    print_endline (string_of_int s);
                     (s, m)
                 end
               else
                 begin
                   let (s, m) = move_helper accmap p None dir steps in
-                    steps_left := !steps_left - steps + s;
+                    steps_left := !steps_left - steps;
+                    print_endline (string_of_int s);
                     (s, m)
                 end
             in accmap
@@ -345,7 +351,7 @@ and calc_path map p destr destc =
          *)
         while not !foundEnd do
           match !queue with
-          | [] -> failwith ("moving to blocked building");
+          | [] -> raise (InvalidLocation "no path exists");
           | (r,c,hist)::t -> 
             if beenHere.(r).(c) then
               queue := t
@@ -364,6 +370,15 @@ and calc_path map p destr destc =
                   let nhist = (r,c)::hist in 
                     queue := t@[(r+1,c,nhist); (r,c+1,nhist);
                                 (r-1,c,nhist); (r,c-1,nhist)];
+                else if ghosts
+                (* we pretend people aren't blocking our way *)
+                then
+                  match m.(r).(c) with
+                  | None       -> queue := t
+                  | Some ghost -> 
+                    let nhist = (r,c)::hist in 
+                      queue := t@[(r+1,c,nhist); (r,c+1,nhist);
+                                  (r-1,c,nhist); (r,c-1,nhist)];
                 else (* can't travel into this space, try other options *)
                   queue := t                
               end
