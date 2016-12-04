@@ -216,13 +216,25 @@ let string_of_coord ((r,c):coord) : string =
   Printf.sprintf "(%d, %d)" r c
 
 (* [string_of_exits exits] is the string representation of all exits to a
- * building with their ids and coordinates. *)
+ * building with their ids and coordinates. 
+ * Requires: [exits] has length 2 or 4. *)
 let rec string_of_exits (exits:(int * coord) list) : string =
   match exits with
+  | [e1;e2] -> (* Statler Hall *)
+      ("exit 1: (13, 8) upper right\n" ^
+       "exit 2: (16, 7) lower left")
+  | [e1;e2;e3;e4] -> (* Klarman Hall *)
+      ("exit 1: (5,  9) upper left\n" ^
+       "exit 2: (8, 10) lower left\n" ^
+       "exit 3: (8, 15) lower right\n" ^
+       "exit 4: (5, 16) upper right")
+  | _ -> failwith "This should not happen in string_of_exits in Data"
+(*
   | [] -> ""
   | (id,coord)::t -> ((Printf.sprintf "  exit %d: %s\n"
                                       id (string_of_coord coord)) ^
-             (string_of_exits t))
+                     (string_of_exits t))
+*)
 
 (* [string_of_prof_lst] is a comma-separated string representation of a list
  * of profs. *)
@@ -287,7 +299,7 @@ let print_case_file (cf:case_file) : unit =
     print_string [cyan; Bold] cf.with_what;
     print_string [] " in ";
     print_string [cyan; Bold] (cf.where^" Hall");
-    print_string [] "\n\n"
+    print_string [] ".\n\n"
   )
 
 (* [wait_for_user] waits for the user to hit enter to continue. *)

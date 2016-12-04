@@ -239,8 +239,9 @@ let rec get_movement (n:int) : string * int =
   ANSITerminal.(
     print_string [red] (
       "You can move "^(string_of_int n)^
-      " steps in directions [up/down/left/right]\n");
-    print_string [yellow] "e.g: up 2, right 4, etc.\n";
+      " steps in directions [up/down/left/right].\n"^
+      "Enter commands for one direction at a time.\n");
+    print_string [yellow] "e.g: up 2, r 4, etc.\n";
   );
   let str = print_string  "> "; read_line () |> String.lowercase_ascii in
   let lst = Str.(str |> split (regexp "[ ]+")) in
