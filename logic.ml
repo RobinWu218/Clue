@@ -32,56 +32,61 @@ let roll_two_dice () : int =
   let d1 = 1 + Random.int 5 in
   let d2 = 1 + Random.int 5 in
   let sum = d1 + d2 in
-    print_endline "Rolling two dice...";
-    Printf.printf "Die 1: %d\n" d1;
-    Printf.printf "Die 2: %d\n" d2;
+    print_info (
+      "Rolling two dice...\n"^
+      "Die 1: "^(string_of_int d1)^"\n"^
+      "Die 2: "^(string_of_int d2))
+      true;
     sum
 
 (* [get_choice_two ()] is [1] if the user selects the first choice and [2] if
  * the user selects the second choice. *)
 let rec get_choice_two () : int =
-  let str = print_string  "> "; read_line () in
+  let str = print  "> " false; read_line () in
   let str' = String.(str |> trim) in
   if String.length str' = 0
   then
     begin
-    print_endline "Please at least type something!";
-    get_choice_two ()
+      print_insn "Please at least type something!" true;
+      get_choice_two ()
     end
   else
     match str'.[0] with
     | '1' -> 1
     | '2' -> 2
-    | _   -> print_endline "Please type either 1 or 2!"; get_choice_two ()
+    | _   -> 
+      print_insn "Please type either 1 or 2!" true; 
+      get_choice_two ()
 
 (* [get_choice_three ()] is [1] if the user selects the first choice, [2] if
  * the user selects the second choice, and [3] if the third. *)
 let rec get_choice_three () : int =
-  let str = print_string  "> "; read_line () in
+  let str = print  "> " false; read_line () in
   let str' = String.(str |> trim) in
   if String.length str' = 0
   then
     begin
-    print_endline "Please at least type something!";
-    get_choice_three ()
+      print_insn "Please at least type something!" true;
+      get_choice_three ()
     end
   else
     match str'.[0] with
     | '1' -> 1
     | '2' -> 2
     | '3' -> 3
-    | _   -> print_endline "Please type 1 or 2 or 3!"; get_choice_three ()
+    | _   -> print_insn "Please type 1 or 2 or 3!" true; 
+             get_choice_three ()
 
 (* [get_choice_four ()] is [1] if the user selects the first choice, [2] if
  * the second, [3] if the third, and [4] if the fourth. *)
 let rec get_choice_four () : int =
-  let str = print_string  "> "; read_line () in
+  let str = print  "> " false; read_line () in
   let str' = String.(str |> trim) in
   if String.length str' = 0
   then
     begin
-    print_endline "Please at least type something!";
-    get_choice_four ()
+      print_insn "Please at least type something!" true;
+      get_choice_four ()
     end
   else
     match str'.[0] with
@@ -89,18 +94,19 @@ let rec get_choice_four () : int =
     | '2' -> 2
     | '3' -> 3
     | '4' -> 4
-    | _   -> print_endline "Please type 1 or 2 or 3 or 4!"; get_choice_four ()
+    | _   -> print_insn "Please type 1 or 2 or 3 or 4!" true; 
+             get_choice_four ()
 
 (* [get_choice_num_ai ()] is [2] up till [5] if the user chooses to play with
  * [2] to [5] AI's. *)
 let rec get_choice_num_ai () : int =
-  let str = print_string  "> "; read_line () in
+  let str = print  "> " false; read_line () in
   let str' = String.(str |> trim) in
   if String.length str' = 0
   then
     begin
-    print_endline "Please at least type something!";
-    get_choice_num_ai ()
+      print_insn "Please at least type something!" true;
+      get_choice_num_ai ()
     end
   else
     match str'.[0] with
@@ -108,7 +114,7 @@ let rec get_choice_num_ai () : int =
     | '3' -> 3
     | '4' -> 4
     | '5' -> 5
-    | _   -> print_endline "Please type an integer between 2 and 5 inclusive!";
+    | _   -> print_insn "Please type an integer between 2 and 5 inclusive!" true;
              get_choice_num_ai ()
 
 (* [user_choose_from_two c1 c2] is [Some c1] or [Some c2] as determined by

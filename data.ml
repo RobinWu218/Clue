@@ -81,7 +81,38 @@ type state = {
   past_guesses:  (case_file * prof * (prof option)) list;
 }
 
+let important_style = [ANSITerminal.on_black; ANSITerminal.Bold; ANSITerminal.green]
+let info_style      = [ANSITerminal.on_black; ANSITerminal.yellow]
+let insn_style      = [ANSITerminal.on_black; ANSITerminal.Bold; ANSITerminal.blue]
+let results_style   = [ANSITerminal.on_black; ANSITerminal.white]
+
 (***** various functions *****)
+
+let card_style () = [ANSITerminal.on_black; ANSITerminal.Bold; ANSITerminal.cyan]
+
+let print_help style s e =
+  ANSITerminal.(
+  if e then
+  begin
+    print_string [] (sprintf style "%-70s" s);
+    print_endline ""
+  end
+  else print_string info_style s;)
+
+let print_info s e = 
+  print_help info_style s e
+
+let print_insn s e =
+  print_help insn_style s e
+
+let print_important s e = 
+  print_help important_style s e
+
+let print_results s e=
+  print_help results_style s e
+
+let print s e =
+  print_help [ANSITerminal.on_black] s e
 
 (* [int_option_of_string s] is [Some i] if [s] can be converted to int [i]
  * using [int_of_string s], and [None] otherwise. *)
@@ -242,9 +273,9 @@ let rec string_of_prof_lst (lst:prof list) : string =
   match lst with
   | [] -> ""
   | [p] -> string_of_card (Prof p)
-  | [p1;p2] -> (string_of_card (Prof p1)) ^ ", and\n" ^
+  | [p1;p2] -> (string_of_card (Prof p1)) ^ ", and " ^
                (string_of_card (Prof p2))
-  | h::t -> (string_of_card (Prof h)) ^ ",\n" ^
+  | h::t -> (string_of_card (Prof h)) ^ ", " ^
             (string_of_prof_lst t)
 
 (* [string_of_card_lst] is a comma-separated string representation of a list
@@ -253,9 +284,9 @@ let rec string_of_card_lst (lst:card list) : string =
   match lst with
   | [] -> ""
   | [c] -> string_of_card c
-  | [c1;c2] -> (string_of_card c1) ^ ", and \n" ^
+  | [c1;c2] -> (string_of_card c1) ^ ", and " ^
                (string_of_card c2)
-  | h::t -> (string_of_card h) ^ ",\n" ^
+  | h::t -> (string_of_card h) ^ ", " ^
             (string_of_card_lst t)
 
 (* [int_lst_to_prof_lst lst] is a prof list corresponding to int list [lst]. *)
@@ -294,17 +325,20 @@ let card_lst_to_building_lst (lst:card list) : building list =
 (* [print_case_file cf] prints the case file [cf] in a sentence. *)
 let print_case_file (cf:case_file) : unit =
   ANSITerminal.(
-    print_string [cyan; Bold] ("Prof. "^cf.who);
-    print_string [] " started the virus with ";
-    print_string [cyan; Bold] cf.with_what;
-    print_string [] " in ";
-    print_string [cyan; Bold] (cf.where^" Hall");
-    print_string [] ".\n\n"
+    print_string (card_style ()) ("Prof. "^cf.who);
+    print_string [white; on_black] " started the virus with ";
+    print_string (card_style ())  cf.with_what;
+    print_string [white; on_black] " in ";
+    print_string (card_style ())  (cf.where^" Hall");
+    print_results "" true;
+    print_results "" true;
   )
 
 (* [wait_for_user] waits for the user to hit enter to continue. *)
 let wait_for_user () =
-  ANSITerminal.print_string [ANSITerminal.red]
-    "\nPress enter to continue...............................................\n";
+  print_info " " true;
+  ANSITerminal.print_string [ANSITerminal.red; ANSITerminal.on_black]
+    "Press enter to continue...............................................";
+  print_info " " true;
   let _ = read_line () in ()
 

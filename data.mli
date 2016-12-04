@@ -89,6 +89,18 @@ type state = {
 
 (***** various functions *****)
 
+val card_style      : unit -> ANSITerminal.style list
+
+val print_info : string -> bool -> unit
+
+val print_insn : string -> bool -> unit
+
+val print_important : string -> bool -> unit
+
+val print_results : string -> bool -> unit
+
+val print : string -> bool -> unit
+
 (* [int_option_of_string s] is [Some i] if [s] can be converted to int [i]
  * using [int_of_string s], and [None] otherwise. *)
 val int_option_of_string : string -> int option

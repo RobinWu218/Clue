@@ -21,27 +21,27 @@ and to_string nr nc w =
     for j = 0 to nc-1 do
       Buffer.add_string buf (display w.(i).(j))
     done;
-    Buffer.add_string buf "\n"
+    Buffer.add_string buf (ANSITerminal.sprintf [ANSITerminal.on_black] "\n")
   done;
   Buffer.contents buf
 and display n =
   match n with
   | None   -> ANSITerminal.sprintf [ANSITerminal.on_black] "%s" "- "
   | Some i -> ANSITerminal.sprintf 
-              [ANSITerminal.on_black; style_of_str i] "%s " 
+              (ANSITerminal.on_black::(style_of_str i)) "%s " 
               (String.make 1 i.[0])
 and style_of_str i =
   let open ANSITerminal in
   match i with
-  | "."    -> white (* ground *)
-  | "*"    -> yellow (* wall   *)
-  | "DOOR" -> green (* exit   *)
-  | "s"    -> green (* secret passage *)
+  | "."    -> [white] (* ground *)
+  | "*"    -> [yellow] (* wall   *)
+  | "DOOR" -> [green] (* exit   *)
+  | "s"    -> [green] (* secret passage *)
   | c      ->
       let len = String.length c in
-      if      len = 1 then yellow  (* part of clue header *)
-      else if len = 2 then cyan    (* part of building name *)
-      else red                     (* professor name *)
+      if      len = 1 then [Bold; yellow]  (* part of clue header *)
+      else if len = 2 then [Bold; yellow]  (* part of building name *)
+      else [Bold; cyan]                    (* professor name *)
 
 (* [get_exits map] returns an association list of exit coordinates to their
  * respective buildings.
