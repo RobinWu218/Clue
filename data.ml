@@ -42,12 +42,9 @@ type map = {
   num_rows:       int;
   num_cols:       int;
   exits:         (building * ((int * coord) list)) list;
-       (* e.g., [("Gates",   [(1,    (0,0));
-                              (2,    (5,5))     ])     ] *)
   buildings:      building list;
   waiting_spots: (building * (coord list)) list;
   secrets:       (building * building) list;
-  (* Below are fields that can change throughout the game. *)
   map_values:     string option array array;
   in_building:   (prof * building)list;
   location:      (prof * coord) list;
@@ -57,7 +54,6 @@ type map = {
 type user = {
   character: prof;
   hand:      hand;
-  (* Below is a field that can change throughout the game. *)
   was_moved: bool;
 }
 
@@ -66,7 +62,6 @@ type ai = {
   character:      prof;
   hand:           hand;
   difficulty:     difficulty;
-  (* Below are fields that can change throughout the game. *)
   was_moved:      bool;
   is_in_game:     bool;
   possible_cards: card list;
@@ -78,7 +73,6 @@ type ai = {
 type state = {
   fact_file:     case_file;
   dictionary:    (prof * [`AI |`User |`No ]) list;
-  (* Below are fields that can change throughout the game. *)
   game_complete: bool;
   counter:       int;
   map:           map;
@@ -95,7 +89,7 @@ let int_option_of_string (s:string) : int option =
   try Some (int_of_string s)
   with Failure _ -> None
 
-(*TODO
+(* [diffculty_of_int] is the difficulty level corresponding to an int.
  * Requires: n is 1 or 2 or 3 *)
 let difficulty_of_int (n:int) : difficulty =
   match n with

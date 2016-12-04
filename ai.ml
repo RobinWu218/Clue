@@ -145,19 +145,20 @@ let update_possible_not_disproved ai guess =
         what)
       where
 
-(* TODO all `N *)
+(* [all_no lst] returns true if lst is a list of all no's and returns false
+ * otherwise. *)
 let rec all_no lst : bool =
   match lst with
   | [] -> true
   | h::t -> h = `N && all_no t
 
-(* TODO one `Y *)
+(*[one_yes lst] returns true if lst has only one yes and false otherwise. *)
 let rec one_yes lst : bool =
   match lst with
   | [] -> false
   | h::t -> h = `Y || one_yes t
 
-(*TODO*)
+(*[update_pc_helper_no] returns a unit. It updates pc_ref. TODO more*)
 let update_pc_helper_no (x:int) (y:int) (a:ai)
                         (pc_ref:card list ref) : unit =
   for i = x to y do
@@ -423,7 +424,7 @@ let rec move_where_medium_helper (lst:building list)
   | h::t -> if check_building bop h then h
             else move_where_medium_helper t a bop s
 
-(* one of possible buildings if any, otherwise one of closest three 
+(* one of possible buildings if any, otherwise one of closest three
  * cannot possibly be blocked*)
 let move_where_medium (a:ai) (bop:building option) (s:state) : building =
   move_where_medium_helper (card_lst_to_building_lst a.possible_cards) a bop s
@@ -451,8 +452,10 @@ let move_where (a:ai) (bop:building option) (s:state) : building =
   | Medium -> let b = move_where_medium a bop s in
               if not (is_building_blocked s.map b) then b
               else move_where_easy a bop s
-  | Hard   -> let b = move_where_hard a bop s in
-              if not (is_building_blocked s.map b) then b
+  | Hard   -> let b1 = move_where_hard a bop s in
+              if not (is_building_blocked s.map b1) then b1
+              else let b2 = move_where_medium a bop s in
+              if not (is_building_blocked s.map b2) then b2
               else move_where_easy a bop s
 
 (* [move a n bop s] allows the AI [a]'s character to move n steps,
@@ -503,7 +506,8 @@ let use_secret (a:ai) (s:state) : state =
   let map = use_secret_passage s.map a.character in (* Gmap *)
   suggest a {s with map = map}
 
-(*true when we want to use the secret passage*)
+(*[want_to_secret a b] is true if we use the secret passage, we would reach
+ * one of the buildings in a.possible_cards. *)
 let want_to_secret a b=
     let dest =
       match b with
@@ -582,7 +586,11 @@ let secret_or_roll_or_suggest (a:ai) (b:building) (s:state) : state =
                 then leave_and_move a b s
               else suggest a s
 
-(*TODO*)
+(*[in_building_involuntarily a b s] returns a state after determining what
+ * action the ai should proceed with given that it was moved there involuntarily.
+ * The ai decides this based on whether or not the building that the ai is in
+ * currently has a secret passage and whether or not the building that the ai is
+ * in right now is blocked. *)
 let in_building_involuntarily (a:ai) (b:building) (s:state) : state =
   let secret = has_secret_passage s.map b in
   let blocked = is_building_blocked s.map b in
@@ -600,7 +608,11 @@ let in_building_involuntarily (a:ai) (b:building) (s:state) : state =
     end
   in assign_was_moved news a.character false
 
-(*TODO*)
+(*[in_building_voluntarily a b s] returns a state after determining what
+ * action the ai should proceed with given that it was moved there voluntarily.
+ * The ai decides this based on whether or not the building that the ai is in
+ * currently has a secret passage and whether or not the building that the ai is
+ * in right now is blocked. *) (*TODO please improve*)
 let in_building_voluntarily (a:ai) (b:building) (s:state) : state =
   let secret = has_secret_passage s.map b in (* Gmap *)
   let blocked = is_building_blocked s.map b in (* Gmap *)

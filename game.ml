@@ -112,9 +112,7 @@ let rec generate_dictionary prof_lst user_char ai_lst =
  * Requires: [n] is an integer between 2 and 5 inclusive, [d] is an integer
  * between 1 and 3 inclusive. *)
 let init_state (n:int) (d:difficulty) : state =
-  Random.self_init ();
-                  (*Fix the problem of producing same sequence of nums every
-                   *time we launch utop*)
+  Random.self_init (); (*Random seed*)
   if (n >= 2) && (n <= 5) then
     let fact_file  = generate_case_file () in
     let fact_cards = [Prof fact_file.who;
@@ -134,7 +132,6 @@ let init_state (n:int) (d:difficulty) : state =
     print_endline
       "\n**********************************************************************\n";
 
-    (* print roles *)
     ANSITerminal.(
       print_string [Bold] "The AI bots play the roles of: \n";
       print_string [] ((string_of_prof_lst ai_characters_lst)^".");
@@ -143,7 +140,6 @@ let init_state (n:int) (d:difficulty) : state =
     );
     wait_for_user();
 
-    (* print map and legend *)
     ANSITerminal.(
       print_string [yellow] "Your location is tracked on the map by your last name ";
       print_string [on_black; Bold; red] "I";
@@ -162,7 +158,6 @@ let init_state (n:int) (d:difficulty) : state =
     print_map map;
     wait_for_user();
 
-    (* print starting hands *)
     ANSITerminal.(
       print_string [] "You have the following cards: \n";
       print_string [cyan; Bold] ((string_of_card_lst user_hand)^".\n");
@@ -260,6 +255,5 @@ and step_helper (p:prof) (s:state) : state =
  * it. *)
 let main n d =
   let s = init_state n (difficulty_of_int d) in
-  (*TODO print out user's character and hand*)
   ignore (step s)
 
