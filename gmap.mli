@@ -114,17 +114,19 @@ val move: map -> prof -> building option -> string -> int -> int * map
  * path. After much discussion, the problem was deemed to occur at too few of a
  * frequency to necessitate a fail-proof automated mover.
  *)
-val move_towards_coord: map -> prof -> coord -> int -> bool * map
+val move_towards_coord: map -> prof -> coord -> building option -> int -> bool * map
 
-(* [move_towards_building map p b n] tries to move professor [p] on the [map] 
- * [n] steps towards the building [b].
+(* [move_towards_building map p b bop n] tries to move professor [p] on the [map] 
+ * [n] steps towards the building [b], safeguarding against reentering the 
+ * building referred by the building option [bop].
  * Requires: [n >= 0], [p] is not in a building already.
- * Returns: the pair [(i, map2)], where
- *   [i]    is the steps remaining after going in [dir] direction, and
+ * TODO: called only when [p] can enter [b], i.e., [p] did not just leave [b].
+ * Returns: the pair [(tf, map2)], where
+ *   [tf]   is [true] iff [p] succesfully made it to [coord]
  *   [map2] is the updated map.
  * Raises: InvalidLocation if [b] is not a valid building id.
  *)
-val move_towards_building: map -> prof -> building -> int -> bool * map
+val move_towards_building: map -> prof -> building -> building option -> int -> bool * map
 
 (* [teleport_professor map p b] moves a professor [p] on the [map] to building [b]
  * This event occurs whenever a suggestion or accusation is made; the

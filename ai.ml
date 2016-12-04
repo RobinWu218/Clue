@@ -423,7 +423,8 @@ let rec move_where_medium_helper (lst:building list)
   | h::t -> if check_building bop h then h
             else move_where_medium_helper t a bop s
 
-(* one of possible buildings if any, otherwise one of closest three *)
+(* one of possible buildings if any, otherwise one of closest three 
+ * cannot possibly be blocked*)
 let move_where_medium (a:ai) (bop:building option) (s:state) : building =
   move_where_medium_helper (card_lst_to_building_lst a.possible_cards) a bop s
 
@@ -443,11 +444,16 @@ let move_where_hard (a:ai) (bop:building option) (s:state) : building =
                          (List.map snd (closest_buildings s.map a.character))
                          a bop s
 
+(*ensures that the building is not blocked*)
 let move_where (a:ai) (bop:building option) (s:state) : building =
   match a.difficulty with
   | Easy   -> move_where_easy a bop s
-  | Medium -> move_where_medium a bop s
-  | Hard   -> move_where_hard a bop s
+  | Medium -> let b = move_where_medium a bop s in
+              if not (is_building_blocked s.map b) then b
+              else move_where_easy a bop s
+  | Hard   -> let b = move_where_hard a bop s in
+              if not (is_building_blocked s.map b) then b
+              else move_where_easy a bop s
 
 (* [move a n bop s] allows the AI [a]'s character to move n steps,
  * or fewer if the character gets into a building
@@ -466,7 +472,7 @@ let move (a:ai) (n:int) (bop:building option) (s:state) : state =
   else
     let b = move_where a bop s in
     let (in_building, new_map) =
-      move_towards_building s.map a.character b n in (* Gmap *)
+      move_towards_building s.map a.character b bop n in (* Gmap *)
     if in_building then
       suggest a {s with map = new_map}
     else
@@ -622,12 +628,12 @@ let in_building_voluntarily (a:ai) (b:building) (s:state) : state =
 let rec step (a:ai) (s:state) : state =
   let (end_turn, s1) = accuse_or_not_start a s in
   if end_turn then s1 else
-  let c = get_current_location s1.map a.character in
-  if is_exit_blocked s1.map c then s1 else
   match get_current_building s1.map a.character with (* Gmap *)
   | Some b ->
       if a.was_moved
       then in_building_involuntarily a b s1
       else in_building_voluntarily a b s1
   | None ->
+      let c = get_current_location s1.map a.character in
+      if is_exit_blocked s1.map c then s1 else
       move a (roll_two_dice ()) None s1 (* Gmap *)
