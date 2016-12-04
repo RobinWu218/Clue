@@ -3,6 +3,3 @@ play:
 
 clean:
 	ocamlbuild -clean
-
-test:
-	ocamlbuild -pkgs oUnit,yojson,str,ANSITerminal game_test.byte && ./game_test.byte
