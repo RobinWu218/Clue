@@ -223,17 +223,21 @@ let accuse (a:ai) (s:state) : bool * state =
   if accusation = s.fact_file
   then
     begin
-    print_endline "Uh oh, the AI has won! That accusation was correct.";
-    print_endline "You have lost this game. :(";
-    print_endline "CLUE will exit automatically. Feel free to play again!";
+      ANSITerminal.(
+      print_string [red] ("Uh oh, the AI has won! That accusation was correct.\n");
+      print_string [red ] "You have lost this game. :(\n";
+      print_string [red ] ("CLUE will exit automatically. Feel free to play again!\n");
+    );
     (true, {s with game_complete=true})
     end
   else
     begin
-    print_endline ("The AI has made the wrong accusation!\n"^
-      "This AI is now out of of the game.\n"^
-      "Although it can still disprove, it can no longer move or win.\n"^
-      "As punishment, it is forever stuck in the building it accused...");
+      ANSITerminal.(
+      print_string [red] ("The AI has made the wrong accusation!\n");
+      print_string [Bold] ("This AI is now out of of the game.\n");
+      print_string [red] ("Although it can still disprove, it can no longer move or win.\n");
+      print_string [red] ("As punishment, it is forever stuck in the building it accused...\n");
+    );
     let new_map     = teleport_professor s.map a.character where in (*Gmap*)
     let new_ai      = {a with is_in_game=false} in
     let new_ai_list = replace_ai_with_new new_ai s.ais in
