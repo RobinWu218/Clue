@@ -2,6 +2,7 @@ open Data
 open Gmap
 open Logic
 
+(* helpful for removing cards from list?
 (*[known_not_possible ai] updates ai.possible_cards to not include the cards
 from ai.known_cards*)
 let known_not_possible ai =
@@ -12,6 +13,7 @@ let known_not_possible ai =
   in
   let new_poss = helper ai.known_cards ai.possible_cards in
   {ai with possible_cards=new_poss}
+*)
 
 (* [init p h d lst] is the AI data structure that represents an AI playing
  * character [p] on difficulty level [d], with hand [h]. [lst] is a list of
@@ -36,40 +38,15 @@ let init (p:prof) (h:hand) (d:difficulty) (lst:prof list) : ai =
       end
     else
       begin List.iter (fun i -> arr.(i) <- `N) pos; (x, arr) end) lst in
-  let a1 = {
-    character      = p;
-    hand           = h;
-    difficulty     = d;
-    was_moved      = false;
-    is_in_game     = true;
-    destination    = None;
-    known_cards    = h;
-    possible_cards = possible;
-    card_status    = status;
-  } in
-  known_not_possible a1
-
-(* [get_ai p s] is the AI data structure for the AI playing character [p] in
- * state [s].
- * Raises: Not_found if [p] is not represented by an AI in [s].
- *)
-let get_ai (p:prof) (s:state) : ai =
-  List.find (fun a -> a.character = p) s.ais
-
-(* [get_difficulty a] is the difficulty level of the AI [a].
- *)
-let get_difficulty (a:ai) : difficulty =
-  a.difficulty
-
-(* [still_in_game a] is [true] iff the AI [a] is still in the game.
- * If that ai is out, s/he can still prove suggestions wrong.
- *)
-let still_in_game (a:ai) : bool =
-  a.is_in_game
-
-(************************************************
- * Helper Functions
- ************************************************)
+  {
+  character      = p;
+  hand           = h;
+  difficulty     = d;
+  was_moved      = false;
+  is_in_game     = true;
+  possible_cards = possible;
+  card_status    = status;
+  }
 
 (*[easy_helper_who possible] takes a list of possible cards and returns the
  * first prof that is in the list. This is a helper function for the easy ai.*)
@@ -397,7 +374,8 @@ let suggest (a:ai) (s:state) : state =
           ) a.card_status;
         let newais = List.map (fun a' ->
           if a' <> a then a'
-          else known_not_possible {a with known_cards = c>::a.known_cards})
+          else {a with possible_cards = 
+            List.filter (fun c' -> c' <> c) a.possible_cards})
           s.ais in
         let news'' =
           {news' with ais = newais;
