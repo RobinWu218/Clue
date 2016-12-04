@@ -145,19 +145,20 @@ let update_possible_not_disproved ai guess =
         what)
       where
 
-(* TODO all `N *)
+(* [all_no lst] returns true if lst is a list of all no's and returns false
+ * otherwise. *)
 let rec all_no lst : bool =
   match lst with
   | [] -> true
   | h::t -> h = `N && all_no t
 
-(* TODO one `Y *)
+(*[one_yes lst] returns true if lst has only one yes and false otherwise. *)
 let rec one_yes lst : bool =
   match lst with
   | [] -> false
   | h::t -> h = `Y || one_yes t
 
-(*TODO*)
+(*[update_pc_helper_no] returns a unit. It updates pc_ref. TODO more*)
 let update_pc_helper_no (x:int) (y:int) (a:ai)
                         (pc_ref:card list ref) : unit =
   for i = x to y do
@@ -585,7 +586,11 @@ let secret_or_roll_or_suggest (a:ai) (b:building) (s:state) : state =
                 then leave_and_move a b s
               else suggest a s
 
-(*[in_building_involuntarily a b s] *)
+(*[in_building_involuntarily a b s] returns a state after determining what
+ * action the ai should proceed with given that it was moved there involuntarily.
+ * The ai decides this based on whether or not the building that the ai is in
+ * currently has a secret passage and whether or not the building that the ai is
+ * in right now is blocked. *)
 let in_building_involuntarily (a:ai) (b:building) (s:state) : state =
   let secret = has_secret_passage s.map b in
   let blocked = is_building_blocked s.map b in
@@ -603,7 +608,11 @@ let in_building_involuntarily (a:ai) (b:building) (s:state) : state =
     end
   in assign_was_moved news a.character false
 
-(*TODO*)
+(*[in_building_voluntarily a b s] returns a state after determining what
+ * action the ai should proceed with given that it was moved there voluntarily.
+ * The ai decides this based on whether or not the building that the ai is in
+ * currently has a secret passage and whether or not the building that the ai is
+ * in right now is blocked. *) (*TODO please improve*)
 let in_building_voluntarily (a:ai) (b:building) (s:state) : state =
   let secret = has_secret_passage s.map b in (* Gmap *)
   let blocked = is_building_blocked s.map b in (* Gmap *)
