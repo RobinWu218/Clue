@@ -321,19 +321,10 @@ and disprove_case (p:prof) (ncurrent:int) (n:int) (guess:case_file) (s:state)
   | `No ->
       disprove_loop ncurrent (n+1) guess s
 
-
-(* AI logic: random. *)
-let suggest_easy (a:ai) (s:state) : (prof * language) =
-  (prof_of_int (Random.int 6), lang_of_int (Random.int 6))
-
-(* AI logic: only guesses possible cards, not the ones that it knows exists.*)
-let suggest_medium (ai:ai) (s:state) : (prof * language) =
-  (easy_helper_who ai.possible_cards, easy_helper_what ai.possible_cards)
-
-let suggest_hard (ai:ai) (s:state) :  (prof * language) =
-  (easy_helper_who ai.possible_cards, easy_helper_what ai.possible_cards)
-
 (*called move towards building while still in building*)
+(* AI logic easy: random. *)
+(* AI logic medium and hard: only guesses possible cards, not the ones that 
+ * it knows exists.*)
 (*TODO*)
 let suggest (a:ai) (s:state) : state =
   Printf.printf "Prof. %s is making a suggestion about the current building.\n"
@@ -344,9 +335,11 @@ let suggest (a:ai) (s:state) : state =
     let (who, with_what) =
       begin
       match a.difficulty with
-      | Easy   -> suggest_easy a s
-      | Medium -> suggest_medium a s
-      | Hard   -> suggest_hard a s
+      | Easy -> 
+          (prof_of_int (Random.int 6), lang_of_int (Random.int 6))
+      | Medium | Hard -> 
+          (easy_helper_who a.possible_cards, 
+           easy_helper_what a.possible_cards)
       end in
     let guess =
       {who = who;
