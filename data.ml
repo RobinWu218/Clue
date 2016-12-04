@@ -281,8 +281,14 @@ let card_lst_to_building_lst (lst:card list) : building list =
 
 (* [print_case_file cf] prints the case file [cf] in a sentence. *)
 let print_case_file (cf:case_file) : unit =
-  Printf.printf "Prof. %s started the virus with %s in %s Hall.\n\n"
-                cf.who cf.with_what cf.where
+  ANSITerminal.(
+    print_string [cyan; Bold] ("Prof. "^cf.who);
+    print_string [] " started the virus with ";
+    print_string [cyan; Bold] cf.with_what;
+    print_string [] " in ";
+    print_string [cyan; Bold] (cf.where^" Hall");
+    print_string [] "\n\n"
+  )
 
 (* [wait_for_user] waits for the user to hit enter to continue. *)
 let wait_for_user () =

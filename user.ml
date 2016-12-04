@@ -150,18 +150,18 @@ let rec accuse_or_not (s:state) : state =
  * It starts with the professor corresponding to integer [n], goes along
  * the loop B->C->F->G->H->W->B until someone is able to disprove [guess]
  * or when the user's character is reached. *)
-let rec disprove_loop (n:int) (guess:case_file) (s:state)
-                        : ((prof * card) option) =
+let rec disprove_loop (n:int)(guess:case_file)(s:state):((prof * card) option) =
   let n' = n mod 6 in
-  if n' = int_of_card (Prof s.user.character) then None else
-  match n' with
-  | 0 -> disprove_case "Bracy"    0 guess s
-  | 1 -> disprove_case "Clarkson" 1 guess s
-  | 2 -> disprove_case "Fan"      2 guess s
-  | 3 -> disprove_case "Gries"    3 guess s
-  | 4 -> disprove_case "Halpern"  4 guess s
-  | 5 -> disprove_case "White"    5 guess s
-  | _ -> failwith "This should not happen in disprove_loop in user.ml"
+    if n' = int_of_card (Prof s.user.character) then None else
+    match n' with
+    | 0 -> disprove_case "Bracy"    0 guess s
+    | 1 -> disprove_case "Clarkson" 1 guess s
+    | 2 -> disprove_case "Fan"      2 guess s
+    | 3 -> disprove_case "Gries"    3 guess s
+    | 4 -> disprove_case "Halpern"  4 guess s
+    | 5 -> disprove_case "White"    5 guess s
+    | _ -> failwith "This should not happen in disprove_loop in user.ml"
+
 (* [disprove_case p n guess s] checks if the professor corresponding
  * to integer [n] is represented by any ai and if so, if that ai can disprove
  * [guess], before possibly calling [disprove_loop (n+1) guess s] to move
@@ -171,11 +171,11 @@ and disprove_case (p:prof) (n:int) (guess:case_file) (s:state)
   match List.assoc p s.dictionary with
   | `AI ->
       let ai = List.find (fun a -> a.character = p) s.ais in
-      begin
-      match ai_disprove ai guess s.ais with (* Logic *)
-      | Some card -> Some (p, card)
-      | None -> disprove_loop (n+1) guess s
-      end
+        begin
+          match ai_disprove ai guess s.ais with (* Logic *)
+          | Some card -> Some (p, card)
+          | None      -> disprove_loop (n+1) guess s
+        end
   | `User ->
       failwith "This should not happen in disprove_case in user.ml"
   | `No ->
@@ -190,7 +190,7 @@ let suggest (s:state) : state =
   ANSITerminal.(print_string [red]
     "Please make a suggestion about the current building now.\n");
   let who = get_who () in
-  let where_option = get_current_building s.map s.user.character in (* Gmap *)
+  let where_option = get_current_building s.map s.user.character in
   let with_what = get_with_what () in
   match where_option with
   | Some where ->
@@ -198,30 +198,36 @@ let suggest (s:state) : state =
         {who = who;
          where = where;
          with_what = with_what} in
-      print_endline "Your suggestion is: ";
+      ANSITerminal.print_string [] "\nYour suggestion is: \n";
       print_case_file guess;
       let (moved_or_not, map) =
-        if get_current_building s.map who <> (Some where) (* Gmap *)
-        then (true, (teleport_professor s.map who where)) (* Gmap *)
+        if get_current_building s.map who <> (Some where) 
+        then (true, (teleport_professor s.map who where)) 
         else (false, s.map) in
-      let news = {s with map = map} in
-      let news' = assign_was_moved news who moved_or_not in (* Gmap *)
+      let news  = {s with map = map} in
+      let news' = assign_was_moved news who moved_or_not in 
       let nuser = int_of_card (Prof s.user.character) in
       begin
-      match disprove_loop (nuser+1) guess s with
-      | Some (p, c) ->
-          Printf.printf "Prof. %s showed you the card %s.\n"
-                        p (string_of_card c);
-          let news'' =
-            {news' with past_guesses =
+        match disprove_loop (nuser+1) guess s with
+        | Some (p, c) ->
+          begin
+            ANSITerminal.(
+              print_string [yellow] ("Professor "^p^" showed you the card ");
+              print_string [cyan; Bold] ((string_of_card c)^"\n"));
+            let news'' =
+              {news' with past_guesses =
               (guess, s.user.character, Some p) >:: news'.past_guesses} in
-          accuse_or_not news''
-      | None ->
-          print_endline "No one could disprove your suggestion.";
-          let news'' =
-            {news' with past_guesses =
+              accuse_or_not news''
+          end
+        | None ->
+          begin
+            ANSITerminal.(
+              print_string [yellow] "No one could disprove your suggestion.\n");          
+            let news'' =
+              {news' with past_guesses =
               (guess, s.user.character, None) >:: news'.past_guesses} in
-          accuse_or_not news''
+              accuse_or_not news''
+          end
       end
   | None -> failwith "This should not happen in suggest in user.ml"
 
@@ -254,7 +260,8 @@ let rec get_movement (n:int) : string * int =
           ANSITerminal.(print_string [red] "Invalid input; try again please.\n");
           get_movement n
       end
-  | _ -> print_endline "Invalid input; try again please."; get_movement n
+  | _ -> ANSITerminal.(print_string [red] "Invalid input; try again please.\n"); 
+         get_movement n
 
 (* [move n bop s] prompts the user to enter commands so that his/her
  * character moves n steps, or fewer if the character gets into a building
@@ -265,7 +272,7 @@ let rec move (n:int) (bop:building option) (s:state) : state =
     failwith "This should not happen in move"
   else if n = 0 then
     begin
-      print_endline "You cannot move anymore.";
+      ANSITerminal.print_string [] "You cannot move anymore.\n";
       s
     end
   else
