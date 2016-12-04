@@ -228,7 +228,7 @@ and step_helper (p:prof) (s:state) : state =
             wait_for_user();
             ANSITerminal.(print_string [] (sprintf [white; Bold; on_black] "%-70s"
                 ("-----------------:: Prof. "^p^"'s turn ::-----------------")));
-            print_info "";
+            print_info "" true;
             Ai.step ai s
           end
         else s
@@ -247,7 +247,7 @@ and step_helper (p:prof) (s:state) : state =
         wait_for_user();
         ANSITerminal.(print_string [] ( sprintf [white; Bold; on_black] "%-70s"
           ("-----------------:: Prof. "^p^"'s (You!) turn ::-----------------\n")));
-        print_info "";
+        print_info "" true;
         User.step s in
       step {news with counter = news.counter + 1}
   | `No ->
