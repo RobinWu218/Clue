@@ -103,29 +103,31 @@ let accuse (s:state) : state =
   then
     begin
     ANSITerminal.(
-      print_string [] "Awesome! You got the right accusation.\n";
+      print_string [green] "Awesome! You got the right accusation.\n";
       print_string [Bold; green] "YOU WIN!!!";
       print_string [Bold; green] "
-   _    _     _____   _____   _____   _____   _  __   _____   _____   _____
-  (_)  (_)   |  ___| |  _  | | ___ | |  ___| | |/__| |  _  | |__ __| |  ___|
-    )  (     | |     | | | | | | | | | | ___ |  /    | |_| |   | |   | |___
-   (  _)     | |___  | |_| | | | | | | |__|| | |     | | | |   | |   |____ |
-   |/        |_____| |_____| |_| |_| |_____| |_|     |_| |_|   |_|   |_____|
+     _____   _____   _____   _____   _  __   _____   _____   _____   _
+    |  ___| |  _  | | ___ | |  ___| | |/__| |  _  | |__ __| |  ___| | |
+    | |     | | | | | | | | | |  _  |  /    | |_| |   | |   | |___  |_|
+    | |___  | |_| | | | | | | |_| | | |     | | | |   | |   |____ |  _
+    |_____| |_____| |_| |_| |_____| |_|     |_| |_|   |_|   |_____| |_|
 
 ";
-      print_string [] "CLUE will exit automatically. Feel free to play again!\n";
+      print_string [green] "CLUE will exit automatically. Feel free to play again!\n";
   );
     let news = {s with game_complete = true; map = map} in
     assign_was_moved news who moved_or_not (* Gmap *)
     end
   else
     begin
-    print_endline "Uh-oh, wrong accusation.";
-    print_endline "Unfortunately, you have just lost the game. :(";
-    print_endline "The real case file is:";
+      ANSITerminal.(
+      print_string [green] "Uh-oh, wrong accusation.\n";
+      print_string [Bold; green] "Unfortunately, you have just LOST the game. :(\n";
+      print_string [Bold; green] "The real case file is:\n";
+    );
     Printf.printf "Prof. %s created the virus with %s in %s Hall.\n"
-                  s.fact_file.who s.fact_file.with_what s.fact_file.where;
-    print_endline "CLUE will exit automatically. Feel free to play again!";
+    s.fact_file.who s.fact_file.with_what s.fact_file.where;
+    ANSITerminal.(print_string [green] "CLUE will exit automatically. Feel free to play again!\n");
     let news = {s with game_complete = true; map = map} in
     assign_was_moved news who moved_or_not (* Gmap *)
     end
