@@ -241,7 +241,8 @@ let accuse (a:ai) (s:state) : bool * state =
     (true, {s with map = new_map; ais = new_ai_list; past_guesses = new_pg})
     end
 
-(* TODO decides whether to accuse or not in the middle of an AI's turn
+(* [accuse_or_not_middle a s] decides whether to accuse or not in the middle of
+ * an AI's turn
  * AI logic:
  *   - Easy:   when the number of possible cards is down to 9, the ai just takes
  * a random guess and guesses the first who, what, where in the possible cards
@@ -263,11 +264,12 @@ let accuse_or_not_middle (a:ai) (s:state) : state =
     if want_to_accuse new_ai then
     let (accused', new_s') = accuse new_ai new_s in new_s' else new_s
 
-(* TODO decides whether to accuse or not at the start of an AI's turn
+(* [accuse_or_not_start a s] decides whether to accuse or not at the start of
+ * an AI's turn
  * AI logic:
  *   - Easy:   simply not accuse and proceed
  *   - Medium: simply not accuse and proceed
- *   - Hard:   TODO *)
+ *   - Hard:   checks whether we want to accuse and then proceeds *)
 let accuse_or_not_start (a:ai) (s:state) : bool * state =
   match a.difficulty with
   | Easy | Medium   ->
@@ -326,7 +328,7 @@ and disprove_case (p:prof) (ncurrent:int) (n:int) (guess:case_file) (s:state)
 
 (*called move towards building while still in building*)
 (* AI logic easy: random. *)
-(* AI logic medium and hard: only guesses possible cards, not the ones that 
+(* AI logic medium and hard: only guesses possible cards, not the ones that
  * it knows exists.*)
 (*TODO*)
 let suggest (a:ai) (s:state) : state =
@@ -338,10 +340,10 @@ let suggest (a:ai) (s:state) : state =
     let (who, with_what) =
       begin
       match a.difficulty with
-      | Easy -> 
+      | Easy ->
           (prof_of_int (Random.int 6), lang_of_int (Random.int 6))
-      | Medium | Hard -> 
-          (easy_helper_who a.possible_cards, 
+      | Medium | Hard ->
+          (easy_helper_who a.possible_cards,
            easy_helper_what a.possible_cards)
       end in
     let guess =
@@ -542,9 +544,9 @@ let secret_or_roll (a:ai) (b:building) (s:state) : state =
   | Medium ->
     begin
     match Random.int 1 with
-      | 0 -> suggest a s
+      | 0 -> use_secret a s
       | 1 -> leave_and_move a b s
-      | _ -> failwith "will never be called"
+      | _ -> failwith "will never be called: secret or roll"
     end
   | Hard   -> if want_to_secret a b then use_secret a s
       else leave_and_move a b s
@@ -554,8 +556,15 @@ let secret_or_roll (a:ai) (b:building) (s:state) : state =
 let suggest_or_roll (a:ai) (b:building) (s:state) : state =
   match a.difficulty with
   | Easy   -> suggest a s
-  | Medium -> failwith "TODO depends on which is easier to get to destination"
-  | Hard   -> failwith "TODO" (* leave_and_move a b s *)
+  | Medium ->
+    begin
+    match Random.int 1 with
+      | 0 -> suggest a s
+      | 1 -> leave_and_move a b s
+      | _ -> failwith "will never be called: suggest or roll"
+    end
+  | Hard   -> if List.mem (Building b) a.possible_cards
+              then leave_and_move a b s else suggest a s
 
 (* [secret_or_roll_or_suggest a s] allows ai [a] to choose to use the secret
  * passage, or roll the dice to move out, or make a suggestion, and returns
@@ -563,8 +572,19 @@ let suggest_or_roll (a:ai) (b:building) (s:state) : state =
 let secret_or_roll_or_suggest (a:ai) (b:building) (s:state) : state =
   match a.difficulty with
   | Easy   -> suggest a s
-  | Medium -> failwith "TODO depends on which is easier to get to destination"
-  | Hard   -> failwith "TODO" (* leave_and_move a b s *)
+  | Medium ->
+    begin
+    match Random.int 2 with
+      | 0 -> suggest a s
+      | 1 -> leave_and_move a b s
+      | 2 -> use_secret a s
+      | _ -> failwith "will never be called: secret or roll or suggest"
+    end
+  | Hard   -> if want_to_secret a b
+                then use_secret a s
+              else if List.mem (Building b) a.possible_cards
+                then leave_and_move a b s
+              else suggest a s
 
 (*TODO*)
 let in_building_involuntarily (a:ai) (b:building) (s:state) : state =
@@ -574,13 +594,13 @@ let in_building_involuntarily (a:ai) (b:building) (s:state) : state =
     begin
     match secret, blocked with
     | true,  true  ->
-        suggest_or_secret a b s (*TODO*)
+        suggest_or_secret a b s
     | true,  false ->
-        secret_or_roll_or_suggest a b s (*TODO*)
+        secret_or_roll_or_suggest a b s
     | false, true  ->
         suggest a s
     | false, false ->
-        suggest_or_roll a b s (*TODO*)
+        suggest_or_roll a b s
     end
   in assign_was_moved news a.character false
 
@@ -594,7 +614,7 @@ let in_building_voluntarily (a:ai) (b:building) (s:state) : state =
       use_secret a s (*TODO*)
   | true,  false ->
       print_endline "There is a secret passage available.";
-      secret_or_roll a b s (*TODO*)
+      secret_or_roll a b s
   | false, true  ->
       Printf.printf "Prof. %s has to wait until next turn.\n" a.character;
       s
