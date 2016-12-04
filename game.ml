@@ -116,18 +116,18 @@ let init_state (n:int) (d:difficulty) : state =
                   (*Fix the problem of producing same sequence of nums every
                    *time we launch utop*)
   if (n >= 2) && (n <= 5) then
-    let fact_file = generate_case_file () in
+    let fact_file  = generate_case_file () in
     let fact_cards = [Prof fact_file.who;
                       Building fact_file.where;
                       Language fact_file.with_what] in
-    let character_lst = assign_characters [] (n+1) in
+    let character_lst   = assign_characters [] (n+1) in
     let dealt_cards_lst = deal_card fact_cards n in
-    let user_hand = List.hd dealt_cards_lst in
+    let user_hand   = List.hd dealt_cards_lst in
     let ai_hand_lst = List.tl dealt_cards_lst in
-    let user_character = List.hd character_lst in
+    let user_character    = List.hd character_lst in
     let ai_characters_lst = List.tl character_lst in
     let ai_lst = init_ai_lst n d ai_hand_lst ai_characters_lst character_lst in
-    let map = construct_map () in
+    let map    = construct_map () in
     let dictionary = generate_dictionary
                       ["Bracy";"Clarkson";"Fan";"Gries";"Halpern";"White"]
                       user_character ai_characters_lst in
@@ -236,10 +236,10 @@ and step_helper (p:prof) (s:state) : state =
         step {news with counter = news.counter + 1}
       else
         begin
-        print_endline "Awesome! All the AI bots have lost.";
-        print_endline "YOU WIN!!!";
-        print_endline "CLUE will exit automatically. Feel free to play again!";
-        step {news with counter = news.counter + 1; game_complete = true}
+          print_endline "Awesome! All the AI bots have lost.";
+          print_endline "YOU WIN!!!";
+          print_endline "CLUE will exit automatically. Feel free to play again!";
+          step {news with counter = news.counter + 1; game_complete = true}
         end
   | `User ->
       let news =

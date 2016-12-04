@@ -316,15 +316,13 @@ let rec move_towards_coord map p coord n =
               then
                 begin
                   let (s, m) = move_helper accmap p None dir !steps_left in
-                    steps_left := s; 
-                    print_endline (string_of_int s);
+                    steps_left := s; (* should be 0 *)
                     (s, m)
                 end
               else
                 begin
                   let (s, m) = move_helper accmap p None dir steps in
                     steps_left := !steps_left - steps;
-                    print_endline (string_of_int s);
                     (s, m)
                 end
             in accmap

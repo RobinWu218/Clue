@@ -86,17 +86,17 @@ let rec get_with_what () : string =
  * player to the suggested building and change that ai's was_moved field to
  * true if ai is not already in the building before being moved. *)
 let accuse (s:state) : state =
-  let who = get_who () in
-  let where = get_where () in
+  let who       = get_who () in
+  let where     = get_where () in
   let with_what = get_with_what () in
   let (moved_or_not, map) =
-    if get_current_building s.map who <> (Some where) (* Gmap *)
-    then (true, (teleport_professor s.map who where)) (* Gmap *)
+    if get_current_building s.map who <> (Some where) 
+    then (true, (teleport_professor s.map who where)) 
     else (false, s.map) in
   let accusation =
-    {who = who;
-     where = where;
-     with_what = with_what} in
+    { who       = who;
+      where     = where;
+      with_what = with_what } in
   print_endline "Your accusation is: ";
   print_case_file accusation;
   if accusation = s.fact_file
@@ -113,10 +113,11 @@ let accuse (s:state) : state =
    |/        |_____| |_____| |_| |_| |_____| |_|     |_| |_|   |_|   |_____|
 
 ";
-      print_string [] "CLUE will exit automatically. Feel free to play again!\n";
+      print_string [yellow] 
+        "CLUE will exit automatically. Feel free to play again!\n";
   );
     let news = {s with game_complete = true; map = map} in
-    assign_was_moved news who moved_or_not (* Gmap *)
+      assign_was_moved news who moved_or_not (* Gmap *)
     end
   else
     begin
@@ -296,7 +297,7 @@ let leave_and_move (b:building) (s:state) : state =
 (* [use_secret s] is the updated state after the user uses the secret
  * passage in the current building.
  * Requires: [s.user] is currently in a building where there is a secret
- *           passage. *)
+ *           passage.  *)
 let use_secret (s:state) : state =
   let map = use_secret_passage s.map s.user.character in (* Gmap *)
   suggest {s with map = map}
@@ -345,12 +346,14 @@ let suggest_or_roll (b:building) (s:state) : state =
  * passage, or roll the dice to move out, or make a suggestion, and returns
  * the updated state. *)
 let secret_or_roll_or_suggest (b:building) (s:state) : state =
-  print_endline "You can either:";
-  print_endline "  1 make a suggestion now, or ";
-  print_endline "  2 roll the dice and move out, or ";
-  Printf.printf "  3 use the secret passage to get into %s Hall.\n"
-                (List.assoc b s.map.secrets);
-  print_endline "Valid responses are: [1/2/3]";
+  ANSITerminal.(
+    print_string [red] "You can either:\n";
+    print_string [yellow] (
+      "\t1) make a suggestion now, or \n"^
+      "\t2) roll the dice and move out, or\n"^
+      "\t3) use the secret passage to get into "^(List.assoc b s.map.secrets)^
+      " Hall.\n");
+    print_string [red] "Valid responses are: [1/2/3]\n");
   match get_choice_three () with
   | 1 -> suggest s
   | 2 -> leave_and_move b s
@@ -362,22 +365,25 @@ let secret_or_roll_or_suggest (b:building) (s:state) : state =
  * determines what the user can do given that the user was moved to the
  * building by someone else, and returns the updated state accordingly. *)
 let in_building_involuntarily (b:building) (s:state) : state =
-  let secret = has_secret_passage s.map b in
+  let secret  = has_secret_passage  s.map b in
   let blocked = is_building_blocked s.map b in
   let news =
     begin
-    match secret, blocked with
-    | true,  true  ->
-        print_endline "There is a secret passage available.";
-        print_endline "All exits to the current building are blocked.";
+      match secret, blocked with
+      | true,  true  ->
+        ANSITerminal.(print_string [yellow] (
+          "There is a secret passage available...\n"^
+          "All other exits to the current building are blocked."));
         suggest_or_secret b s
-    | true,  false ->
-        print_endline "There is a secret passage available.";
+      | true,  false ->
+        ANSITerminal.(print_string [yellow] 
+          "There is a secret passage available...");
         secret_or_roll_or_suggest b s
-    | false, true  ->
-        print_endline "All exits to the current building are blocked.";
+      | false, true  ->
+        ANSITerminal.(print_string [yellow] 
+          "All exits to the current building are blocked.");
         suggest s
-    | false, false ->
+      | false, false ->
         suggest_or_roll b s
     end
   in assign_was_moved news s.user.character false
@@ -387,21 +393,22 @@ let in_building_involuntarily (b:building) (s:state) : state =
  * determines what the user can do given that the user entered the building
  * on his/her own, and returns the updated state accordingly. *)
 let in_building_voluntarily (b:building) (s:state) : state =
-  let secret = has_secret_passage s.map b in (* Gmap *)
-  let blocked = is_building_blocked s.map b in (* Gmap *)
+  let secret  = has_secret_passage  s.map b in 
+  let blocked = is_building_blocked s.map b in 
   match secret, blocked with
   | true,  true  ->
-      print_endline "There is a secret passage available.";
-      print_endline "All exits to the current building are blocked.";
-      print_endline "You have to use the secret passage.";
+    ANSITerminal.(print_string [yellow] (
+      "All exits to the current building are blocked."^
+      "\t--> You have to use the secret passage!\n"));
       use_secret s
   | true,  false ->
-      print_endline "There is a secret passage available.";
+    ANSITerminal.(print_string [yellow] 
+      "There is a secret passage available.");
       secret_or_roll b s
   | false, true  ->
-      print_endline "There is no secret passage available.";
-      print_endline "All exits to the current building are blocked.";
-      print_endline "You have to wait until your next turn.";
+    ANSITerminal.(print_string [yellow] (
+      "All exits to the current building are blocked."^
+      "\t--> You have to wait until your next turn!\n"));
       s
   | false, false ->
       leave_and_move b s
@@ -410,15 +417,16 @@ let in_building_voluntarily (b:building) (s:state) : state =
  * the current state is [s]. *)
 let step (s:state) : state =
   let s1 = accuse_or_not s in
-  if s1.game_complete then s1 else
-  let c = get_current_location s1.map s1.user.character in
-  if is_exit_blocked s1.map c then s1 else
-  match get_current_building s1.map s1.user.character with (* Gmap *)
-  | Some b ->
-      Printf.printf "Prof. %s's current building: %s" s.user.character b;(*TODO debug*)
-      if s1.user.was_moved
-      then in_building_involuntarily b s1
-      else in_building_voluntarily b s1
-  | None ->
-      move (roll_two_dice ()) None s1 (* Gmap *)
+  if s1.game_complete then s1 
+  else
+    let c = get_current_location s1.map s1.user.character in
+      if is_exit_blocked s1.map c then s1 (* person is blocked in *)
+      else
+        match get_current_building s1.map s1.user.character with
+        | Some b ->
+            if s1.user.was_moved
+            then in_building_involuntarily b s1
+            else in_building_voluntarily   b s1
+        | None ->
+            move (roll_two_dice ()) None s1 (* Gmap *)
 
