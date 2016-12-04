@@ -5,7 +5,7 @@ open Logic
 (* [get_who ()] prompts the user for the professor s/he wants to suggest
  * or accuse and returns the corresponding string. *)
 let rec get_who () : string =
-  ANSITerminal.(print_string [red] 
+  ANSITerminal.(print_string [red]
     "Who did it? [Bracy/Clarkson/Fan/Gries/Halpern/White]\n");
   let str = print_string  "> "; read_line () in
   let str' = String.(str |> trim |> lowercase_ascii) in
@@ -23,14 +23,14 @@ let rec get_who () : string =
     | 'g' -> "Gries"
     | 'h' -> "Halpern"
     | 'w' -> "White"
-    | _   -> 
-      ANSITerminal.(print_string [red] "Invalid input; try again please."); 
+    | _   ->
+      ANSITerminal.(print_string [red] "Invalid input; try again please.");
       get_who ()
 
 (* [get_where ()] prompts the user for the builidng s/he wants to accuse
  * and returns the corresponding string. *)
 let rec get_where () : string =
-  ANSITerminal.(print_string [red] 
+  ANSITerminal.(print_string [red]
     ("Where? [Baker/Carpenter/Duffield/Gates/Klarman/Olin/"^
              "Phillips/Rhodes/Statler]\n"));
   let str = print_string  "> "; read_line () in
@@ -52,13 +52,13 @@ let rec get_where () : string =
     | 'r' -> "Rhodes"
     | 's' -> "Statler"
     | _   ->
-      ANSITerminal.(print_string [red] "Invalid input; try again please."); 
+      ANSITerminal.(print_string [red] "Invalid input; try again please.");
       get_where ()
 
 (* [get_with_what ()] prompts the user for the language s/he wants to suggest
  * or accuse and returns the corresponding string. *)
 let rec get_with_what () : string =
-  ANSITerminal.(print_string [red] 
+  ANSITerminal.(print_string [red]
     "With what language? [Bash/C/Java/MATLAB/OCaml/Python]\n");
   let str = print_string  "> "; read_line () in
   let str' = String.(str |> trim |> lowercase_ascii) in
@@ -77,7 +77,7 @@ let rec get_with_what () : string =
     | 'o' -> "OCaml"
     | 'p' -> "Python"
     | _   ->
-      ANSITerminal.(print_string [red] "Invalid input; try again please."); 
+      ANSITerminal.(print_string [red] "Invalid input; try again please.");
       get_with_what ()
 
 (* [accuse s] prompts the user for his/her accusation, determines whether
@@ -102,9 +102,19 @@ let accuse (s:state) : state =
   if accusation = s.fact_file
   then
     begin
-    print_endline "Awesome! You got the right accusation.";
-    print_endline "YOU WIN!!!";
-    print_endline "CLUE will exit automatically. Feel free to play again!";
+    ANSITerminal.(
+      print_string [] "Awesome! You got the right accusation.\n";
+      print_string [Bold; green] "YOU WIN!!!";
+      print_string [Bold; cyan] "
+   _    _     _____   _____   _____   _____   _  __   _____   _____   _____
+  (_)  (_)   |  ___| |  _  | | ___ | |  ___| | |/__| |  _  | |__ __| |  ___|
+    )  (     | |     | | | | | | | | | | ___ |  /    | |_| |   | |   | |___
+   (  _)     | |___  | |_| | | | | | | |__|| | |     | | | |   | |   |____ |
+   |/        |_____| |_____| |_| |_| |_____| |_|     |_| |_|   |_|   |_____|
+
+      ";
+      print_string [] "CLUE will exit automatically. Feel free to play again!\n";
+  );
     let news = {s with game_complete = true; map = map} in
     assign_was_moved news who moved_or_not (* Gmap *)
     end
@@ -128,8 +138,8 @@ let rec accuse_or_not (s:state) : state =
   match String.(str |> trim |> lowercase_ascii) with
   | "y" -> accuse s
   | "n" -> s
-  | _   -> 
-      ANSITerminal.(print_string [red] "Invalid command; try again please."); 
+  | _   ->
+      ANSITerminal.(print_string [red] "Invalid command; try again please.");
       accuse_or_not s
 
 (* [disprove_loop n guess s] is [Some (prof, card)] if [prof] disproved
@@ -174,7 +184,7 @@ and disprove_case (p:prof) (n:int) (guess:case_file) (s:state)
  * building and change that ai's [was_moved] field to true.
  * Requires: user is currently in a building. *)
 let suggest (s:state) : state =
-  ANSITerminal.(print_string [red] 
+  ANSITerminal.(print_string [red]
     "Please make a suggestion about the current building now.\n");
   let who = get_who () in
   let where_option = get_current_building s.map s.user.character in (* Gmap *)
