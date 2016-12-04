@@ -487,19 +487,20 @@ let move (a:ai) (n:int) (bop:building option) (s:state) : state =
     failwith "This should not happen in ai_move"
   else if n = 0 then
     begin
-    Printf.printf "Prof. %s cannot move anymore.\n" a.character;
-    if is_in_building s.map a.character (* Gmap *)
-    then suggest a s
-    else s
+      ANSITerminal.print_string [] 
+        ("Prof. "^a.character^" cannot move anymore.\n");
+      if is_in_building s.map a.character
+      then suggest a s
+      else s
     end
   else
     let b = move_where a bop s in
     let (in_building, new_map) =
-      move_towards_building s.map a.character b bop n in (* Gmap *)
-    if in_building then
-      suggest a {s with map = new_map}
-    else
-      {s with map = new_map}
+      move_towards_building s.map a.character b bop n in
+      if in_building then
+        suggest a {s with map = new_map}
+      else
+        {s with map = new_map}
 
 (* [get_exit a b s] is the id of an exit to building [b] selected by ai [a]. *)
 let rec get_exit (a:ai) (b:building) (s:state) : int =
@@ -522,9 +523,10 @@ let leave_and_move (a:ai) (b:building) (s:state) : state =
  * Requires: [a] is currently in a building where there is a secret
  *           passage. *)
 let use_secret (a:ai) (s:state) : state =
-  Printf.printf "Prof. %s used the secret passage.\n" a.character;
-  let map = use_secret_passage s.map a.character in (* Gmap *)
-  suggest a {s with map = map}
+  ANSITerminal.(print_string [yellow] (
+    "Prof. "^a.character^" used the secret passage.\n"));
+  let map = use_secret_passage s.map a.character in
+    suggest a {s with map = map}
 
 (*[want_to_secret a b] is true if we use the secret passage, we would reach
  * one of the buildings in a.possible_cards. *)
