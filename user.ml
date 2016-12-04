@@ -278,6 +278,7 @@ let rec move (n:int) (bop:building option) (s:state) : state =
 (* [get_exit b s] is the id of an exit to building [b] selected by the user. *)
 let rec get_exit (b:building) (s:state) : int =
   let exits = List.assoc b s.map.exits in
+  let rec find_valid () = 
     match List.length exits with
     | 1 -> 1
     | 2 -> 
@@ -287,8 +288,16 @@ let rec get_exit (b:building) (s:state) : int =
             "Please choose one of the two exits to "^b^" Hall to leave.\n");
           print_string [] ((string_of_exits exits)^"\n");
           print_string [red] "Valid responses are: [1/2]\n");
-          get_choice_two () 
-     end
+        let choice = get_choice_two () in
+          if is_exit_blocked s.map (List.assoc choice exits)
+          then 
+            begin
+              ANSITerminal.print_string [] 
+                "This exit is blocked! Please pick another\n";
+              find_valid ()
+            end
+          else choice
+      end
     | 4 -> 
       begin
         ANSITerminal.(
@@ -296,9 +305,18 @@ let rec get_exit (b:building) (s:state) : int =
              "Please choose one of the four exits to "^b^" Hall to leave\n");
           print_string [] ((string_of_exits exits)^"\n");
           print_string [red] "Valid responses are: [1/2/3/4]\n");
-          get_choice_four () 
-       end
+        let choice = get_choice_four () in
+          if is_exit_blocked s.map (List.assoc choice exits)
+          then 
+            begin
+              ANSITerminal.print_string [] 
+                "This exit is blocked! Please pick another\n";
+              find_valid ()
+            end
+          else choice
+      end
     | _ -> failwith "This should not happen in get_exit in User given map.json"
+  in find_valid ()
 
 (* [leave_and_move b s] is the updated state after the user moves out of
  * building [b].
