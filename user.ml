@@ -24,7 +24,7 @@ let rec get_who () : string =
     | 'h' -> "Halpern"
     | 'w' -> "White"
     | _   ->
-      ANSITerminal.(print_string [red] "Invalid input; try again please.");
+      ANSITerminal.(print_string [red] "Invalid input; try again please.\n");
       get_who ()
 
 (* [get_where ()] prompts the user for the builidng s/he wants to accuse
@@ -52,7 +52,7 @@ let rec get_where () : string =
     | 'r' -> "Rhodes"
     | 's' -> "Statler"
     | _   ->
-      ANSITerminal.(print_string [red] "Invalid input; try again please.");
+      ANSITerminal.(print_string [red] "Invalid input; try again please.\n");
       get_where ()
 
 (* [get_with_what ()] prompts the user for the language s/he wants to suggest
@@ -77,7 +77,7 @@ let rec get_with_what () : string =
     | 'o' -> "OCaml"
     | 'p' -> "Python"
     | _   ->
-      ANSITerminal.(print_string [red] "Invalid input; try again please.");
+      ANSITerminal.(print_string [red] "Invalid input; try again please.\n");
       get_with_what ()
 
 (* [accuse s] prompts the user for his/her accusation, determines whether
@@ -97,27 +97,27 @@ let accuse (s:state) : state =
     { who       = who;
       where     = where;
       with_what = with_what } in
-  print_endline "Your accusation is: ";
+  ANSITerminal.print_string [] "Your accusation is: \n";
   print_case_file accusation;
+  wait_for_user();
+  ANSITerminal.print_string [] "Your case file is... \n";
+  print_case_file s.fact_file;
   if accusation = s.fact_file
   then
     begin
     ANSITerminal.(
-      print_string [green] "Awesome! You got the right accusation.\n";
-      print_string [Bold; green] "YOU WIN!!!";
+      print_string [Bold; green] "You were correct! Awesome! You won!\n";
       print_string [Bold; green] "
      _____   _____   _____   _____   _  __   _____   _____   _____   _
     |  ___| |  _  | | ___ | |  ___| | |/__| |  _  | |__ __| |  ___| | |
     | |     | | | | | | | | | |  _  |  /    | |_| |   | |   | |___  |_|
     | |___  | |_| | | | | | | |_| | | |     | | | |   | |   |____ |  _
-    |_____| |_____| |_| |_| |_____| |_|     |_| |_|   |_|   |_____| |_|
-
-";
+    |_____| |_____| |_| |_| |_____| |_|     |_| |_|   |_|   |_____| |_|\n";
       print_string [yellow] 
         "CLUE will exit automatically. Feel free to play again!\n";
   );
     let news = {s with game_complete = true; map = map} in
-      assign_was_moved news who moved_or_not (* Gmap *)
+      assign_was_moved news who moved_or_not 
     end
   else
     begin
@@ -126,8 +126,6 @@ let accuse (s:state) : state =
       print_string [Bold; green] "Unfortunately, you have just LOST the game. :(\n";
       print_string [Bold; green] "The real case file is:\n";
     );
-    Printf.printf "Prof. %s created the virus with %s in %s Hall.\n"
-    s.fact_file.who s.fact_file.with_what s.fact_file.where;
     ANSITerminal.(print_string [green] "CLUE will exit automatically. Feel free to play again!\n");
     let news = {s with game_complete = true; map = map} in
     assign_was_moved news who moved_or_not (* Gmap *)
@@ -142,7 +140,7 @@ let rec accuse_or_not (s:state) : state =
   | "y" -> accuse s
   | "n" -> s
   | _   ->
-      ANSITerminal.(print_string [red] "Invalid command; try again please.");
+      ANSITerminal.(print_string [red] "Invalid command; try again please.\n");
       accuse_or_not s
 
 (* [disprove_loop n guess s] is [Some (prof, card)] if [prof] disproved
@@ -199,7 +197,7 @@ let suggest (s:state) : state =
         {who = who;
          where = where;
          with_what = with_what} in
-      ANSITerminal.print_string [] "\nYour suggestion is: \n";
+      ANSITerminal.(print_string [] "\nYour suggestion is: \n");
       print_case_file guess;
       let (moved_or_not, map) =
         if get_current_building s.map who <> (Some where) 
@@ -348,8 +346,8 @@ let suggest_or_secret (b:building) (s:state) : state =
   ANSITerminal.(
     print_string [red] "You can either:\n";
     print_string [] (
-      "\t1) make a suggestion now or\n"^
-      "\t2) use the secret passage to get into "^
+      "   1) make a suggestion now or\n"^
+      "   2) use the secret passage to get into "^
       (List.assoc b s.map.secrets)^" Hall.\n");
     print_string [red] "Valid responses are: [1/2]\n");
   match get_choice_two () with
@@ -364,8 +362,8 @@ let secret_or_roll (b:building) (s:state) : state =
   ANSITerminal.(
     print_string [red] "You can either:\n";
     print_string [] (
-      "\t1) roll the dice and move out, or\n"^
-      "\t2) use the secret passage to get into "^
+      "   1) roll the dice and move out, or\n"^
+      "   2) use the secret passage to get into "^
       (List.assoc b s.map.secrets)^" Hall.\n");
     print_string [red] "Valid responses are: [1/2]\n");
   match get_choice_two () with
@@ -379,8 +377,8 @@ let suggest_or_roll (b:building) (s:state) : state =
   ANSITerminal.(
     print_string [red] "You can either:\n";
     print_string [] (
-      "\t1) make a suggestion now, or\n"^
-      "\t2) roll the dice and move out.\n");
+      "   1) make a suggestion now, or\n"^
+      "   2) roll the dice and move out.\n");
     print_string [red] "Valid responses are: [1/2]");
   match get_choice_two () with
   | 1 -> suggest s
@@ -394,9 +392,9 @@ let secret_or_roll_or_suggest (b:building) (s:state) : state =
   ANSITerminal.(
     print_string [red] "You can either:\n";
     print_string [] (
-      "\t1) make a suggestion now, or \n"^
-      "\t2) roll the dice and move out, or\n"^
-      "\t3) use the secret passage to get into "^(List.assoc b s.map.secrets)^
+      "   1) make a suggestion now, or \n"^
+      "   2) roll the dice and move out, or\n"^
+      "   3) use the secret passage to get into "^(List.assoc b s.map.secrets)^
       " Hall.\n");
     print_string [red] "Valid responses are: [1/2/3]\n");
   match get_choice_three () with
@@ -444,7 +442,7 @@ let in_building_voluntarily (b:building) (s:state) : state =
   | true,  true  ->
     ANSITerminal.(print_string [yellow] (
       "All exits to the current building are blocked.\n"^
-      "\t--> You have to use the secret passage!\n"));
+      "   --> You have to use the secret passage!\n"));
       use_secret s
   | true,  false ->
     ANSITerminal.(print_string [yellow] 
@@ -453,7 +451,7 @@ let in_building_voluntarily (b:building) (s:state) : state =
   | false, true  ->
     ANSITerminal.(print_string [yellow] (
       "All exits to the current building are blocked.\n"^
-      "\t--> You have to wait until your next turn!\n"));
+      "   --> You have to wait until your next turn!\n"));
       s
   | false, false ->
       leave_and_move b s
@@ -471,4 +469,8 @@ let step (s:state) : state =
   | None ->
       let c = get_current_location s1.map s1.user.character in
       if is_coord_blocked s1.map c then s1 else
-      move (roll_two_dice ()) None s1
+      begin
+        print_map s.map;
+        move (roll_two_dice ()) None s1  
+      end
+      

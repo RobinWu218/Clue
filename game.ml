@@ -129,46 +129,51 @@ let init_state (n:int) (d:difficulty) : state =
     let dictionary = generate_dictionary
                       ["Bracy";"Clarkson";"Fan";"Gries";"Halpern";"White"]
                       user_character ai_characters_lst in
-    print_endline
-      "\n**********************************************************************\n";
+    print "**********************************************************************"
+          true;
 
-    ANSITerminal.(
-      print_string [Bold] "The AI bots play the roles of: \n";
-      print_string [] ((string_of_prof_lst ai_characters_lst)^".");
-      print_string [Bold; Underlined; green;]
-        ("\n\nYou play the role of Prof. "^user_character^".\n");
-    );
+    print_results "The AI bots play the roles of: " true;
+    print_results ((string_of_prof_lst ai_characters_lst)) true;
+    print_info " " true;
+    print_important
+      ("You play the role of Prof. "^user_character^".") true;
     wait_for_user();
 
     ANSITerminal.(
-      print_string [yellow] "Your location is tracked on the map by your last name ";
-      print_string [on_black; Bold; red] "I";
-      print_string [yellow] (
-        "nitial.\n"^
-        "You can move on any spot marked by ");
+      print_info "Your location is tracked on the map by your last name " false;
+      print_string [on_black; Bold; cyan] "I";
+      print_string [on_black; yellow] "nitial.        ";
+      print_endline "";
+      print_info "You can move on any spot marked by " false;
       print_string [on_black; Bold; white] ".";
-      print_string [yellow] ",\nEnter a building through a door ";
+      print_string [on_black; yellow]  ",                                 \n";
+      print_info "Enter a building through a door " false;
       print_string [on_black; Bold; green] "D";
-      print_string [yellow] ", and \nUse a secret passage ";
+      print_string [on_black; yellow] 
+        ", and                                ";
+      print_info "Use a secret passage " false;
       print_string [on_black; Bold; green] "s";
-      print_string [yellow] " to get to the building diagonally across the map.\n\n";
-      print_string [yellow]
-        "Note: the map is on a coordinate system, with (0,0) at the top left corner.\n"
+      print_string [on_black; yellow] " to get to the building diagonally across the   ";
+      print_endline "";
+      print_info "map. Note: the map is on a coordinate system, with (0,0) at the top   " true;
+      print_info "left corner." true;
+      print_info "" true;
     );
     print_map map;
     wait_for_user();
 
     ANSITerminal.(
-      print_string [] "You have the following cards: \n";
-      print_string [cyan; Bold] ((string_of_card_lst user_hand)^".\n");
-      print_string [yellow] (
-        "\nTo play the game, follow the instructions and type into the command\n"^
-        "line when prompted by ");
-      print_string [] ">";
-      print_string [yellow] (
-        ". You may find having a sheet of paper and a \n"^
-        "writing utensil handy when playing the game. Good luck!\n\n");
-      print_string [Bold; green] "The game begins now!\n";
+      print_info "You have the following cards: " true;
+      print_string []
+        (sprintf (card_style()) "%-70s" ((string_of_card_lst user_hand)^"."));
+      print_endline "";
+      print_info "" true;
+      print_info "To play the game, follow the instructions and type into the command" true;
+      print_info "line when prompted by " false;
+      print_string [on_black] ">";
+      print_info ". You may find having a sheet of paper and a" true;
+      print_info "writing utensil handy when playing the game. Good luck!" true;
+      print_important "The game begins now!" true;
     );
     {
       counter = 0;
@@ -221,8 +226,9 @@ and step_helper (p:prof) (s:state) : state =
         then
           begin
             wait_for_user();
-            ANSITerminal.(print_string [Bold] (
-              "-----------------:: Prof. "^p^"'s turn ::-----------------\n"));
+            ANSITerminal.(print_string [] (sprintf [white; Bold; on_black] "%-70s"
+                ("-----------------:: Prof. "^p^"'s turn ::-----------------")));
+            print_info "";
             Ai.step ai s
           end
         else s
@@ -231,16 +237,17 @@ and step_helper (p:prof) (s:state) : state =
         step {news with counter = news.counter + 1}
       else
         begin
-          print_endline "Awesome! All the AI bots have lost.";
-          print_endline "YOU WIN!!!";
-          print_endline "CLUE will exit automatically. Feel free to play again!";
+          print_important "Wow! All the AI bots have lost!" true;
+          print_important "YOU WIN!" true;
+          print_info "CLUE will exit automatically. Feel free to play again!" true;
           step {news with counter = news.counter + 1; game_complete = true}
         end
   | `User ->
       let news =
         wait_for_user();
-            ANSITerminal.(print_string [Bold] (
-              "-----------------:: Prof. "^p^"'s (You!) turn ::-----------------\n"));
+        ANSITerminal.(print_string [] ( sprintf [white; Bold; on_black] "%-70s"
+          ("-----------------:: Prof. "^p^"'s (You!) turn ::-----------------\n")));
+        print_info "";
         User.step s in
       step {news with counter = news.counter + 1}
   | `No ->
