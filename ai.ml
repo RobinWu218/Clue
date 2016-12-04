@@ -2,19 +2,6 @@ open Data
 open Gmap
 open Logic
 
-(* helpful for removing cards from list?
-(*[known_not_possible ai] updates ai.possible_cards to not include the cards
-from ai.known_cards*)
-let known_not_possible ai =
-  let rec helper known possible =
-    match possible with
-    |[]   -> []
-    |h::t -> if List.mem h known then (helper known t) else h::(helper known t)
-  in
-  let new_poss = helper ai.known_cards ai.possible_cards in
-  {ai with possible_cards=new_poss}
-*)
-
 (* [init p h d lst] is the AI data structure that represents an AI playing
  * character [p] on difficulty level [d], with hand [h]. [lst] is a list of
  * all players initialized in the game.

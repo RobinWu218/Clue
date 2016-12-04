@@ -138,7 +138,7 @@ let building_of_int (i:int) : building =
   | 6 -> "Phillips"
   | 7 -> "Rhodes"
   | 8 -> "Statler"
-  | _ -> failwith "Illegal int representation of a building"
+  | _ -> failwith ("Illegal int representation of a building"^(string_of_int i))
 
 (* [lang_of_int i] is the integer corresponding to a language. *)
 let lang_of_int (i:int) : language =
@@ -221,12 +221,12 @@ let card_to_string (c:card) : string =
 let string_of_coord ((r,c):coord) : string =
   Printf.sprintf "(%d, %d)" r c
 
-(* [string_of_exits exits] is the string representation of all exits to a 
+(* [string_of_exits exits] is the string representation of all exits to a
  * building with their ids and coordinates. *)
 let rec string_of_exits (exits:(int * coord) list) : string =
   match exits with
   | [] -> ""
-  | (id,coord)::t -> ((Printf.sprintf "  exit %d: %s\n" 
+  | (id,coord)::t -> ((Printf.sprintf "  exit %d: %s\n"
                                       id (string_of_coord coord)) ^
              (string_of_exits t))
 
@@ -236,9 +236,9 @@ let rec string_of_prof_lst (lst:prof list) : string =
   match lst with
   | [] -> ""
   | [p] -> string_of_card (Prof p)
-  | [p1;p2] -> (string_of_card (Prof p1)) ^ ", and\n" ^ 
+  | [p1;p2] -> (string_of_card (Prof p1)) ^ ", and\n" ^
                (string_of_card (Prof p2))
-  | h::t -> (string_of_card (Prof h)) ^ ",\n" ^ 
+  | h::t -> (string_of_card (Prof h)) ^ ",\n" ^
             (string_of_prof_lst t)
 
 (* [string_of_card_lst] is a comma-separated string representation of a list
@@ -247,9 +247,9 @@ let rec string_of_card_lst (lst:card list) : string =
   match lst with
   | [] -> ""
   | [c] -> string_of_card c
-  | [c1;c2] -> (string_of_card c1) ^ ", and \n" ^ 
+  | [c1;c2] -> (string_of_card c1) ^ ", and \n" ^
                (string_of_card c2)
-  | h::t -> (string_of_card h) ^ ",\n" ^ 
+  | h::t -> (string_of_card h) ^ ",\n" ^
             (string_of_card_lst t)
 
 (* [int_lst_to_prof_lst lst] is a prof list corresponding to int list [lst]. *)
@@ -277,20 +277,21 @@ let rec card_lst_to_int_lst (lst:card list) : int list =
   | [] -> []
   | h::t -> (int_of_card h)::(card_lst_to_int_lst t)
 
-(* [card_lst_to_building_lst lst] is the building list corresponding to a 
+(* [card_lst_to_building_lst lst] is the building list corresponding to a
  * subset of the card list [lst]. *)
 let card_lst_to_building_lst (lst:card list) : building list =
   lst |> card_lst_to_int_lst
-      |> List.filter (fun i -> 6 <= i && i <= 14) 
-      |> List.map building_of_int
+      |> List.filter (fun i -> 6 <= i && i <= 14)
+      |> List.map (fun x-> x-6)
+      |> List.map (building_of_int)
 
 (* [print_case_file cf] prints the case file [cf] in a sentence. *)
 let print_case_file (cf:case_file) : unit =
-  Printf.printf "Prof. %s started the virus with %s in %s Hall.\n"
+  Printf.printf "Prof. %s started the virus with %s in %s Hall.\n\n"
                 cf.who cf.with_what cf.where
 
 (* [wait_for_user] waits for the user to hit enter to continue. *)
 let wait_for_user () =
-  ANSITerminal.print_string [ANSITerminal.red] 
+  ANSITerminal.print_string [ANSITerminal.red]
     "\nPress enter to continue...............................................\n";
   let _ = read_line () in ()
