@@ -3,37 +3,38 @@
 *     **...****...** OLIN*
 * BAKR*..***  ***..* ??? *
 * ??? *..* KLRN *..* ??? *
-* ??? *..D  ??  D..*     *
-*     *..*  ??  *...D*****
-*****D*..*  ??  *.......B*
-*........*D****D*.......**
+* ??? *..d  ??  d..*     *
+*     *..*  ??  *...d*****
+*****d*..*  ??  *.......B*
+*........*d****d*.......**
 **.................*******
-*********..........D CARP*
+*********..........d CARP*
 *       *..*****...* ??? *
 * STAT  *..**C**...* ??? *
-* ????  D..**L**...*******
+* ????  d..**L**...*******
 *  ??   *..**U**........**
 *       *..**E**...*******
-*******D*..*****..* PHIL *
-**.........*****..D ???? *
+*******d*..*****..* PHIL *
+**.........*****..d ???? *
 *Y................*  ??  *
-**........***D**...*******
-*******D..*    *........P*
+**........***d**...*******
+*******d..*    *........P*
 *      *..*GATE*........**
-* DUFF *..* ?? *..D*******
+* DUFF *..* ?? *..d*******
 * ???? *..* ?? *..* RHOD *
 *  ??  *..* ?? *..* ???? *
 *s    **R**    **.*  ?? s*
 **************************
 
 27 rows, 26 cols
-D = DOOR
+
+. = path (reachable)
+* = wall (not reachable)
+  = space in building (not reachable)
+d = DOOR
 s = secret passage
-? = waiting spot for people
-RYWGBP = starting spots
-* = blocked/wall
-. = unblocked/path
-  = in building (not reachable)
+? = waiting spot for profs
+BCFGHW = starting spot for profs
 
 BAKR Baker Hall
 CARP Carpenter Hall
