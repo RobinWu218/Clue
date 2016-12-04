@@ -423,7 +423,8 @@ let rec move_where_medium_helper (lst:building list)
   | h::t -> if check_building bop h then h
             else move_where_medium_helper t a bop s
 
-(* one of possible buildings if any, otherwise one of closest three *)
+(* one of possible buildings if any, otherwise one of closest three 
+ * cannot possibly be blocked*)
 let move_where_medium (a:ai) (bop:building option) (s:state) : building =
   move_where_medium_helper (card_lst_to_building_lst a.possible_cards) a bop s
 
@@ -443,11 +444,16 @@ let move_where_hard (a:ai) (bop:building option) (s:state) : building =
                          (List.map snd (closest_buildings s.map a.character))
                          a bop s
 
+(*ensures that the building is not blocked*)
 let move_where (a:ai) (bop:building option) (s:state) : building =
   match a.difficulty with
   | Easy   -> move_where_easy a bop s
-  | Medium -> move_where_medium a bop s
-  | Hard   -> move_where_hard a bop s
+  | Medium -> let b = move_where_medium a bop s in
+              if not is_building_blocked s.map b then b
+              else move_where_easy a bop s
+  | Hard   -> let b = move_where_hard a bop s in
+              if not is_building_blocked s.map b then b
+              else move_where_easy a bop s
 
 (* [move a n bop s] allows the AI [a]'s character to move n steps,
  * or fewer if the character gets into a building
