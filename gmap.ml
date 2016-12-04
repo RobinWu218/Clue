@@ -1,9 +1,9 @@
 open Data
 open Reader
 
-(*******************************************
- * utility methods
- *******************************************)
+(*******************)
+(* utility methods *)
+(*******************)
 
 (* [constuct_map] creates a map data structure. *)
 let construct_map () = make_map ()
@@ -43,7 +43,6 @@ and style_of_str i =
       else if len = 2 then cyan    (* part of building name *)
       else red                     (* professor name *)
 
-
 (* [get_exits map] returns an association list of exit coordinates to their
  * respective buildings.
  *)
@@ -53,10 +52,10 @@ let get_exits map =
       ((x,y), b)::acc) [] el)
     ) [] map.exits
 
-(* [is_exit_blocked map coord] returns true if the exit at location [coord] is 
+(* [is_coord_blocked map coord] returns true if the exit at location [coord] is 
  * blocked in by another professor. Does not check that [coord] is a valid exit. 
  *)
-let is_exit_blocked map (r,c) =
+let is_coord_blocked map (r,c) =
   let m = map.map_values in
     (m.(r-1).(c) <> Some ".") && (m.(r).(c-1) <> Some ".") &&
     (m.(r+1).(c) <> Some ".") && (m.(r).(c+1) <> Some ".")
@@ -67,13 +66,12 @@ let is_exit_blocked map (r,c) =
  *)
 let is_building_blocked map b =
   List.fold_left (fun acc (n, c) ->
-    acc && (is_exit_blocked map c)) 
+    acc && (is_coord_blocked map c)) 
     true (List.assoc b map.exits)
 
-
-(*******************************************
- * Methods for professor queries
- *******************************************)
+(*********************************)
+(* Methods for professor queries *)
+(*********************************)
 
 (* [is_in_building map p] checks if professor [p] is currently in a building on 
  * the [map].
@@ -120,7 +118,7 @@ let get_current_location map p =
  *)
 let get_closest_exit map lst (r,c) =
   let dists = List.map (fun (_, (r',c')) ->
-    if is_exit_blocked map (r',c')
+    if is_coord_blocked map (r',c')
     then 
       (map.num_rows*map.num_cols, (r',c')) (* effectively infinity for map *)
     else
@@ -146,12 +144,11 @@ let closest_buildings map p =
       (map.num_rows*map.num_cols, b)
     else
       (abs (r - my_r) + abs (c - my_c), b)) exits in
-    List.sort_uniq (Pervasives.compare) dists
+  List.sort_uniq (Pervasives.compare) dists
 
-
-(*******************************************
- * methods for moving around on the map
- *******************************************)
+(****************************************)
+(* methods for moving around on the map *)
+(****************************************)
 
 (*[replace_tile m p r c] resets the value of the tile professor [p] is or was 
  * standing on in [m]. 
@@ -163,7 +160,6 @@ let replace_tile m p r c =
   | Some "."    -> m.(r).(c) <- Some "."
   | Some "DOOR" -> m.(r).(c) <- Some "DOOR"
   | Some str    ->
-    Printf.printf "replace_tile %s at (%d, %d)\n" str r c; (*TODO debug why not working?*)
     if (String.length str) <> (String.length p) then
       m.(r).(c) <- Some "DOOR"
     else
@@ -177,7 +173,6 @@ let update_location locs p c =
   let locL = List.remove_assoc p locs in
   (p, c)::locL
 
-
 let leave_building_helper map p n =
   match get_current_building map p with
   | None   -> raise InvalidOperation
@@ -190,11 +185,10 @@ let leave_building_helper map p n =
       let m = map.map_values in
         m.(r).(c)   <- None;
         m.(er).(ec) <- Some (p^"DOOR");
-        let nloc = update_location map.location p (er,ec) in
-        {map with in_building = buildL; location = nloc}
+      let nloc = update_location map.location p (er,ec) in
+      {map with in_building = buildL; location = nloc}
     with
     | Not_found -> raise InvalidOperation
-
 
 (* [leave_building map p n] moves professor [p] to exit number [n] of the current
  * building [p] is in, and performs all changes necessary to update the [map].
@@ -225,7 +219,8 @@ and get_open_spot m lst = match lst with
   | [] -> failwith "No open waiting spots! which should not happen."
 
 let move_helper map p bop dir n =
-  let (rd, cd) = match dir with
+  let (rd, cd) = 
+  match dir with
   | "up"    -> (-1, 0)
   | "down"  -> ( 1, 0)
   | "left"  -> ( 0,-1)
@@ -233,42 +228,41 @@ let move_helper map p bop dir n =
   | _ -> failwith ("Invalid direction to move: "^dir) in
   let m = map.map_values in
   let (sr,sc) = get_current_location map p in
-    replace_tile m p sr sc;  (* clear out starting location *)
-    let cr = ref sr in
-    let cc = ref sc in
-    let i  = ref 0  in
-    (* move in [dir] direction while you are able to*)
-    while (!i < n) && (m.(!cr + rd).(!cc + cd) = Some ".") do
-      incr i;
-      cr := !cr + rd;
-      cc := !cc + cd;
-    done;
-    (* if you end up in front of a door with steps left, enter the building if 
-     * permitted *) 
-    if (!i < n) && (m.(!cr + rd).(!cc + cd) = Some "DOOR") 
-    then
-      let b = List.assoc (!cr + rd,!cc + cd) (get_exits map) in
+  replace_tile m p sr sc;  (* clear out starting location *)
+  let cr = ref sr in
+  let cc = ref sc in
+  let i  = ref 0  in
+  (* move in [dir] direction while you are able to*)
+  while (!i < n) && (m.(!cr + rd).(!cc + cd) = Some ".") do
+    incr i;
+    cr := !cr + rd;
+    cc := !cc + cd;
+  done;
+  (* if you end up in front of a door with steps left, enter the building if 
+   * permitted *) 
+  if (!i < n) && (m.(!cr + rd).(!cc + cd) = Some "DOOR") 
+  then
+    let b = List.assoc (!cr + rd,!cc + cd) (get_exits map) in
+    begin
+    match bop with 
+    | Some b' when b' = b ->
         begin
-          match bop with 
-          | Some b' when b' = b -> (*TODO debug*)
-              begin
-                print_endline "Cannot re-enter the same building in the same turn!";
-                let nloc = update_location map.location p (!cr,!cc) in
-                m.(!cr).(!cc) <- Some p; (* mark down at new location   *)
-                (n-(!i), {map with location = nloc; map_values = m})
-              end
-          | Some _ | None -> (*TODO debug*)
-              begin
-                i := n; (* no steps left after entering building *)
-                Printf.printf "Entering %s Hall debug\n" b; (*TODO*)
-                (0, enter_building map p b)
-              end
+          print_endline "Cannot re-enter the same building in the same turn!";
+          let nloc = update_location map.location p (!cr,!cc) in
+          m.(!cr).(!cc) <- Some p; (* mark down at new location   *)
+          (n-(!i), {map with location = nloc; map_values = m})
         end
-    else
-      let nloc = update_location map.location p (!cr,!cc) in
-        (* mark down at new location *)
-        m.(!cr).(!cc) <- Some p; 
-        (n-(!i), {map with location = nloc; map_values = m})
+    | Some _ | None ->
+        begin
+          i := n; (* no steps left after entering building *)
+          (0, enter_building map p b)
+        end
+    end
+  else
+    let nloc = update_location map.location p (!cr,!cc) in
+    (* mark down at new location *)
+    m.(!cr).(!cc) <- Some p; 
+    (n-(!i), {map with location = nloc; map_values = m})
 
 (* [move map p bop dir n] tries to move professor [p] on the [map] [n] steps
  * in [dir] direction. If [bop] is [Some b'] then [p] cannot move into 
@@ -281,8 +275,8 @@ let move_helper map p bop dir n =
  *)
 let move map p bop dir n = 
   let (steps_left, nmap) = move_helper map p bop dir n in
-    print_map nmap;
-    (steps_left, nmap)
+  print_map nmap;
+  (steps_left, nmap)
 
 (* [move_towards_coord map p coord n] tries to move professor [p] on the [map]
  * [n] steps towards the coordinate [coord].
@@ -334,46 +328,46 @@ let rec move_towards_coord map p coord bop n =
  * avoiding all obstacles (so collision doesn't happen when moving) *)
 and calc_path map p destr destc =
   let m = map.map_values in
-    if m.(destr).(destc) = Some "." || m.(destr).(destc) = Some "DOOR" then 
-    (* valid destination *)
-      let (sr,sc)  = get_current_location map p in 
-      let beenHere = Array.make_matrix map.num_rows map.num_cols false in
-      let foundEnd = ref false in
-      let path     = ref [] in
-      let queue    = ref [(sr,sc,[])] in
-        (* We use flood fill to find the destination.
-         * path = our travel history to a specific location.
-         * queue = our queue of possibly unvisited locations, ordered by 
-         *         increasing distance
-         *)
-        while not !foundEnd do
-          match !queue with
-          | [] -> raise (InvalidLocation "no path exists")
-          | (r,c,hist)::t -> 
-            if beenHere.(r).(c) then
-              queue := t
-            else (* visiting a new spot *)
+  if m.(destr).(destc) = Some "." || m.(destr).(destc) = Some "DOOR" then 
+  (* valid destination *)
+    let (sr,sc)  = get_current_location map p in 
+    let beenHere = Array.make_matrix map.num_rows map.num_cols false in
+    let foundEnd = ref false in
+    let path     = ref [] in
+    let queue    = ref [(sr,sc,[])] in
+    (* We use flood fill to find the destination.
+     * path = our travel history to a specific location.
+     * queue = our queue of possibly unvisited locations, ordered by 
+     *         increasing distance
+     *)
+    while not !foundEnd do
+      match !queue with
+      | [] -> raise (InvalidLocation "no path exists")
+      | (r,c,hist)::t -> 
+        if beenHere.(r).(c) then
+          queue := t
+        else (* visiting a new spot *)
+          begin
+            (* mark spot as traveled *)
+            beenHere.(r).(c) <- true;
+            if r = destr && c = destc 
+            then (* we've arrived *)
               begin
-                (* mark spot as traveled *)
-                beenHere.(r).(c) <- true;
-                if r = destr && c = destc 
-                then (* we've arrived *)
-                  begin
-                    foundEnd := true;
-                    path     := (r,c)::hist
-                  end
-                else if m.(r).(c) = Some "." || m.(r).(c) = Some "DOOR" then
-                  (* valid position, add possible spots to walk into from here *)
-                  let nhist = (r,c)::hist in 
-                    queue := t@[(r+1,c,nhist); (r,c+1,nhist);
-                                (r-1,c,nhist); (r,c-1,nhist)];
-                else (* can't travel into this space, try other options *)
-                  queue := t                
+                foundEnd := true;
+                path     := (r,c)::hist
               end
-        done;
-        !path
-    else (* destination inside a building or on a professor *)
-      raise (InvalidLocation "destination not a valid ending spot")
+            else if m.(r).(c) = Some "." || m.(r).(c) = Some "DOOR" then
+              (* valid position, add possible spots to walk into from here *)
+              let nhist = (r,c)::hist in 
+              queue := t@[(r+1,c,nhist); (r,c+1,nhist);
+                          (r-1,c,nhist); (r,c-1,nhist)];
+            else (* can't travel into this space, try other options *)
+              queue := t                
+          end
+    done;
+    !path
+  else (* destination inside a building or on a professor *)
+    raise (InvalidLocation "destination not a valid ending spot")
 (* simplifies the calculated path so that it is reduced to a sequence of [move] 
  * commands where each subsequent command is in a different direction.*)
 and simplify_path lst =
@@ -420,8 +414,9 @@ and simplify_path lst =
           | _ -> acc
         end
     in 
-      simplify [] lst
+    simplify [] lst
 
+(*TODO*)
 let random_walk map p bop n =
   let (sr,sc) = get_current_location map p in
   let m = map.map_values in
@@ -431,54 +426,55 @@ let random_walk map p bop n =
   let fb = ref "" in
   let counter = ref 0 in
     while !counter < n do
-      let (dr, dc) = match Random.int 4 with
+      let (dr, dc) = 
+      match Random.int 4 with
       | 0 -> ( 1,  0)
       | 1 -> (-1,  0)
       | 2 -> ( 0,  1)
       | 3 -> ( 0, -1)
       | _ -> failwith "unexpected error in Random.int value"
       in
-        if m.(!cr+dr).(!cc+dc) = Some "."
-        then
-          begin
-            cr := !cr + dr;
-            cc := !cc + dc;
-            incr counter
-          end
-        else if m.(!cr+dr).(!cc+dc) = Some "DOOR"
-        then
-          let b' = List.assoc (!cr + dr,!cc + dc) (get_exits map) in
-            match bop with 
-            | None ->
-              begin
-                cr := !cr + dr;
-                cc := !cc + dc;
-                counter := n;
-                fb := b'
-              end
-            | Some b when b <> b' ->
-              begin
-                cr := !cr + dr;
-                cc := !cc + dc;
-                counter := n;
-                fb := b'
-              end
-            | _ -> ()        
+      if m.(!cr+dr).(!cc+dc) = Some "."
+      then
+        begin
+          cr := !cr + dr;
+          cc := !cc + dc;
+          incr counter
+        end
+      else if m.(!cr+dr).(!cc+dc) = Some "DOOR"
+      then
+        let b' = List.assoc (!cr + dr,!cc + dc) (get_exits map) in
+          match bop with 
+          | None ->
+            begin
+              cr := !cr + dr;
+              cc := !cc + dc;
+              counter := n;
+              fb := b'
+            end
+          | Some b when b <> b' ->
+            begin
+              cr := !cr + dr;
+              cc := !cc + dc;
+              counter := n;
+              fb := b'
+            end
+          | _ -> ()        
     done;
     if m.(!cr).(!cc) = Some "DOOR"
     then (false, enter_building map p !fb)
     else 
       begin
         let nloc = update_location map.location p (!cr,!cc) in
-          m.(!cr).(!cc) <- Some p;
-          (false, {map with location = nloc; map_values = m})
+        m.(!cr).(!cc) <- Some p;
+        (false, {map with location = nloc; map_values = m})
       end
 
 (* [move_towards_building map p b bop n] tries to move professor [p] on the [map] 
  * [n] steps towards the building [b], safeguarding against reentering the 
  * building referred by the building option [bop].
  * Requires: [n >= 0], [p] is not in a building already.
- * TODO: called only when [p] can enter [b], i.e., [p] did not just leave [b].
+ *           Called only when [p] can enter [b], i.e., [p] did not just leave [b].
  * Returns: the pair [(tf, map2)], where
  *   [tf]   is [true] iff [p] succesfully made it to [coord]
  *   [map2] is the updated map.
@@ -490,8 +486,8 @@ let move_towards_building map p b bop n =
     let el   = List.assoc b map.exits in
     try
       let eloc = get_closest_exit map el loc in
-        move_towards_coord map p eloc bop n
-      with
+      move_towards_coord map p eloc bop n
+    with
       (* somehow no path exists...time to run around like a headless chicken *)
       | InvalidLocation s -> (random_walk map p bop n)
   with
@@ -506,16 +502,16 @@ let move_towards_building map p b bop n =
  *)
 let teleport_professor_helper map p b = 
   let umap = 
-      match get_current_building map p with
-      (* inside a building, [p] needs to leave first if not in building [b]  *)
-      | Some curB ->
-        leave_building_helper map p 1
-      (* not in a building: *)
-      | None -> map in
-      let (curr, curc) = get_current_location umap p in
-        (* replace current spot w/ the original terrain: *)
-        replace_tile umap.map_values p curr curc;
-        enter_building umap p b
+  match get_current_building map p with
+  (* inside a building, [p] needs to leave first if not in building [b]  *)
+  | Some curB ->
+    leave_building_helper map p 1
+  (* not in a building: *)
+  | None -> map in
+  let (curr, curc) = get_current_location umap p in
+  (* replace current spot w/ the original terrain: *)
+  replace_tile umap.map_values p curr curc;
+  enter_building umap p b
 
 (* [teleport_professor map p b] moves a professor [p] on the [map] to building [b]
  * This event occurs whenever a suggestion or accusation is made; the
@@ -524,8 +520,8 @@ let teleport_professor_helper map p b =
  *)
 let teleport_professor map p b =
   let umap = teleport_professor_helper map p b in
-    print_map umap;
-    umap
+  print_map umap;
+  umap
 
 (* [use_secret_passage map p] returns the updated map when [p] takes the secret
  * passage inside a room.
@@ -539,7 +535,7 @@ let use_secret_passage map p =
   | Some b -> 
     try
       let toB  = List.assoc b map.secrets in
-        teleport_professor map p toB
+      teleport_professor map p toB
     with
     | _ -> failwith ("No secret passage to take in "^b)
 

@@ -152,25 +152,29 @@ let rec all_no lst : bool =
   | [] -> true
   | h::t -> h = `N && all_no t
 
-(*[one_yes lst] returns true if lst has only one yes and false otherwise. *)
+(* [one_yes lst] returns true if lst has at least one yes and false 
+ * otherwise. *)
 let rec one_yes lst : bool =
   match lst with
   | [] -> false
   | h::t -> h = `Y || one_yes t
 
-(*[update_pc_helper_no] returns a unit. It updates pc_ref. TODO more*)
+(* [update_pc_helper_no] updates pc_ref so that any card that no one has 
+ * becomes the only card of its kind remaining in possible_cards. *)
 let update_pc_helper_no (x:int) (y:int) (a:ai)
                         (pc_ref:card list ref) : unit =
   for i = x to y do
     if all_no (List.map (fun (p,arr) -> arr.(i)) a.card_status) then
     pc_ref := List.filter (fun c ->
-                   let cint = int_of_card c in
-                   not (cint <> i && x <= cint && cint <= y))
-                 !pc_ref
+                let cint = int_of_card c in
+                not (cint <> i && x <= cint && cint <= y))
+              !pc_ref
     else ()
   done
 
-(*TODO*)
+(* [update_pc_helper_yes] updates pc_ref so that any card that at least one 
+ * player has gets removed from possible_cards. In fact, at most one player 
+ * can have any one card. *)
 let update_pc_helper_yes (x:int) (y:int) (a:ai)
                          (pc_ref:card list ref) : unit =
   for i = x to y do
@@ -183,19 +187,21 @@ let update_pc_helper_yes (x:int) (y:int) (a:ai)
     else ()
   done
 
-(*TODO*)
 let update_pc_helper x y a : ai =
   let pc_ref = ref a.possible_cards in
   update_pc_helper_no x y a pc_ref;
   update_pc_helper_yes x y a pc_ref;
   {a with possible_cards = !pc_ref}
 
-(* TODO checks if any card can be removed from possible_cards or determined
- * to be in the case file and thus known. *)
+(* [update_possible_cards a] checks if any card can be removed from ai [a]'s
+ * possible_cards or determined to be in the case file and returns the updated 
+ * ai. Specifically, any card that at least one player has gets removed from 
+ * possible_cards, and any card that no one has becomes the only card of its 
+ * kind remaining in possible_cards and thus must be in the case file. *)
 let update_possible_cards (a:ai) : ai =
-  a |> update_pc_helper 0 5
-    |> update_pc_helper 6 14
-    |> update_pc_helper 15 20
+  a |> update_pc_helper 0 5 (* prof *)
+    |> update_pc_helper 6 14 (* building *)
+    |> update_pc_helper 15 20 (* language *)
 
 (*[accuse a s] produces a state where the accusation has been made
  * with the case_file that the ai believes is correct. Does not depend on ai
@@ -297,7 +303,7 @@ and disprove_case (p:prof) (ncurrent:int) (n:int) (guess:case_file) (s:state)
                          : ((prof * card) option) =
   match List.assoc p s.dictionary with
   | `AI ->
-      let ai = List.find (fun a -> a.character = p) s.ais in (*TODO use get_ai?*)
+      let ai = List.find (fun a -> a.character = p) s.ais in
       begin
       match ai_disprove ai guess s.ais with
       | Some card -> Some (p, card)
@@ -317,11 +323,12 @@ and disprove_case (p:prof) (ncurrent:int) (n:int) (guess:case_file) (s:state)
   | `No ->
       disprove_loop ncurrent (n+1) guess s
 
-(*called move towards building while still in building*)
-(* AI logic easy: random. *)
-(* AI logic medium and hard: only guesses possible cards, not the ones that
- * it knows exists.*)
-(*TODO*)
+(* [suggest s] allows ai [a] to make a suggestion and calls [User.disprove] and
+ * [Ai.disprove] until [a] is disproved or not disproved in
+ * the end. Calls [teleport_professor] to move the suggested prof's 
+ * corresponding ai player to the suggested building and change 
+ * that ai's [was_moved] field to true.
+ * Requires: ai [a] is currently in a building. *)
 let suggest (a:ai) (s:state) : state =
   Printf.printf "Prof. %s is making a suggestion about the current building.\n"
                 a.character;
@@ -367,7 +374,7 @@ let suggest (a:ai) (s:state) : state =
           s.ais in
         let news'' =
           {news' with ais = newais;
-                      past_guesses = (*TODO possibly have a helper.ml?*)
+                      past_guesses =
                       (guess, a.character, Some p)>::news'.past_guesses;} in
         accuse_or_not_middle a news''
         end
@@ -628,19 +635,17 @@ let in_building_involuntarily (a:ai) (b:building) (s:state) : state =
   in assign_was_moved news a.character false
 
 (*[in_building_voluntarily a b s] returns a state after determining what
- * action the ai should proceed with given that it was moved there voluntarily.
+ * action the ai should proceed with given that it moved there voluntarily.
  * The ai decides this based on whether or not the building that the ai is in
  * currently has a secret passage and whether or not the building that the ai is
- * in right now is blocked. *) (*TODO please improve*)
+ * in right now is blocked. *)
 let in_building_voluntarily (a:ai) (b:building) (s:state) : state =
   let secret = has_secret_passage s.map b in (* Gmap *)
   let blocked = is_building_blocked s.map b in (* Gmap *)
   match secret, blocked with
   | true,  true  ->
-      Printf.printf "Prof. %s has to use the secret passage.\n" a.character;
-      use_secret a s (*TODO*)
+      use_secret a s
   | true,  false ->
-      print_endline "There is a secret passage available.\n";
       secret_or_roll a b s
   | false, true  ->
       Printf.printf "Prof. %s has to wait until next turn.\n" a.character;
@@ -666,5 +671,6 @@ let rec step (a:ai) (s:state) : state =
       else in_building_voluntarily a b s1
   | None ->
       let c = get_current_location s1.map a.character in
-      if is_exit_blocked s1.map c then s1 else
-      move a (roll_two_dice ()) None s1 (* Gmap *)
+      if is_coord_blocked s1.map c then s1 else
+      move a (roll_two_dice ()) None s1
+

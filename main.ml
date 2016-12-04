@@ -2,10 +2,7 @@ open Logic
 
 (* This file prints the game description and rules, prompts the user to choose 
  *   the number of AI bots and level of difficulty, and calls Game.main to 
- *   start the game. The reason this file is factored out from [game.ml] is 
- *   for testing purposes: if we're going to unit test the [Game] module, it 
- *   can't itself invoke its [main] function; if it did, the game would try to 
- *   launch and would interfere with OUnit.
+ *   start the game. 
  *)
 let () =
   ANSITerminal.resize 98 50;

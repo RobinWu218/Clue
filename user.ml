@@ -182,9 +182,10 @@ and disprove_case (p:prof) (n:int) (guess:case_file) (s:state)
       disprove_loop (n+1) guess s
 
 (* [suggest s] prompts the user for his/her suggestion and calls
- * [Ai.disprove] until it is disproved or all passed. Calls [teleport_professor]
- * to move the suggested prof's corresponding ai player to the suggested
- * building and change that ai's [was_moved] field to true.
+ * [Ai.disprove] until the user is disproved or not disproved in
+ * the end. Calls [teleport_professor] to move the suggested prof's 
+ * corresponding ai player to the suggested building and change 
+ * that ai's [was_moved] field to true.
  * Requires: user is currently in a building. *)
 let suggest (s:state) : state =
   ANSITerminal.(print_string [red]
@@ -439,11 +440,10 @@ let step (s:state) : state =
   if s1.game_complete then s1 else
   match get_current_building s1.map s1.user.character with
   | Some b ->
-      Printf.printf "Prof. %s's current building: %s" s.user.character b;(*TODO debug*)
       if s1.user.was_moved
       then in_building_involuntarily b s1
       else in_building_voluntarily b s1
   | None ->
       let c = get_current_location s1.map s1.user.character in
-      if is_exit_blocked s1.map c then s1 else
+      if is_coord_blocked s1.map c then s1 else
       move (roll_two_dice ()) None s1
