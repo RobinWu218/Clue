@@ -35,31 +35,50 @@ let init (p:prof) (h:hand) (d:difficulty) (lst:prof list) : ai =
   card_status    = status;
   }
 
-(*[easy_helper_who possible] takes a list of possible cards and returns the
- * first prof that is in the list. This is a helper function for the easy ai.*)
-let rec easy_helper_who possible =
+(* [get_first_possible_who possible] takes a list of possible cards and returns the
+ * first prof that is in the list. *)
+let rec get_first_possible_who possible =
   match possible with
   |[]   -> failwith "there are no possible professors"
   |h::t -> if (((int_of_card h) > (-1)) && ((int_of_card h) < 6))
-    then card_to_string h else easy_helper_who t
+    then card_to_string h else get_first_possible_who t
 
-(*[easy_helper_who possible] takes a list of possible cards and returns the
- * first language that is in the list. This is a helper function for the easy ai.
- *)
-let rec easy_helper_what possible =
+(* [get_first_possible_who possible] takes a list of possible cards and returns the
+ * first language that is in the list. *)
+let rec get_first_possible_with_what possible =
   match possible with
   |[]   -> failwith "there are no possible languages"
   |h::t -> if (((int_of_card h) > 14) && ((int_of_card h) < 21))
-    then card_to_string h else easy_helper_what t
+    then card_to_string h else get_first_possible_with_what t
 
-(*[easy_helper_where possible] takes a list of possible cards and returns the
- * first building that is in the list. This is a helper function for the easy ai.
- *)
-let rec easy_helper_where possible =
+(* [get_first_possible_where possible] takes a list of possible cards and returns the
+ * first building that is in the list. *)
+let rec get_first_possible_where possible =
   match possible with
   |[]   -> failwith "there are no possible buildings"
   |h::t -> if (((int_of_card h) > 5) && ((int_of_card h) < 15))
-    then card_to_string h else easy_helper_where t
+    then card_to_string h else get_first_possible_where t
+
+(* [get_random_who possible] takes a list of possible cards and returns the
+ * a random prof that is in the list. *)
+let rec get_random_who possible =
+  let i = Random.int 6 in
+  if List.mem (Prof (prof_of_int i)) possible then prof_of_int i 
+  else get_random_who possible
+
+(* [get_random_with_what possible] takes a list of possible cards and returns the
+ * a random language that is in the list. *)
+let rec get_random_with_what possible =
+  let i = Random.int 6 in
+  if List.mem (Language (lang_of_int i)) possible then lang_of_int i 
+  else get_random_with_what possible
+
+(* [get_random_where possible] takes a list of possible cards and returns the
+ * a random building that is in the list. *)
+let rec get_random_where possible =
+  let i = Random.int 9 in
+  if List.mem (Building (building_of_int i)) possible then building_of_int i 
+  else get_random_where possible
 
 (*[replace_ai_with_new new_ai ai_list] returns an updated list of ais, replacing
 the old ai with this new one.*)
@@ -137,9 +156,9 @@ let update_possible_cards (a:ai) : ai =
  * difficulty. The ai only makes an accusation
  * when it has narrowed down the possible cards to 3. *)
 let accuse (a:ai) (s:state) : bool * state =
-  let where      = easy_helper_where a.possible_cards in
-  let who        = easy_helper_who   a.possible_cards in
-  let with_what  = easy_helper_what  a.possible_cards in
+  let where      = get_first_possible_where a.possible_cards in
+  let who        = get_first_possible_who   a.possible_cards in
+  let with_what  = get_first_possible_with_what  a.possible_cards in
   let accusation = {who=who; where=where; with_what=with_what} in
   Printf.printf "Prof. %s is making an accusation:\n" a.character;
   print_case_file accusation;
@@ -269,9 +288,18 @@ let suggest (a:ai) (s:state) : state =
       match a.difficulty with
       | Easy ->
           (prof_of_int (Random.int 6), lang_of_int (Random.int 6))
-      | Medium | Hard ->
-          (easy_helper_who a.possible_cards,
-           easy_helper_what a.possible_cards)
+      | Medium ->
+          (get_random_who a.possible_cards,
+           get_random_with_what a.possible_cards)
+      | Hard ->
+          begin
+          match Random.int 10 with 
+          | i when i < 9 ->
+              (get_random_who a.possible_cards,
+               get_random_with_what a.possible_cards)
+          | _ ->
+              (prof_of_int (Random.int 6), lang_of_int (Random.int 6))
+          end
       end in
     let guess =
       {who = who;
