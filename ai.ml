@@ -449,10 +449,10 @@ let move_where (a:ai) (bop:building option) (s:state) : building =
   match a.difficulty with
   | Easy   -> move_where_easy a bop s
   | Medium -> let b = move_where_medium a bop s in
-              if not is_building_blocked s.map b then b
+              if not (is_building_blocked s.map b) then b
               else move_where_easy a bop s
   | Hard   -> let b = move_where_hard a bop s in
-              if not is_building_blocked s.map b then b
+              if not (is_building_blocked s.map b) then b
               else move_where_easy a bop s
 
 (* [move a n bop s] allows the AI [a]'s character to move n steps,
