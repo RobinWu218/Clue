@@ -102,12 +102,17 @@ val enter_building: map -> prof -> building -> map
  *)
 val move: map -> prof -> building option -> string -> int -> int * map
 
-(* [move_towards_coord map p c n] tries to move professor [p] on the [map] 
- * [n] steps towards the coordinate [c]. 
- * Returns: the pair [(i, map2)], where
- *   [i]    is the steps remaining after going in [dir] direction, and
+(* [move_towards_coord map p coord n] tries to move professor [p] on the [map]
+ * [n] steps towards the coordinate [coord].
+ * Requires: [n >= 0], [p] is not in a building, [is_building_blocked = false]
+ *  
+ * Returns: the pair [(tf, map2)], where
+ *   [tf]   is [true] iff [p] succesfully made it to [coord]
  *   [map2] is the updated map.
- * Raises: InvalidLocation if [c] is off the map or inside a building. 
+ *
+ * Note: fails to account for people clogging up hallways to prevent a valid
+ * path. After much discussion, the problem was deemed to occur at too few of a
+ * frequency to necessitate a fail-proof automated mover.
  *)
 val move_towards_coord: map -> prof -> coord -> int -> bool * map
 

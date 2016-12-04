@@ -287,7 +287,7 @@ let move map p bop dir n =
 
 (* [move_towards_coord map p coord n] tries to move professor [p] on the [map]
  * [n] steps towards the coordinate [coord].
- * Requires: [n >= 0], [p] is not in a building, building 
+ * Requires: [n >= 0], [p] is not in a building, [is_building_blocked = false] 
  *  
  * Returns: the pair [(tf, map2)], where
  *   [tf]   is [true] iff [p] succesfully made it to [coord]
@@ -304,7 +304,7 @@ let rec move_towards_coord map p coord n =
     else
       let (sr, sc) = get_current_location map p in
       replace_tile map.map_values p sr sc;
-      let path = calc_path map p destr destc false in
+      let path = calc_path map p destr destc in
       let dirs = simplify_path path in
       let steps_left = ref n in
       let map2 =
@@ -351,7 +351,7 @@ and calc_path map p destr destc =
          *)
         while not !foundEnd do
           match !queue with
-          | [] -> raise (InvalidLocation "no path exists");
+          | [] -> raise (InvalidLocation "no path exists")
           | (r,c,hist)::t -> 
             if beenHere.(r).(c) then
               queue := t
@@ -370,15 +370,6 @@ and calc_path map p destr destc =
                   let nhist = (r,c)::hist in 
                     queue := t@[(r+1,c,nhist); (r,c+1,nhist);
                                 (r-1,c,nhist); (r,c-1,nhist)];
-                else if ghosts
-                (* we pretend people aren't blocking our way *)
-                then
-                  match m.(r).(c) with
-                  | None       -> queue := t
-                  | Some ghost -> 
-                    let nhist = (r,c)::hist in 
-                      queue := t@[(r+1,c,nhist); (r,c+1,nhist);
-                                  (r-1,c,nhist); (r,c-1,nhist)];
                 else (* can't travel into this space, try other options *)
                   queue := t                
               end
@@ -456,25 +447,34 @@ let move_towards_building map p b n =
     | Not_found -> 
       failwith ("[move_towards_building]: could not find professor or building")
       
+(* [teleport_professor_helper map p b] moves a professor [p] on the [map] to 
+ * building [b]. This event occurs whenever a suggestion or accusation is made; 
+ * the suspect is moved to the "scene of the crime."
+ * Returns: the updated map.
+ * Does not print resultant map to screen
+ *)
+let teleport_professor_helper map p b = 
+  let umap = 
+      match get_current_building map p with
+      (* inside a building, [p] needs to leave first if not in building [b]  *)
+      | Some curB ->
+        leave_building_helper map p 1
+      (* not in a building: *)
+      | None -> map in
+      let (curr, curc) = get_current_location umap p in
+        (* replace current spot w/ the original terrain: *)
+        replace_tile umap.map_values p curr curc;
+        enter_building umap p b
+
 (* [teleport_professor map p b] moves a professor [p] on the [map] to building [b]
  * This event occurs whenever a suggestion or accusation is made; the
  * suspect is moved to the "scene of the crime."
- * Returns: the updated map.
+ * Returns the updated map, and prints it to screen.
  *)
 let teleport_professor map p b =
-  let umap = 
-    match get_current_building map p with
-    (* inside a building, [p] needs to leave first if not in building [b]  *)
-    | Some curB ->
-      leave_building_helper map p 1
-    (* not in a building: *)
-    | None -> map in
-    let (curr, curc) = get_current_location umap p in
-      (* replace current spot w/ the original terrain: *)
-      replace_tile umap.map_values p curr curc;
-      let umap = enter_building umap p b in
-        print_map umap;
-        umap
+  let umap = teleport_professor_helper map p b in
+    print_map umap;
+    umap
 
 (* [use_secret_passage map p] returns the updated map when [p] takes the secret
  * passage inside a room.
