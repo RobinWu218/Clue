@@ -47,6 +47,7 @@ type map = {
   buildings:      building list;
   waiting_spots: (building * (coord list)) list;
   secrets:       (building * building) list;
+  static_map:     string option array array; (*TODO debug*)
   (* Below are fields that can change throughout the game. *)
   map_values:     string option array array;
   in_building:   (prof * building)list;

@@ -169,7 +169,7 @@ let init_state (n:int) (d:difficulty) : state =
     wait_for_user();
 
     ANSITerminal.(
-      print_info "You have the following cards: " true;
+      print_info "You have the following cards (take notes please!): " true;
       print_string []
         (sprintf card_style "%-70s" ((string_of_card_lst user_hand)^"."));
       print_endline "";

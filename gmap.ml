@@ -168,6 +168,10 @@ let replace_tile m p r c =
     else
       m.(r).(c) <- Some "."
 
+(*TODO debug*)
+let replace_tile_static map r c =
+  map.map_values.(r).(c) <- map.static_map.(r).(c)
+
 (* [update_location locs p c] returns the list of locations [loc] with [p]'s
  * location updated to [c]. 
  * requires: [p] is a valid professor name.
@@ -232,7 +236,8 @@ let move_helper map p bop dir n =
   | _ -> failwith ("Invalid direction to move: "^dir) in
   let m = map.map_values in
   let (sr,sc) = get_current_location map p in
-  replace_tile m p sr sc;  (* clear out starting location *)
+  replace_tile_static map sr sc; (*TODO debug*)(*
+  replace_tile m p sr sc;  (* clear out starting location *)*)
   let cr = ref sr in
   let cc = ref sc in
   let i  = ref 0  in
@@ -300,7 +305,8 @@ let rec move_towards_coord map p coord bop n =
     then raise (InvalidLocation "out of bounds")
     else
       let (sr, sc) = get_current_location map p in
-      replace_tile map.map_values p sr sc;
+      replace_tile_static map sr sc; (*TODO debug*)(*
+      replace_tile map.map_values p sr sc;*)
       let path = calc_path map p destr destc in
       let dirs = simplify_path path in
       let steps_left = ref n in
@@ -424,7 +430,8 @@ and simplify_path lst =
 let random_walk map p bop n =
   let (sr,sc) = get_current_location map p in
   let m = map.map_values in
-  replace_tile  m p sr sc;
+  replace_tile_static map sr sc; (*TODO debug*)(*
+  replace_tile m p sr sc;*)
   let cr = ref sr in
   let cc = ref sc in
   let fb = ref "" in
@@ -515,7 +522,8 @@ let teleport_professor_helper map p b =
   | None -> map in
   let (curr, curc) = get_current_location umap p in
   (* replace current spot w/ the original terrain: *)
-  replace_tile umap.map_values p curr curc;
+  replace_tile_static umap curr curc; (*TODO debug*)(*
+  replace_tile umap.map_values p curr curc;*)
   enter_building umap p b
 
 (* [teleport_professor map p b] moves a professor [p] on the [map] to 

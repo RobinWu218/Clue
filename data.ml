@@ -45,6 +45,7 @@ type map = {
   buildings:      building list;
   waiting_spots: (building * (coord list)) list;
   secrets:       (building * building) list;
+  static_map:     string option array array; (*TODO debug*)
   map_values:     string option array array;
   in_building:   (prof * building)list;
   location:      (prof * coord) list;
@@ -86,7 +87,7 @@ let important_style =
 let info_style      = 
   [ANSITerminal.on_black; ANSITerminal.yellow]
 let insn_style      = 
-  [ANSITerminal.on_black; ANSITerminal.Bold; ANSITerminal.blue]
+  [ANSITerminal.on_black; ANSITerminal.Bold; ANSITerminal.white]
 let results_style   = 
   [ANSITerminal.on_black; ANSITerminal.white]
 let card_style      = 
@@ -342,7 +343,7 @@ let print_case_file (cf:case_file) : unit =
 let wait_for_user () =
   print_info " " true;
   ANSITerminal.(
-    print_string [blue; Bold; on_black]
+    print_string [white; Bold; on_black]
     "Press enter to continue...............................................");
   let _ = read_line () in 
     print_info " " true
