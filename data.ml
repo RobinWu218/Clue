@@ -45,7 +45,7 @@ type map = {
   buildings:      building list;
   waiting_spots: (building * (coord list)) list;
   secrets:       (building * building) list;
-  static_map:     string option array array; (*TODO debug*)
+  static_map:     string option array array;
   map_values:     string option array array;
   in_building:   (prof * building)list;
   location:      (prof * coord) list;
