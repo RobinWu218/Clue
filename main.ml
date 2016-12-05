@@ -24,7 +24,7 @@ let () =
     "| It is a dangerous virus and the perpetrator needs to be caught.    |\n"^
     "| Your job is to answer these three questions:                       |\n|")
     false;
-  ANSITerminal.(print_string [Bold; blue; on_black]
+  ANSITerminal.(print_string [Bold; white; on_black]
     " Who did it? Where? And with what language?                         ");
   print_info ("|\n"^
     "+--------------------------------------------------------------------+\n|")

@@ -17,16 +17,37 @@ let extract_info field f =
 let extract_map json nr nc =
   let strmap = (extract_info "map_diag" to_string) json in
   let m = Array.make_matrix nr nc None in
-    for r = 0 to nr - 1 do 
-      for c = 0 to nc - 1 do
-        let ch = strmap.[r*(nc+1) + c] in
-          if ch = 'd' then 
-            m.(r).(c) <- Some "DOOR" 
-          else if ch <>'?' then
-            m.(r).(c) <- Some (String.make 1 ch)
-      done;
-    done; 
-    m
+  for r = 0 to nr - 1 do 
+    for c = 0 to nc - 1 do
+      let ch = strmap.[r*(nc+1) + c] in
+      if ch = 'd' then 
+        m.(r).(c) <- Some "DOOR" 
+      else if ch <>'?' then
+        m.(r).(c) <- Some (String.make 1 ch)
+    done;
+  done; 
+  m
+
+(*TODO debug*)
+(* [extract_static_map json nr nc] extracts the unchanging ascii map from 
+ * [json] and puts it into a matrix. 
+ * requires: [nr] is the number of rows in the map,
+ *           [nc] is the number of cols in the map,
+ *           the ascii diagram is broken up across multiple lines.
+ *)
+let extract_static_map json nr nc =
+  let strmap = (extract_info "map_diag" to_string) json in
+  let m = Array.make_matrix nr nc None in
+  for r = 0 to nr - 1 do 
+    for c = 0 to nc - 1 do
+      let ch = strmap.[r*(nc+1) + c] in
+      match ch with
+      | 'd' -> m.(r).(c) <- Some "DOOR"
+      | 'B' | 'C' | 'F' | 'G' | 'H' | 'W' -> m.(r).(c) <- Some "."
+      | _ -> m.(r).(c) <- Some (String.make 1 ch)
+    done;
+  done; 
+  m
 
 (* [extract_building_info json m] parses [json] for information regarding:
  *   - building name on map [m], and updates [m] accordingly
@@ -104,11 +125,13 @@ let make_map () =
   let n_r = (extract_info "num_rows" to_int) json in
   let n_c = (extract_info "num_cols" to_int) json in
   let m = extract_map json n_r n_c in
+  let static = extract_static_map json n_r n_c in (*TODO debug*)
   let (blist, elist, wslist, slist) = extract_building_info json m in
   {
     num_rows      = n_r; 
     num_cols      = n_c;
     map_values    = m;
+    static_map    = static; (*TODO debug*)
     exits         = elist; 
     buildings     = blist;
     in_building   = [];    (* no one starts in a building *)

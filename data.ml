@@ -45,6 +45,7 @@ type map = {
   buildings:      building list;
   waiting_spots: (building * (coord list)) list;
   secrets:       (building * building) list;
+  static_map:     string option array array; (*TODO debug*)
   map_values:     string option array array;
   in_building:   (prof * building)list;
   location:      (prof * coord) list;
@@ -343,8 +344,14 @@ let print_case_file (cf:case_file) : unit =
 (* [wait_for_user] waits for the user to hit enter to continue. *)
 let wait_for_user () =
   print_info " " true;
+<<<<<<< HEAD
   print_insn 
     "Press enter to continue..............................................."
     false;
+=======
+  ANSITerminal.(
+    print_string [white; Bold; on_black]
+    "Press enter to continue...............................................");
+>>>>>>> 314ee076b9c4155f19d7b5afa085f15c00dd6d6d
   let _ = read_line () in 
     print_info " " true
