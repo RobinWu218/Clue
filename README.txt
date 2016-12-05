@@ -6,7 +6,7 @@ Authors:
   Alice Chen (xc278)
 Last updated: 12/4/2016
 
-## To Compile and Play the Game
+To Compile and Play the Game
 Run: make play
 For best results, run the command when the terminal window is not full screen.
 That way ANSITerminal is able to resize the terminal for the best size.
