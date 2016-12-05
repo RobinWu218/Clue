@@ -5,3 +5,4 @@ open Data
  * converts it into a [map].
  * Returns: a [map] with only information about the map (no player info) *)
 val make_map: unit -> map
+

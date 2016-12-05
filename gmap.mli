@@ -1,9 +1,9 @@
 open Data
 open Reader
 
-(*******************************************
- * utility methods 
- *******************************************)
+(*******************)
+(* utility methods *)
+(*******************)
 
 (* [constuct_map] creates a map data structure. *)
 val construct_map: unit -> map
@@ -20,10 +20,10 @@ val print_map: map -> unit
  *)
 val get_exits: map -> (coord * building) list
 
-(* [is_exit_blocked map coord] returns true if the exit at location [coord] is 
+(* [is_coord_blocked map coord] returns true if the exit at location [coord] is 
  * blocked in by another professor. Does not check that [coord] is a valid exit. 
  *)
-val is_exit_blocked: map -> coord -> bool
+val is_coord_blocked: map -> coord -> bool
 
 (* [is_building_blocked map b] returns true if all exits out of building [b] is
  * blocked. 
@@ -31,10 +31,9 @@ val is_exit_blocked: map -> coord -> bool
  *)
 val is_building_blocked: map -> building -> bool
 
-
-(*******************************************
- * Methods for professor queries 
- *******************************************)
+(*********************************)
+(* Methods for professor queries *)
+(*********************************)
 
 (* [is_in_building map p] checks if professor [p] is currently in a building on 
  * the [map].
@@ -76,10 +75,9 @@ val get_closest_exit : map -> (int * coord) list -> coord -> coord
  *)
 val closest_buildings: map -> prof -> (int * building) list
 
-
-(*******************************************
- * methods for moving around on the map 
- *******************************************)
+(****************************************)
+(* methods for moving around on the map *)
+(****************************************)
 
 (* [leave_building map p n] moves professor [p] to exit [n] of the current
  * building [p] is in, and performs all changes necessary to update the [map].

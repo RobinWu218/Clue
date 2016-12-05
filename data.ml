@@ -45,6 +45,7 @@ type map = {
   buildings:      building list;
   waiting_spots: (building * (coord list)) list;
   secrets:       (building * building) list;
+  static_map:     string option array array; (*TODO debug*)
   map_values:     string option array array;
   in_building:   (prof * building)list;
   location:      (prof * coord) list;
@@ -81,7 +82,42 @@ type state = {
   past_guesses:  (case_file * prof * (prof option)) list;
 }
 
+let important_style = 
+  [ANSITerminal.on_black; ANSITerminal.Bold; ANSITerminal.green]
+let info_style      = 
+  [ANSITerminal.on_black; ANSITerminal.yellow]
+let insn_style      = 
+  [ANSITerminal.on_black; ANSITerminal.Bold; ANSITerminal.white]
+let results_style   = 
+  [ANSITerminal.on_black; ANSITerminal.white]
+let card_style      = 
+  [ANSITerminal.on_black; ANSITerminal.Bold; ANSITerminal.cyan]
+
 (***** various functions *****)
+
+let print_help style s e =
+  ANSITerminal.(
+  if e then
+  begin
+    print_string [] (sprintf style "%-70s" s);
+    print_endline ""
+  end
+  else print_string info_style s;)
+
+let print_info s e = 
+  print_help info_style s e
+
+let print_insn s e =
+  print_help insn_style s e
+
+let print_important s e = 
+  print_help important_style s e
+
+let print_results s e=
+  print_help results_style s e
+
+let print s e =
+  print_help [ANSITerminal.white; ANSITerminal.on_black] s e
 
 (* [int_option_of_string s] is [Some i] if [s] can be converted to int [i]
  * using [int_of_string s], and [None] otherwise. *)
@@ -132,7 +168,7 @@ let building_of_int (i:int) : building =
   | 6 -> "Phillips"
   | 7 -> "Rhodes"
   | 8 -> "Statler"
-  | _ -> failwith ("Illegal int representation of a building"^(string_of_int i))
+  | _ -> failwith ("Illegal int representation of building"^(string_of_int i))
 
 (* [lang_of_int i] is the integer corresponding to a language. *)
 let lang_of_int (i:int) : language =
@@ -216,13 +252,25 @@ let string_of_coord ((r,c):coord) : string =
   Printf.sprintf "(%d, %d)" r c
 
 (* [string_of_exits exits] is the string representation of all exits to a
- * building with their ids and coordinates. *)
+ * building with their ids and coordinates. 
+ * Requires: [exits] has length 2 or 4. *)
 let rec string_of_exits (exits:(int * coord) list) : string =
   match exits with
+  | [e1;e2] -> (* Statler Hall *)
+      ("exit 1: (13, 8) upper right\n" ^
+       "exit 2: (16, 7) lower left")
+  | [e1;e2;e3;e4] -> (* Klarman Hall *)
+      ("exit 1: (5,  9) upper left\n" ^
+       "exit 2: (8, 10) lower left\n" ^
+       "exit 3: (8, 15) lower right\n" ^
+       "exit 4: (5, 16) upper right")
+  | _ -> failwith "This should not happen in string_of_exits in Data"
+(*
   | [] -> ""
   | (id,coord)::t -> ((Printf.sprintf "  exit %d: %s\n"
                                       id (string_of_coord coord)) ^
-             (string_of_exits t))
+                     (string_of_exits t))
+*)
 
 (* [string_of_prof_lst] is a comma-separated string representation of a list
  * of profs. *)
@@ -230,9 +278,9 @@ let rec string_of_prof_lst (lst:prof list) : string =
   match lst with
   | [] -> ""
   | [p] -> string_of_card (Prof p)
-  | [p1;p2] -> (string_of_card (Prof p1)) ^ ", and\n" ^
+  | [p1;p2] -> (string_of_card (Prof p1)) ^ ", and " ^
                (string_of_card (Prof p2))
-  | h::t -> (string_of_card (Prof h)) ^ ",\n" ^
+  | h::t -> (string_of_card (Prof h)) ^ ", " ^
             (string_of_prof_lst t)
 
 (* [string_of_card_lst] is a comma-separated string representation of a list
@@ -241,9 +289,9 @@ let rec string_of_card_lst (lst:card list) : string =
   match lst with
   | [] -> ""
   | [c] -> string_of_card c
-  | [c1;c2] -> (string_of_card c1) ^ ", and \n" ^
+  | [c1;c2] -> (string_of_card c1) ^ ", and " ^
                (string_of_card c2)
-  | h::t -> (string_of_card h) ^ ",\n" ^
+  | h::t -> (string_of_card h) ^ ", " ^
             (string_of_card_lst t)
 
 (* [int_lst_to_prof_lst lst] is a prof list corresponding to int list [lst]. *)
@@ -265,7 +313,7 @@ let rec int_lst_to_card_lst (lst:int list) : card list =
   | [] -> []
   | h::t -> (card_of_int h)::(int_lst_to_card_lst t)
 
-(* [card_lst_to_int_lst lst] is an int list corresponding to card list [lst]. *)
+(* [card_lst_to_int_lst lst] is an int list corresponding to card list [lst].*)
 let rec card_lst_to_int_lst (lst:card list) : int list =
   match lst with
   | [] -> []
@@ -281,11 +329,82 @@ let card_lst_to_building_lst (lst:card list) : building list =
 
 (* [print_case_file cf] prints the case file [cf] in a sentence. *)
 let print_case_file (cf:case_file) : unit =
-  Printf.printf "Prof. %s started the virus with %s in %s Hall.\n\n"
-                cf.who cf.with_what cf.where
+  ANSITerminal.(
+    print_string card_style ("Prof. "^cf.who);
+    print_string [white; on_black] " started the virus with ";
+    print_string card_style  cf.with_what;
+    print_string [white; on_black] " in ";
+    print_string card_style  (cf.where^" Hall");
+    print_results "" true;
+    print_results "" true;
+  )
 
 (* [wait_for_user] waits for the user to hit enter to continue. *)
 let wait_for_user () =
-  ANSITerminal.print_string [ANSITerminal.red]
-    "\nPress enter to continue...............................................\n";
-  let _ = read_line () in ()
+  print_info " " true;
+  ANSITerminal.(
+    print_string [white; Bold; on_black]
+    "Press enter to continue...............................................");
+  let _ = read_line () in 
+    print_info " " true
+
+(*
+ANSITerminal.(
+    print_string [red; Bold]
+    "Press enter to continue...............................................");
+    print_info " " true;
+ANSITerminal.(
+    print_string [green; Bold]
+    "Press enter to continue...............................................");
+    print_info " " true;
+ANSITerminal.(
+    print_string [yellow; Bold]
+    "Press enter to continue...............................................");
+    print_info " " true;
+ANSITerminal.(
+    print_string [blue; Bold]
+    "Press enter to continue...............................................");
+    print_info " " true;
+ANSITerminal.(
+    print_string [magenta; Bold]
+    "Press enter to continue...............................................");
+    print_info " " true;
+ANSITerminal.(
+    print_string [cyan; Bold]
+    "Press enter to continue...............................................");
+    print_info " " true;
+ANSITerminal.(
+    print_string [white; Bold]
+    "Press enter to continue...............................................");
+    print_info " " true;
+
+ANSITerminal.(
+    print_string [red; Bold; on_black]
+    "Press enter to continue...............................................");
+    print_info " " true;
+ANSITerminal.(
+    print_string [green; Bold; on_black]
+    "Press enter to continue...............................................");
+    print_info " " true;
+ANSITerminal.(
+    print_string [yellow; Bold; on_black]
+    "Press enter to continue...............................................");
+    print_info " " true;
+ANSITerminal.(
+    print_string [blue; Bold; on_black]
+    "Press enter to continue...............................................");
+    print_info " " true;
+ANSITerminal.(
+    print_string [magenta; Bold; on_black]
+    "Press enter to continue...............................................");
+    print_info " " true;
+ANSITerminal.(
+    print_string [cyan; Bold; on_black]
+    "Press enter to continue...............................................");
+    print_info " " true;
+ANSITerminal.(
+    print_string [white; Bold; on_black]
+    "Press enter to continue...............................................");
+    print_info " " true
+*)
+

@@ -29,59 +29,63 @@ let assign_was_moved (s:state) (p:prof) (b:bool) : state =
 (* [roll_two_dice ()] simulates rolling two dice, prints the results, and
  * returns the sum. *)
 let roll_two_dice () : int =
-  let d1 = 1 + Random.int 5 in (*same every game? TODO*)
+  let d1 = 1 + Random.int 5 in
   let d2 = 1 + Random.int 5 in
   let sum = d1 + d2 in
-    print_endline "Rolling two dice...";
-    Printf.printf "Die 1: %d\n" d1;
-    Printf.printf "Die 2: %d\n" d2;
+    print_results "Rolling two dice..." true;
+    print_results ("Die 1: "^(string_of_int d1)) true;
+    print_results ("Die 2: "^(string_of_int d2)) true;
+    print_results " " true;
     sum
 
 (* [get_choice_two ()] is [1] if the user selects the first choice and [2] if
  * the user selects the second choice. *)
 let rec get_choice_two () : int =
-  let str = print_string  "> "; read_line () in
+  let str = print  "> " false; read_line () in
   let str' = String.(str |> trim) in
   if String.length str' = 0
   then
     begin
-    print_endline "Please at least type something!";
-    get_choice_two ()
+      print_insn "Please at least type something!" true;
+      get_choice_two ()
     end
   else
     match str'.[0] with
     | '1' -> 1
     | '2' -> 2
-    | _   -> print_endline "Please type either 1 or 2!"; get_choice_two ()
+    | _   -> 
+      print_insn "Please type either 1 or 2!" true; 
+      get_choice_two ()
 
 (* [get_choice_three ()] is [1] if the user selects the first choice, [2] if
  * the user selects the second choice, and [3] if the third. *)
 let rec get_choice_three () : int =
-  let str = print_string  "> "; read_line () in
+  let str = print  "> " false; read_line () in
   let str' = String.(str |> trim) in
   if String.length str' = 0
   then
     begin
-    print_endline "Please at least type something!";
-    get_choice_three ()
+      print_insn "Please at least type something!" true;
+      get_choice_three ()
     end
   else
     match str'.[0] with
     | '1' -> 1
     | '2' -> 2
     | '3' -> 3
-    | _   -> print_endline "Please type 1 or 2 or 3!"; get_choice_three ()
+    | _   -> print_insn "Please type 1 or 2 or 3!" true; 
+             get_choice_three ()
 
 (* [get_choice_four ()] is [1] if the user selects the first choice, [2] if
  * the second, [3] if the third, and [4] if the fourth. *)
 let rec get_choice_four () : int =
-  let str = print_string  "> "; read_line () in
+  let str = print  "> " false; read_line () in
   let str' = String.(str |> trim) in
   if String.length str' = 0
   then
     begin
-    print_endline "Please at least type something!";
-    get_choice_four ()
+      print_insn "Please at least type something!" true;
+      get_choice_four ()
     end
   else
     match str'.[0] with
@@ -89,18 +93,19 @@ let rec get_choice_four () : int =
     | '2' -> 2
     | '3' -> 3
     | '4' -> 4
-    | _   -> print_endline "Please type 1 or 2 or 3 or 4!"; get_choice_four ()
+    | _   -> print_insn "Please type 1 or 2 or 3 or 4!" true; 
+             get_choice_four ()
 
 (* [get_choice_num_ai ()] is [2] up till [5] if the user chooses to play with
  * [2] to [5] AI's. *)
 let rec get_choice_num_ai () : int =
-  let str = print_string  "> "; read_line () in
+  let str = print  "> " false; read_line () in
   let str' = String.(str |> trim) in
   if String.length str' = 0
   then
     begin
-    print_endline "Please at least type something!";
-    get_choice_num_ai ()
+      print_insn "Please at least type something!" true;
+      get_choice_num_ai ()
     end
   else
     match str'.[0] with
@@ -108,7 +113,8 @@ let rec get_choice_num_ai () : int =
     | '3' -> 3
     | '4' -> 4
     | '5' -> 5
-    | _   -> print_endline "Please type an integer between 2 and 5 inclusive!";
+    | _   -> print_insn 
+             "Please type an integer between 2 and 5 inclusive!" true;
              get_choice_num_ai ()
 
 (* [user_choose_from_two c1 c2] is [Some c1] or [Some c2] as determined by
@@ -133,51 +139,50 @@ let user_choose_from_three (c1:card) (c2:card) (c3:card) : card option =
   | 3 -> Some c3
   | _ -> failwith "This should not happen in user_choose_from_three in Logic"
 
-(*
-(* [easy_helper_disprove hand guess] attempts to disprove [guess] with the cards
-they have in their [hand]. Returns Some Card that the player uses to disprove
-or None if no such card exists. *)
-let rec easy_helper_disprove (hand:hand) (guess:case_file) : card option =
-  match hand with
-  | []   -> None
-  | h::t -> if (card_to_string h) = guess.who   ||
-               (card_to_string h) = guess.where ||
-               (card_to_string h) = guess.with_what
-            then (Some h)
-            else easy_helper_disprove t guess
-
-(* [ai_disprove ai guess] figures out which card to reveal in response
- * to a suggestion [guess].
- * Returns: [Some c] where [c] is a card that [ai] can reveal. Or, if [ai] has
- * none of the cards in [guess], then it will return [None].
- *)
-let ai_disprove (ai:ai) (guess: case_file) : card option =
-  match ai.difficulty with
-  | Easy   -> easy_helper_disprove ai.hand guess
-  | Medium -> failwith "TODO"
-  | Hard   -> failwith "TODO"
-  (* TODO if one of the cards has already been in a past guess, the ai wants to
-   show that one so we give the other players as little information as possible.
-    *)
-*)
-
-(*TODO
- * AI logic:
- *   - Easy: simply chooses the first card. *)
+(* [ai_choose_from_two a c1 c2] is [Some c1] or [Some c2] as determined by
+ * ai [a]. *)
 let ai_choose_from_two (a:ai) (c1:card) (c2:card) : card option =
   match a.difficulty with
-  | Easy   -> Some c1
-  | Medium -> Some c2
-  | Hard   -> Some c1
-(*TODO
- * AI logic:
- *   - Easy: simply chooses the first card. *)
+  | Easy | Medium -> 
+    begin
+    match Random.int 1 with 
+    | 0 -> Some c1
+    | 1 -> Some c2
+    | _ -> failwith "This should not happen in ai_choose_from_two in Logic"
+    end
+  | Hard   -> 
+    begin
+    match c1, c2 with
+    | Building _, _ -> Some c2
+    | _, Building _ -> Some c1
+    | _ ->     
+      begin
+      match Random.int 1 with 
+      | 0 -> Some c1
+      | 1 -> Some c2
+      | _ -> failwith "This should not happen in ai_choose_from_two in Logic"
+      end
+    end
+
+(* [ai_choose_from_three a c1 c2 c3] is [Some c1] or [Some c2] or [Some c3] as
+ * determined by ai [a]. *)
 let ai_choose_from_three (a:ai) (c1:card) (c2:card) (c3:card) : card option =
-  Some c1
-  (*match a.difficulty with
-  | Easy   -> Some c1
-  | Medium -> failwith "TODO"
-  | Hard   -> failwith "TODO"*)
+  match a.difficulty with
+  | Easy | Medium -> 
+    begin
+    match Random.int 2 with 
+    | 0 -> Some c1
+    | 1 -> Some c2
+    | 2 -> Some c3
+    | _ -> failwith "This should not happen in ai_choose_from_three in Logic"
+    end
+  | Hard   -> 
+    begin
+    match Random.int 1 with 
+    | 0 -> Some c1
+    | 1 -> Some c3
+    | _ -> failwith "This should not happen in ai_choose_from_three in Logic"
+    end
 
 (*[ai_two_nos] is called when there are two "N"'s and one maybe - we know
  * that the maybe is a yes.*)
@@ -192,7 +197,9 @@ let ai_two_nos arr (pos:int list) : unit =
     end
   |_-> failwith "This shouldn't happen in ai_two_nos in logic.ml. "
 
-(*TODO*)
+(* [ais_after_ai_disprove a guess ais co] updates the card_status field of
+ * all ai's in ai list [ais] after ai [a] either disproves [guess] with card 
+ * [c] if [co] is [Some c] or fails to disprove [guess] if [co] is [None]. *)
 let ais_after_ai_disprove (a:ai) (guess:case_file)
                           (ais:ai list) (co:card option)
                           : unit =
@@ -221,8 +228,7 @@ let ais_after_ai_disprove (a:ai) (guess:case_file)
         begin List.iter (fun i -> arr.(i) <- `N) pos end
         else ()) ais
 
-(*TODO
- * side effect: update each ai's card_status in ais *)
+(* Side effect: update each ai's card_status in ais *)
 let ai_disprove_helper (a:ai) (guess:case_file) (ais:ai list) : card option =
   Printf.printf "It is Prof. %s's turn to disprove the suggestion:\n"
                 a.character;
@@ -257,12 +263,14 @@ let ai_disprove_helper (a:ai) (guess:case_file) (ais:ai list) : card option =
       Printf.printf "Prof. %s was not able to disprove the suggestion.\n"
                     a.character;
       None
-(*also updating ai*)
+(* also updating ai *)
 let ai_disprove (a:ai) (guess:case_file) (ais:ai list) : card option =
   let co = ai_disprove_helper a guess ais in
   ais_after_ai_disprove a guess ais co; co
 
-(*TODO*)
+(* [ais_after_user_disprove s guess ais co] updates the card_status field of
+ * all ai's in ai list [ais] after user either disproves [guess] with card 
+ * [c] if [co] is [Some c] or fails to disprove [guess] if [co] is [None]. *)
 let ais_after_user_disprove (s:state) (guess:case_file)
                             (ais:ai list) (co:card option)
                             : unit =

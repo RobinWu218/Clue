@@ -47,6 +47,7 @@ type map = {
   buildings:      building list;
   waiting_spots: (building * (coord list)) list;
   secrets:       (building * building) list;
+  static_map:     string option array array; (*TODO debug*)
   (* Below are fields that can change throughout the game. *)
   map_values:     string option array array;
   in_building:   (prof * building)list;
@@ -87,7 +88,19 @@ type state = {
   past_guesses:  (case_file * prof * (prof option)) list;
 }
 
+val card_style : ANSITerminal.style list
+
 (***** various functions *****)
+
+val print_info : string -> bool -> unit
+
+val print_insn : string -> bool -> unit
+
+val print_important : string -> bool -> unit
+
+val print_results : string -> bool -> unit
+
+val print : string -> bool -> unit
 
 (* [int_option_of_string s] is [Some i] if [s] can be converted to int [i]
  * using [int_of_string s], and [None] otherwise. *)
