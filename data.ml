@@ -85,10 +85,9 @@ let important_style = [ANSITerminal.on_black; ANSITerminal.Bold; ANSITerminal.gr
 let info_style      = [ANSITerminal.on_black; ANSITerminal.yellow]
 let insn_style      = [ANSITerminal.on_black; ANSITerminal.Bold; ANSITerminal.blue]
 let results_style   = [ANSITerminal.on_black; ANSITerminal.white]
+let card_style      = [ANSITerminal.on_black; ANSITerminal.Bold; ANSITerminal.cyan]
 
 (***** various functions *****)
-
-let card_style () = [ANSITerminal.on_black; ANSITerminal.Bold; ANSITerminal.cyan]
 
 let print_help style s e =
   ANSITerminal.(
@@ -325,11 +324,11 @@ let card_lst_to_building_lst (lst:card list) : building list =
 (* [print_case_file cf] prints the case file [cf] in a sentence. *)
 let print_case_file (cf:case_file) : unit =
   ANSITerminal.(
-    print_string (card_style ()) ("Prof. "^cf.who);
+    print_string card_style ("Prof. "^cf.who);
     print_string [white; on_black] " started the virus with ";
-    print_string (card_style ())  cf.with_what;
+    print_string card_style  cf.with_what;
     print_string [white; on_black] " in ";
-    print_string (card_style ())  (cf.where^" Hall");
+    print_string card_style  (cf.where^" Hall");
     print_results "" true;
     print_results "" true;
   )
@@ -343,4 +342,63 @@ let wait_for_user () =
   let _ = read_line () in 
     print_info " " true
 
+(*
+ANSITerminal.(
+    print_string [red; Bold]
+    "Press enter to continue...............................................");
+    print_info " " true;
+ANSITerminal.(
+    print_string [green; Bold]
+    "Press enter to continue...............................................");
+    print_info " " true;
+ANSITerminal.(
+    print_string [yellow; Bold]
+    "Press enter to continue...............................................");
+    print_info " " true;
+ANSITerminal.(
+    print_string [blue; Bold]
+    "Press enter to continue...............................................");
+    print_info " " true;
+ANSITerminal.(
+    print_string [magenta; Bold]
+    "Press enter to continue...............................................");
+    print_info " " true;
+ANSITerminal.(
+    print_string [cyan; Bold]
+    "Press enter to continue...............................................");
+    print_info " " true;
+ANSITerminal.(
+    print_string [white; Bold]
+    "Press enter to continue...............................................");
+    print_info " " true;
+
+ANSITerminal.(
+    print_string [red; Bold; on_black]
+    "Press enter to continue...............................................");
+    print_info " " true;
+ANSITerminal.(
+    print_string [green; Bold; on_black]
+    "Press enter to continue...............................................");
+    print_info " " true;
+ANSITerminal.(
+    print_string [yellow; Bold; on_black]
+    "Press enter to continue...............................................");
+    print_info " " true;
+ANSITerminal.(
+    print_string [blue; Bold; on_black]
+    "Press enter to continue...............................................");
+    print_info " " true;
+ANSITerminal.(
+    print_string [magenta; Bold; on_black]
+    "Press enter to continue...............................................");
+    print_info " " true;
+ANSITerminal.(
+    print_string [cyan; Bold; on_black]
+    "Press enter to continue...............................................");
+    print_info " " true;
+ANSITerminal.(
+    print_string [white; Bold; on_black]
+    "Press enter to continue...............................................");
+    print_info " " true
+*)
 

@@ -166,7 +166,7 @@ let init_state (n:int) (d:difficulty) : state =
     ANSITerminal.(
       print_info "You have the following cards: " true;
       print_string []
-        (sprintf (card_style()) "%-70s" ((string_of_card_lst user_hand)^"."));
+        (sprintf card_style "%-70s" ((string_of_card_lst user_hand)^"."));
       print_endline "";
       print_info "" true;
       print_info "To play the game, follow the instructions and type into the command" true;

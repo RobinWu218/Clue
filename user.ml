@@ -207,7 +207,7 @@ let suggest (s:state) : state =
           begin
             ANSITerminal.(
               print_info ("Professor "^p^" showed you the card ") false;
-              print_string (card_style ()) ((string_of_card c)^"\n"));
+              print_string card_style ((string_of_card c)^"\n"));
             let news'' =
               {news' with past_guesses =
               (guess, s.user.character, Some p) >:: news'.past_guesses} in
