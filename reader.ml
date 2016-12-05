@@ -28,7 +28,6 @@ let extract_map json nr nc =
   done; 
   m
 
-(*TODO debug*)
 (* [extract_static_map json nr nc] extracts the unchanging ascii map from 
  * [json] and puts it into a matrix. 
  * requires: [nr] is the number of rows in the map,
@@ -125,13 +124,13 @@ let make_map () =
   let n_r = (extract_info "num_rows" to_int) json in
   let n_c = (extract_info "num_cols" to_int) json in
   let m = extract_map json n_r n_c in
-  let static = extract_static_map json n_r n_c in (*TODO debug*)
+  let static = extract_static_map json n_r n_c in
   let (blist, elist, wslist, slist) = extract_building_info json m in
   {
     num_rows      = n_r; 
     num_cols      = n_c;
     map_values    = m;
-    static_map    = static; (*TODO debug*)
+    static_map    = static;
     exits         = elist; 
     buildings     = blist;
     in_building   = [];    (* no one starts in a building *)

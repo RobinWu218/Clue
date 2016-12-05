@@ -153,22 +153,10 @@ let closest_buildings map p =
 (* methods for moving around on the map *)
 (****************************************)
 
-(*[replace_tile m p r c] resets the value of the tile professor [p] is or was 
- * standing on in [m]. 
- * requires: [p] is a valid professor name, [r] and [c] are in bounds on [m].
+(* [replace_tile_static map r c] resets the value of the tile at [(r,c)] 
+ * in [map]. 
+ * requires: [r] and [c] are in bounds on [map].
  *)
-let replace_tile m p r c =
-  match m.(r).(c) with
-  | None        -> failwith "Unexpected None value"
-  | Some "."    -> m.(r).(c) <- Some "."
-  | Some "DOOR" -> m.(r).(c) <- Some "DOOR"
-  | Some str    ->
-    if (String.length str) <> (String.length p) then
-      m.(r).(c) <- Some "DOOR"
-    else
-      m.(r).(c) <- Some "."
-
-(*TODO debug*)
 let replace_tile_static map r c =
   map.map_values.(r).(c) <- map.static_map.(r).(c)
 
@@ -237,8 +225,7 @@ let move_helper map p bop dir n =
   | _ -> failwith ("Invalid direction to move: "^dir) in
   let m = map.map_values in
   let (sr,sc) = get_current_location map p in
-  replace_tile_static map sr sc; (*TODO debug*)(*
-  replace_tile m p sr sc;  (* clear out starting location *)*)
+  replace_tile_static map sr sc;
   let cr = ref sr in
   let cc = ref sc in
   let i  = ref 0  in
@@ -306,8 +293,7 @@ let rec move_towards_coord map p coord bop n =
     then raise (InvalidLocation "out of bounds")
     else
       let (sr, sc) = get_current_location map p in
-      replace_tile_static map sr sc; (*TODO debug*)(*
-      replace_tile map.map_values p sr sc;*)
+      replace_tile_static map sr sc;
       let path = calc_path map p destr destc in
       let dirs = simplify_path path in
       let steps_left = ref n in
@@ -431,8 +417,7 @@ and simplify_path lst =
 let random_walk map p bop n =
   let (sr,sc) = get_current_location map p in
   let m = map.map_values in
-  replace_tile_static map sr sc; (*TODO debug*)(*
-  replace_tile m p sr sc;*)
+  replace_tile_static map sr sc;
   let cr = ref sr in
   let cc = ref sc in
   let fb = ref "" in
@@ -523,8 +508,7 @@ let move_towards_building map p b bop n =
   | None -> map in
   let (curr, curc) = get_current_location umap p in
   (* replace current spot w/ the original terrain: *)
-  replace_tile_static umap curr curc; (*TODO debug*)(*
-  replace_tile umap.map_values p curr curc;*)
+  replace_tile_static umap curr curc;
   enter_building umap p b
 
 (* [use_secret_passage map p] returns the updated map when [p] takes the secret

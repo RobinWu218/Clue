@@ -618,7 +618,7 @@ let in_building_involuntarily (a:ai) (b:building) (s:state) : state =
     begin
     match secret, blocked with
     | true,  true  ->
-        suggest_or_secret a b s (*TODO add print statements*)
+        suggest_or_secret a b s
     | true,  false ->
         secret_or_roll_or_suggest a b s
     | false, true  ->
@@ -642,7 +642,7 @@ let in_building_voluntarily (a:ai) (b:building) (s:state) : state =
   | true,  false ->
       secret_or_roll a b s
   | false, true  ->
-    print_info ("Prof. "^a.character^" has to wait until next turn.") true;
+      print_info ("Prof. "^a.character^" has to wait until next turn.") true;
       s
   | false, false ->
       leave_and_move a b s
