@@ -82,19 +82,32 @@ type state = {
   past_guesses:  (case_file * prof * (prof option)) list;
 }
 
+(*[important_style] = style list for text under category: important *)
 let important_style = 
   [ANSITerminal.on_black; ANSITerminal.Bold; ANSITerminal.green]
+
+(*[info_style] = style list for text under category: game info *)
 let info_style      = 
   [ANSITerminal.on_black; ANSITerminal.yellow]
+
+(*[insn_style] = style list for text under category: instructions *)
 let insn_style      = 
   [ANSITerminal.on_black; ANSITerminal.Bold; ANSITerminal.magenta]
+
+(*[results_style] = style list for text under category: results *)
 let results_style   = 
   [ANSITerminal.on_black; ANSITerminal.white]
+
+(*[card_style] = style list for text that are cards*)
 let card_style      = 
   [ANSITerminal.on_black; ANSITerminal.Bold; ANSITerminal.cyan]
 
 (***** various functions *****)
 
+(* [print_help] is a helper function for all other prints. Keeps the
+ * output to 70 chars wide (width of preferred terminal width)
+ * if it's shorter.
+ *)
 let print_help style s e =
   ANSITerminal.(
   if e then
@@ -104,23 +117,61 @@ let print_help style s e =
   end
   else print_string style s;)
 
+(* [print_info s e] prints out text [s] under category: information.
+ * if [e] = [true], then it will also return to new line, keeping output
+ * at minimum width of 70 characters long. *)
 let print_info s e = 
   print_help info_style s e
 
+(* [print_insn s e] prints out text [s] under category: instructions.
+ * if [e] = [true], then it will also return to new line, keeping output
+ * at minimum width of 70 characters long. *)
 let print_insn s e =
   print_help insn_style s e
 
+(* [print_important s e] prints out text [s] under category: important.
+ * if [e] = [true], then it will also return to new line, keeping output
+ * at minimum width of 70 characters long. *)
 let print_important s e = 
   print_help important_style s e
 
+(* [print_results s e] prints out text [s] under category: results.
+ * if [e] = [true], then it will also return to new line, keeping output
+ * at minimum width of 70 characters long. *)
 let print_results s e=
   print_help results_style s e
 
+(* [print_card s e] prints out text [s] under category: card.
+ * if [e] = [true], then it will also return to new line, keeping output
+ * at minimum width of 70 characters long. *)
 let print_card s e =
   print_help card_style s e
 
+(* [print_info s e] prints out text [s].
+ * if [e] = [true], then it will also return to new line, keeping output
+ * at minimum width of 70 characters long. *)
 let print s e =
   print_help [ANSITerminal.white; ANSITerminal.on_black] s e
+
+(*[print_win] prints out the message when you win! *)
+let print_win () =  
+  print_important
+  "   _____   _____   _____   _____   _  __   _____   _____   _____   _ " 
+    true;
+  print_important
+  "  |  ___| |  _  | | ___ | |  ___| | |/__| |  _  | |__ __| |  ___| | |" 
+    true;
+  print_important 
+  "  | |     | | | | | | | | | |  _  |  /    | |_| |   | |   | |___  |_|" 
+    true;
+  print_important 
+  "  | |___  | |_| | | | | | | |_| | | |     | | | |   | |   |____ |  _ " 
+    true;
+  print_important 
+  "  |_____| |_____| |_| |_| |_____| |_|     |_| |_|   |_|   |_____| |_|" 
+    true;
+  print_important " " true;
+  print_info "CLUE will exit automatically. Feel free to play again!" true
 
 (* [int_option_of_string s] is [Some i] if [s] can be converted to int [i]
  * using [int_of_string s], and [None] otherwise. *)

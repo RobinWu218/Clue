@@ -246,9 +246,7 @@ and step_helper (p:prof) (s:state) : state =
       else
         begin
           print_important "Wow! All the AI bots have lost!" true;
-          print_important "YOU WIN!" true;
-          print_info "CLUE will exit automatically. Feel free to play again!" 
-                     true;
+          print_win ();
           step {news with counter = news.counter + 1; game_complete = true}
         end
   | `User ->

@@ -413,7 +413,10 @@ and simplify_path lst =
     in 
     simplify [] lst
 
-(*TODO*)
+(*[random_walk map p bop n] makes the AI [p] move randomly for [n] steps on the 
+ *[map] while avoiding walking into the same building it came from, if they
+ * just left a building (found in building option [bop])
+ *)
 let random_walk map p bop n =
   let (sr,sc) = get_current_location map p in
   let m = map.map_values in

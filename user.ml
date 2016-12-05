@@ -97,25 +97,15 @@ let accuse (s:state) : state =
   print_results "Your accusation is: " true;
   print_case_file accusation;
   wait_for_user();
-  print_results "Your case file is..." true;
+  print_results "The fact file is..." true;
   print_case_file s.fact_file;
   if accusation = s.fact_file
   then
     begin
       print_important "You were correct! Awesome! You won!" true;
-      print_important
-"   _____   _____   _____   _____   _  __   _____   _____   _____   _ " true;
-print_important
-"  |  ___| |  _  | | ___ | |  ___| | |/__| |  _  | |__ __| |  ___| | |" true;
-print_important 
-"  | |     | | | | | | | | | |  _  |  /    | |_| |   | |   | |___  |_|" true;
-print_important 
-"  | |___  | |_| | | | | | | |_| | | |     | | | |   | |   |____ |  _ " true;
-print_important 
-"  |_____| |_____| |_| |_| |_____| |_|     |_| |_|   |_|   |_____| |_|" true;
-      print_info "CLUE will exit automatically. Feel free to play again!" true;
-    let news = {s with game_complete = true; map = map} in
-      assign_was_moved news who moved_or_not 
+      print_win ();
+      let news = {s with game_complete = true; map = map} in
+        assign_was_moved news who moved_or_not 
     end
   else
     begin

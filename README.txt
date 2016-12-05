@@ -6,11 +6,14 @@ Authors:
   Alice Chen (xc278)
 Last updated: 12/4/2016
 
-To Compile and Play the Game
-make play
+## To Compile and Play the Game
+Run: make play
+For best results, run the command when the terminal window is not full screen.
+That way ANSITerminal is able to resize the terminal for the best size.
+
 
 To Clean the Directory
-make clean
+Run: make clean
 
 Below is a brief summary of important information and rules of the game. You 
 may find it helpful to place this text file next to the terminal for instant 
@@ -21,7 +24,9 @@ your head can be really hard.
 ================================================================================
 ********************************************************************************
 
-Who did it? Where? And with what language?+--------------------------------------------------------------------+
+Who did it? Where? And with what language?
+
++--------------------------------------------------------------------+
 |     Professors      |        Buildings       |      Languages      |
 +--------------------------------------------------------------------+
 |       Bracy         |          Baker         |        Bash         |
@@ -55,11 +60,14 @@ reveal a card if you have at least one card in the suggested three cards.
 You may not leave and re-enter the same building in a single turn. You may do 
 so across different turns, though.
 
-For more information, please see the instruction booklet:
+** For full instructions: **
 http://www.hasbro.com/common/instruct/Clue_(2002).pdf
 
-Things that are different from rules described in the instruction booklet: 1. Players are allowed to enter the same square twice on the same turn.2. Player have to use up all steps before ending their turns unless they enter 
-   a building.3. Unlike in the board game where each weapon is moved around when being 
+Things that are different from rules described in the instruction booklet: 
+1. Players are allowed to enter the same square twice on the same turn.
+2. Player have to use up all steps before ending their turns unless they enter 
+   a building.
+3. Unlike in the board game where each weapon is moved around when being 
    suggested or accused, languages do not show up on our map.
 
 ********************************************************************************

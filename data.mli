@@ -92,15 +92,38 @@ val card_style : ANSITerminal.style list
 
 (***** various functions *****)
 
+(* [print_info s e] prints out text [s] under category: information.
+ * if [e] = [true], then it will also return to new line, keeping output
+ * at minimum width of 70 characters long. *)
 val print_info : string -> bool -> unit
 
+(* [print_insn s e] prints out text [s] under category: instructions.
+ * if [e] = [true], then it will also return to new line, keeping output
+ * at minimum width of 70 characters long. *)
 val print_insn : string -> bool -> unit
 
+(* [print_important s e] prints out text [s] under category: important.
+ * if [e] = [true], then it will also return to new line, keeping output
+ * at minimum width of 70 characters long. *)
 val print_important : string -> bool -> unit
 
+(* [print_results s e] prints out text [s] under category: results.
+ * if [e] = [true], then it will also return to new line, keeping output
+ * at minimum width of 70 characters long. *)
 val print_results : string -> bool -> unit
 
+(* [print_card s e] prints out text [s] under category: card.
+ * if [e] = [true], then it will also return to new line, keeping output
+ * at minimum width of 70 characters long. *)
+val print_card : string -> bool -> unit
+
+(* [print_info s e] prints out text [s].
+ * if [e] = [true], then it will also return to new line, keeping output
+ * at minimum width of 70 characters long. *)
 val print : string -> bool -> unit
+
+(*[print_win] prints out the message when you win! *)
+val print_win : unit -> unit
 
 (* [int_option_of_string s] is [Some i] if [s] can be converted to int [i]
  * using [int_of_string s], and [None] otherwise. *)
