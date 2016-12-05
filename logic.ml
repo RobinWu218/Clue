@@ -113,14 +113,24 @@ let rec get_choice_num_ai () : int =
     | '3' -> 3
     | '4' -> 4
     | '5' -> 5
-    | _   -> print_insn "Please type an integer between 2 and 5 inclusive!" true;
+    | _   -> print_insn 
+             "Please type an integer between 2 and 5 inclusive!" true;
              get_choice_num_ai ()
 
 (* [user_choose_from_two c1 c2] is [Some c1] or [Some c2] as determined by
  * user. *)
 let user_choose_from_two (c1:card) (c2:card) : card option =
-  Printf.printf "You can reveal either card 1: %s, or card 2: %s. [1/2]\n"
-                (string_of_card c1) (string_of_card c2);
+  ANSITerminal.(
+    print_info "You can reveal either:" true;
+    print_results "  Card 1)" false;
+    print_string []
+      (sprintf card_style "%-61s" (string_of_card c1));
+    print_endline "";
+    print_results "  Card 2)" false;
+    print_string []
+      (sprintf card_style "%-61s" (string_of_card c2));
+    print_endline "";
+    print_insn "Valid choices are [1/2]" true);
   match get_choice_two () with
   | 1 -> Some c1
   | 2 -> Some c2
@@ -129,9 +139,21 @@ let user_choose_from_two (c1:card) (c2:card) : card option =
 (* [user_choose_from_three c1 c2 c3] is [Some c1] or [Some c2] or [Some c3] as
  * determined by user. *)
 let user_choose_from_three (c1:card) (c2:card) (c3:card) : card option =
-  print_endline "You can reveal one of the three cards: \n";
-  Printf.printf "card 1: %s, card 2: %s, or card 3: %s. [1/2/3]\n"
-                (string_of_card c1) (string_of_card c2) (string_of_card c3);
+  ANSITerminal.(
+    print_info "You can reveal one of three cards:" true;
+    print_results "  Card 1)" false;
+    print_string []
+      (sprintf card_style "%-61s" (string_of_card c1));
+    print_endline "";
+    print_results "  Card 2)" false;
+    print_string []
+      (sprintf card_style "%-61s" (string_of_card c2));
+    print_endline "";
+    print_results "  Card 3)" false;
+    print_string []
+      (sprintf card_style "%-61s" (string_of_card c3));
+    print_endline "";
+    print_insn "Valid choices are [1/2/3]" true);
   match get_choice_three () with
   | 1 -> Some c1
   | 2 -> Some c2
@@ -229,39 +251,63 @@ let ais_after_ai_disprove (a:ai) (guess:case_file)
 
 (* Side effect: update each ai's card_status in ais *)
 let ai_disprove_helper (a:ai) (guess:case_file) (ais:ai list) : card option =
-  Printf.printf "It is Prof. %s's turn to disprove the suggestion:\n"
-                a.character;
+  print_info (
+    "It is Prof. "^a.character^"'s turn to disprove the suggestion:")
+      true;
   let hand = a.hand in
   let {who; where; with_what} = guess in
   let who_or_not = List.mem (Prof who) hand in
   let where_or_not = List.mem (Building where) hand in
   let with_what_or_not = List.mem (Language with_what) hand in
   match who_or_not, where_or_not, with_what_or_not with
-  | true, true, true ->
-      Printf.printf "Prof. %s disproved the suggestion.\n" a.character;
-      ai_choose_from_three a (Prof who) (Building where) (Language with_what)
-  | true, true, false ->
-      Printf.printf "Prof. %s disproved the suggestion.\n" a.character;
-      ai_choose_from_two a (Prof who) (Building where)
-  | true, false, true ->
-      Printf.printf "Prof. %s disproved the suggestion.\n" a.character;
-      ai_choose_from_two a (Prof who) (Language with_what)
-  | true, false, false ->
-      Printf.printf "Prof. %s disproved the suggestion.\n" a.character;
-      Some (Prof who)
-  | false, true, true ->
-      Printf.printf "Prof. %s disproved the suggestion.\n" a.character;
-      ai_choose_from_two a (Building where) (Language with_what)
-  | false, true, false ->
-      Printf.printf "Prof. %s disproved the suggestion.\n" a.character;
-      Some (Building where)
-  | false, false, true ->
-      Printf.printf "Prof. %s disproved the suggestion.\n" a.character;
-      Some (Language with_what)
+  | true,  true,  true  ->
+    print_results (
+      "Prof. "^a.character^" disproved the suggestion.")
+      true;
+    print_results " " true;
+    ai_choose_from_three a (Prof who) (Building where) (Language with_what)
+  | true,  true,  false ->
+    print_results (
+      "Prof. "^a.character^" disproved the suggestion.")
+      true;
+    print_results " " true;
+    ai_choose_from_two a (Prof who) (Building where)
+  | true,  false, true  ->
+    print_results (
+      "Prof. "^a.character^" disproved the suggestion.")
+      true;
+    print_results " " true;
+    ai_choose_from_two a (Prof who) (Language with_what)
+  | true,  false, false ->
+    print_results (
+      "Prof. "^a.character^" disproved the suggestion.")
+      true;
+    print_results " " true;
+    Some (Prof who)
+  | false, true,  true  ->
+    print_results (
+      "Prof. "^a.character^" disproved the suggestion.")
+      true;
+    print_results " " true;
+    ai_choose_from_two a (Building where) (Language with_what)
+  | false, true,  false ->
+    print_results (
+      "Prof. "^a.character^" disproved the suggestion.")
+      true;
+    print_results " " true;
+    Some (Building where)
+  | false, false, true  ->
+    print_results (
+      "Prof. "^a.character^" disproved the suggestion.")
+      true;
+    print_results " " true;
+    Some (Language with_what)
   | false, false, false ->
-      Printf.printf "Prof. %s was not able to disprove the suggestion.\n"
-                    a.character;
-      None
+    print_results (
+      "Prof. "^a.character^" was not able to disprove the suggestion.")
+      true;
+    print_results " " true;
+    None
 (* also updating ai *)
 let ai_disprove (a:ai) (guess:case_file) (ais:ai list) : card option =
   let co = ai_disprove_helper a guess ais in
@@ -299,7 +345,7 @@ let ais_after_user_disprove (s:state) (guess:case_file)
  * card(s) and wishes to disprove [guess] with that card. *)
 let user_disprove_helper (s:state) (guess:case_file) (ais:ai list)
                          : card option =
-  print_endline "It is your turn to disprove the suggstion:";
+  print_info  "It is your turn to disprove the suggstion:" true;
   let hand = s.user.hand in
   let {who; where; with_what} = guess in
   let who_or_not       = List.mem (Prof who) hand in
@@ -307,37 +353,49 @@ let user_disprove_helper (s:state) (guess:case_file) (ais:ai list)
   let with_what_or_not = List.mem (Language with_what) hand in
   match who_or_not, where_or_not, with_what_or_not with
   | true, true, true ->
-      print_endline ("You have three cards to disprove the suggestion \n" ^
-                     "and you have to reveal one of them.");
-      user_choose_from_three (Prof who) (Building where) (Language with_what)
+    print_results "You have three cards to disprove the suggestion." true;
+    print_insn    "You have to reveal a card." true;
+    print_results " " true;
+    user_choose_from_three (Prof who) (Building where) (Language with_what)
   | true, true, false ->
-      print_endline ("You have two cards to disprove the suggestion \n" ^
-                     "and you have to reveal one of them.");
-      user_choose_from_two (Prof who) (Building where)
+    print_results "You have two cards to disprove the suggestion." true;
+    print_insn    "You have to reveal a card." true;
+    print_results " " true;
+    user_choose_from_two (Prof who) (Building where)
   | true, false, true ->
-      print_endline ("You have two cards to disprove the suggestion \n" ^
-                     "and you have to reveal one of them.");
-      user_choose_from_two (Prof who) (Language with_what)
+    print_results "You have two cards to disprove the suggestion." true;
+    print_insn    "You have to reveal a card." true;
+    print_results " " true;
+    user_choose_from_two (Prof who) (Language with_what)
   | true, false, false ->
-      print_endline ("You have only one card to disprove the suggestion \n" ^
-                     "and you have to reveal the card.");
-      Some (Prof who)
+    print_results "You have only one card to disprove the suggestion." true;
+    print_insn    "You have to reveal the card." true;
+    print_results " " true;
+    Some (Prof who)
   | false, true, true ->
-      print_endline ("You have two cards to disprove the suggestion \n" ^
-                     "and you have to reveal one of them.");
-      user_choose_from_two (Building where) (Language with_what)
+    print_results "You have two cards to disprove the suggestion." true;
+    print_insn    "You have to reveal a card." true;
+    print_results " " true;
+    user_choose_from_two (Building where) (Language with_what)
   | false, true, false ->
-      print_endline ("You have only one card to disprove the suggestion \n" ^
-                     "and you have to reveal the card.");
-      Some (Building where)
+    print_results "You have only one card to disprove the suggestion." true;
+    print_insn    "You have to reveal the card." true;
+    print_results " " true;
+    Some (Building where)
   | false, false, true ->
-      print_endline ("You have only one card to disprove the suggestion \n" ^
-                     "and you have to reveal the card.");
-      Some (Language with_what)
+    print_results "You have only one card to disprove the suggestion." true;
+    print_insn    "You have to reveal the card." true;
+    print_results " " true;
+    Some (Language with_what)
   | false, false, false ->
-      print_endline "You do not have any cards to disprove the suggestion.";
-      None
-
+    print_results "You do not have any cards to disprove the suggestion."
+      true;
+    print_results " " true;
+    None
+    
+(* [user_disprove s guess] is [None] if the user does not have any card
+ * to disprove the suggestion [guess] and a card option if the user has the
+ * card(s) and wishes to disprove [guess] with that card. *)
 let user_disprove (s:state) (guess:case_file) (ais:ai list) : card option =
   let co = user_disprove_helper s guess ais in
   ais_after_user_disprove s guess ais co; co

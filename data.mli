@@ -87,9 +87,9 @@ type state = {
   past_guesses:  (case_file * prof * (prof option)) list;
 }
 
-(***** various functions *****)
+val card_style : ANSITerminal.style list
 
-val card_style      : unit -> ANSITerminal.style list
+(***** various functions *****)
 
 val print_info : string -> bool -> unit
 

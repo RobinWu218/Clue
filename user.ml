@@ -104,15 +104,15 @@ let accuse (s:state) : state =
     begin
       print_important "You were correct! Awesome! You won!" true;
       print_important
-"     _____   _____   _____   _____   _  __   _____   _____   _____   _ " true;
+"    _____   _____   _____   _____   _  __   _____   _____   _____   _" true;
 print_important
-"    |  ___| |  _  | | ___ | |  ___| | |/__| |  _  | |__ __| |  ___| | |" true;
+"   |  ___| |  _  | | ___ | |  ___| | |/__| |  _  | |__ __| |  ___| | |" true;
 print_important 
-"    | |     | | | | | | | | | |  _  |  /    | |_| |   | |   | |___  |_|" true;
+"   | |     | | | | | | | | | |  _  |  /    | |_| |   | |   | |___  |_|" true;
 print_important 
-"    | |___  | |_| | | | | | | |_| | | |     | | | |   | |   |____ |  _ " true;
+"   | |___  | |_| | | | | | | |_| | | |     | | | |   | |   |____ |  _" true;
 print_important 
-"    |_____| |_____| |_| |_| |_____| |_|     |_| |_|   |_|   |_____| |_|" true;
+"   |_____| |_____| |_| |_| |_____| |_|     |_| |_|   |_|   |_____| |_|" true;
       print_info "CLUE will exit automatically. Feel free to play again!" true;
     let news = {s with game_complete = true; map = map} in
       assign_was_moved news who moved_or_not 
@@ -143,7 +143,7 @@ let rec accuse_or_not (s:state) : state =
  * It starts with the professor corresponding to integer [n], goes along
  * the loop B->C->F->G->H->W->B until someone is able to disprove [guess]
  * or when the user's character is reached. *)
-let rec disprove_loop (n:int)(guess:case_file)(s:state):((prof * card) option) =
+let rec disprove_loop (n:int)(guess:case_file)(s:state):((prof * card) option)=
   let n' = n mod 6 in
     if n' = int_of_card (Prof s.user.character) then None else
     match n' with
@@ -206,8 +206,11 @@ let suggest (s:state) : state =
         | Some (p, c) ->
           begin
             ANSITerminal.(
-              print_info ("Professor "^p^" showed you the card ") false;
-              print_string (card_style ()) ((string_of_card c)^"\n"));
+              print_info ("Professor "^p^" showed you the card: ") true;
+              print_string []
+                (sprintf card_style "  %-68s" (string_of_card c));
+              print_endline "";
+              );
             let news'' =
               {news' with past_guesses =
               (guess, s.user.character, Some p) >:: news'.past_guesses} in

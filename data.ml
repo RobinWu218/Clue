@@ -81,14 +81,18 @@ type state = {
   past_guesses:  (case_file * prof * (prof option)) list;
 }
 
-let important_style = [ANSITerminal.on_black; ANSITerminal.Bold; ANSITerminal.green]
-let info_style      = [ANSITerminal.on_black; ANSITerminal.yellow]
-let insn_style      = [ANSITerminal.on_black; ANSITerminal.Bold; ANSITerminal.magenta]
-let results_style   = [ANSITerminal.on_black; ANSITerminal.white]
+let important_style = 
+  [ANSITerminal.on_black; ANSITerminal.Bold; ANSITerminal.green]
+let info_style      = 
+  [ANSITerminal.on_black; ANSITerminal.yellow]
+let insn_style      = 
+  [ANSITerminal.on_black; ANSITerminal.Bold; ANSITerminal.magenta]
+let results_style   = 
+  [ANSITerminal.on_black; ANSITerminal.white]
+let card_style      = 
+  [ANSITerminal.on_black; ANSITerminal.Bold; ANSITerminal.cyan]
 
 (***** various functions *****)
-
-let card_style () = [ANSITerminal.on_black; ANSITerminal.Bold; ANSITerminal.cyan]
 
 let print_help style s e =
   ANSITerminal.(
@@ -163,7 +167,7 @@ let building_of_int (i:int) : building =
   | 6 -> "Phillips"
   | 7 -> "Rhodes"
   | 8 -> "Statler"
-  | _ -> failwith ("Illegal int representation of a building"^(string_of_int i))
+  | _ -> failwith ("Illegal int representation of building"^(string_of_int i))
 
 (* [lang_of_int i] is the integer corresponding to a language. *)
 let lang_of_int (i:int) : language =
@@ -252,13 +256,13 @@ let string_of_coord ((r,c):coord) : string =
 let rec string_of_exits (exits:(int * coord) list) : string =
   match exits with
   | [e1;e2] -> (* Statler Hall *)
-      ("exit 1: (13, 8) upper right\n" ^
-       "exit 2: (16, 7) lower left")
+      ("  exit 1: (13, 8) upper right\n" ^
+       "  exit 2: (16, 7) lower left")
   | [e1;e2;e3;e4] -> (* Klarman Hall *)
-      ("exit 1: (5,  9) upper left\n" ^
-       "exit 2: (8, 10) lower left\n" ^
-       "exit 3: (8, 15) lower right\n" ^
-       "exit 4: (5, 16) upper right")
+      ("  exit 1: (5,  9) upper left\n" ^
+       "  exit 2: (8, 10) lower left\n" ^
+       "  exit 3: (8, 15) lower right\n" ^
+       "  exit 4: (5, 16) upper right")
   | _ -> failwith "This should not happen in string_of_exits in Data"
 (*
   | [] -> ""
@@ -308,7 +312,7 @@ let rec int_lst_to_card_lst (lst:int list) : card list =
   | [] -> []
   | h::t -> (card_of_int h)::(int_lst_to_card_lst t)
 
-(* [card_lst_to_int_lst lst] is an int list corresponding to card list [lst]. *)
+(* [card_lst_to_int_lst lst] is an int list corresponding to card list [lst].*)
 let rec card_lst_to_int_lst (lst:card list) : int list =
   match lst with
   | [] -> []
@@ -325,12 +329,14 @@ let card_lst_to_building_lst (lst:card list) : building list =
 (* [print_case_file cf] prints the case file [cf] in a sentence. *)
 let print_case_file (cf:case_file) : unit =
   ANSITerminal.(
-    print_string (card_style ()) ("Prof. "^cf.who);
-    print_string [white; on_black] " started the virus with ";
-    print_string (card_style ())  cf.with_what;
-    print_string [white; on_black] " in ";
-    print_string (card_style ())  (cf.where^" Hall");
-    print_results "" true;
+    let s = 
+      (sprintf card_style "%s" ("Prof. "^cf.who))^
+      (sprintf [white; on_black] "%s" " started the virus with ")^
+      (sprintf card_style "%s" cf.with_what)^
+      (sprintf [white; on_black] "%s" " in ")^
+      (sprintf card_style "%s" (cf.where^" Hall"))^"\n"
+    in
+    print_string [] s;
     print_results "" true;
   )
 
@@ -342,5 +348,3 @@ let wait_for_user () =
     false;
   let _ = read_line () in 
     print_info " " true
-
-

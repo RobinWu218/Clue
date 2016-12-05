@@ -55,7 +55,8 @@ let get_exits map =
     ) [] map.exits
 
 (* [is_coord_blocked map coord] returns true if the exit at location [coord] is 
- * blocked in by another professor. Does not check that [coord] is a valid exit. 
+ * blocked in by another professor. 
+ * Does not check that [coord] is a valid exit. 
  *)
 let is_coord_blocked map (r,c) =
   let m = map.map_values in
@@ -83,8 +84,8 @@ let is_in_building map p =
   List.mem_assoc p map.in_building
 
 (* [get_current_building map p]
- * Returns: [some r] if professor [p] is in building [b] or [None] if professor [p]
- * is currently not in a building.
+ * Returns: [some r] if professor [p] is in building [b] or [None] 
+ * if professor [p] is currently not in a building.
  *)
 let get_current_building map p =
   try
@@ -114,9 +115,9 @@ let get_secret_passage map b =
 let get_current_location map p =
   List.assoc p map.location
 
-(* [get_closest_exit map lst (r,c)] returns the closest exit coordinate in [lst] to 
- * the location[(r,c)] based on manhattan distance (not actual steps it takes to
- * reach).
+(* [get_closest_exit map lst (r,c)] returns the closest exit coordinate in 
+ * [lst] to the location[(r,c)] based on 
+ * manhattan distance (not actual steps it takes to reach).
  *)
 let get_closest_exit map lst (r,c) =
   let dists = List.map (fun (_, (r',c')) ->
@@ -192,8 +193,9 @@ let leave_building_helper map p n =
     with
     | Not_found -> raise InvalidOperation
 
-(* [leave_building map p n] moves professor [p] to exit number [n] of the current
- * building [p] is in, and performs all changes necessary to update the [map].
+(* [leave_building map p n] moves professor [p] to exit number [n] of the 
+ * current building [p] is in, and performs all changes necessary 
+ * to update the [map].
  * Raises: InvalidOperation if the professor p is not in a room.
  *)
 let leave_building map p n =
@@ -207,6 +209,7 @@ let leave_building map p n =
  *)
 let rec enter_building map p b =
   print_info ("Prof. "^p^" enters "^b^" Hall.") true;
+  print_info " " true;
   let m     = map.map_values in
   let wl    = List.assoc b map.waiting_spots in
   let (r,c) = get_open_spot m wl in
@@ -472,11 +475,12 @@ let random_walk map p bop n =
         (false, {map with location = nloc; map_values = m})
       end
 
-(* [move_towards_building map p b bop n] tries to move professor [p] on the [map] 
- * [n] steps towards the building [b], safeguarding against reentering the 
- * building referred by the building option [bop].
+(* [move_towards_building map p b bop n] tries to move professor [p] on the 
+ * [map] [n] steps towards the building [b], safeguarding against reentering 
+ * the building referred by the building option [bop].
  * Requires: [n >= 0], [p] is not in a building already.
- *           Called only when [p] can enter [b], i.e., [p] did not just leave [b].
+ *           Called only when [p] can enter [b], i.e., [p] did not just 
+ *           leave [b].
  * Returns: the pair [(tf, map2)], where
  *   [tf]   is [true] iff [p] succesfully made it to [coord]
  *   [map2] is the updated map.
@@ -494,15 +498,15 @@ let move_towards_building map p b bop n =
       | InvalidLocation s -> (random_walk map p bop n)
   with
     | Not_found -> 
-      failwith ("[move_towards_building]: could not find professor or building")
+      failwith "[move_towards_building]: could not find professor or building"
       
-(* [teleport_professor_helper map p b] moves a professor [p] on the [map] to 
- * building [b]. This event occurs whenever a suggestion or accusation is made; 
- * the suspect is moved to the "scene of the crime."
- * Returns: the updated map.
- * Does not print resultant map to screen
+(* [teleport_professor map p b] moves a professor [p] on the [map] to 
+ * building [b]
+ * This event occurs whenever a suggestion or accusation is made; the
+ * suspect is moved to the "scene of the crime."
+ * Returns the updated map, and prints it to screen.
  *)
-let teleport_professor_helper map p b = 
+ let teleport_professor map p b = 
   let umap = 
   match get_current_building map p with
   (* inside a building, [p] needs to leave first if not in building [b]  *)
@@ -514,16 +518,6 @@ let teleport_professor_helper map p b =
   (* replace current spot w/ the original terrain: *)
   replace_tile umap.map_values p curr curc;
   enter_building umap p b
-
-(* [teleport_professor map p b] moves a professor [p] on the [map] to building [b]
- * This event occurs whenever a suggestion or accusation is made; the
- * suspect is moved to the "scene of the crime."
- * Returns the updated map, and prints it to screen.
- *)
-let teleport_professor map p b =
-  let umap = teleport_professor_helper map p b in
-  print_map umap;
-  umap
 
 (* [use_secret_passage map p] returns the updated map when [p] takes the secret
  * passage inside a room.
@@ -537,7 +531,9 @@ let use_secret_passage map p =
   | Some b -> 
     try
       let toB  = List.assoc b map.secrets in
-      teleport_professor map p toB
+      let umap = teleport_professor map p toB in
+        print_map umap;
+        umap
     with
     | _ -> failwith ("No secret passage to take in "^b)
 
