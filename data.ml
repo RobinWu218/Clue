@@ -81,11 +81,16 @@ type state = {
   past_guesses:  (case_file * prof * (prof option)) list;
 }
 
-let important_style = [ANSITerminal.on_black; ANSITerminal.Bold; ANSITerminal.green]
-let info_style      = [ANSITerminal.on_black; ANSITerminal.yellow]
-let insn_style      = [ANSITerminal.on_black; ANSITerminal.Bold; ANSITerminal.blue]
-let results_style   = [ANSITerminal.on_black; ANSITerminal.white]
-let card_style      = [ANSITerminal.on_black; ANSITerminal.Bold; ANSITerminal.cyan]
+let important_style = 
+  [ANSITerminal.on_black; ANSITerminal.Bold; ANSITerminal.green]
+let info_style      = 
+  [ANSITerminal.on_black; ANSITerminal.yellow]
+let insn_style      = 
+  [ANSITerminal.on_black; ANSITerminal.Bold; ANSITerminal.blue]
+let results_style   = 
+  [ANSITerminal.on_black; ANSITerminal.white]
+let card_style      = 
+  [ANSITerminal.on_black; ANSITerminal.Bold; ANSITerminal.cyan]
 
 (***** various functions *****)
 
@@ -162,7 +167,7 @@ let building_of_int (i:int) : building =
   | 6 -> "Phillips"
   | 7 -> "Rhodes"
   | 8 -> "Statler"
-  | _ -> failwith ("Illegal int representation of a building"^(string_of_int i))
+  | _ -> failwith ("Illegal int representation of building"^(string_of_int i))
 
 (* [lang_of_int i] is the integer corresponding to a language. *)
 let lang_of_int (i:int) : language =
@@ -307,7 +312,7 @@ let rec int_lst_to_card_lst (lst:int list) : card list =
   | [] -> []
   | h::t -> (card_of_int h)::(int_lst_to_card_lst t)
 
-(* [card_lst_to_int_lst lst] is an int list corresponding to card list [lst]. *)
+(* [card_lst_to_int_lst lst] is an int list corresponding to card list [lst].*)
 let rec card_lst_to_int_lst (lst:card list) : int list =
   match lst with
   | [] -> []

@@ -143,7 +143,7 @@ let rec accuse_or_not (s:state) : state =
  * It starts with the professor corresponding to integer [n], goes along
  * the loop B->C->F->G->H->W->B until someone is able to disprove [guess]
  * or when the user's character is reached. *)
-let rec disprove_loop (n:int)(guess:case_file)(s:state):((prof * card) option) =
+let rec disprove_loop (n:int)(guess:case_file)(s:state):((prof * card) option)=
   let n' = n mod 6 in
     if n' = int_of_card (Prof s.user.character) then None else
     match n' with
