@@ -83,7 +83,7 @@ type state = {
 
 let important_style = [ANSITerminal.on_black; ANSITerminal.Bold; ANSITerminal.green]
 let info_style      = [ANSITerminal.on_black; ANSITerminal.yellow]
-let insn_style      = [ANSITerminal.on_black; ANSITerminal.Bold; ANSITerminal.blue]
+let insn_style      = [ANSITerminal.on_black; ANSITerminal.Bold; ANSITerminal.magenta]
 let results_style   = [ANSITerminal.on_black; ANSITerminal.white]
 
 (***** various functions *****)
@@ -97,7 +97,7 @@ let print_help style s e =
     print_string [] (sprintf style "%-70s" s);
     print_endline ""
   end
-  else print_string info_style s;)
+  else print_string style s;)
 
 let print_info s e = 
   print_help info_style s e
@@ -337,9 +337,9 @@ let print_case_file (cf:case_file) : unit =
 (* [wait_for_user] waits for the user to hit enter to continue. *)
 let wait_for_user () =
   print_info " " true;
-  ANSITerminal.(
-    print_string [blue; Bold; on_black]
-    "Press enter to continue...............................................");
+  print_insn 
+    "Press enter to continue..............................................."
+    false;
   let _ = read_line () in 
     print_info " " true
 
