@@ -8,7 +8,7 @@ open Data
 let extract_info field f =
   fun x -> member field x |> f
 
-(* [extract_map json nr nc] extracts the ascii map from [json] and puts it into 
+(* [extract_map json nr nc] extracts the ascii map from [json] and puts it into
  * a matrix. 
  * requires: [nr] is the number of rows in the map,
  *           [nc] is the number of cols in the map,
@@ -51,7 +51,7 @@ let rec extract_building_info json m =
 (* [extract_coord j] parses a pair (r,c) value out of [j] *)
 and extract_coord j =
   (extract_info "r" to_int j, extract_info "c" to_int j)
-(* [write_name_to_map m j nickname] writes the name [nickname] onto the map [m].
+(* [write_name_to_map m j nickname] writes the name [nickname] onto the map m.
  * requires: [String.length nickname = 4]
  *)
 and write_name_to_map m j nickname =
