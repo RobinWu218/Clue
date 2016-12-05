@@ -128,9 +128,10 @@ let init_state (n:int) (d:difficulty) : state =
     let map    = construct_map () in
     let dictionary = generate_dictionary
                       ["Bracy";"Clarkson";"Fan";"Gries";"Halpern";"White"]
-                      user_character ai_characters_lst in
-    print "**********************************************************************"
-          true;
+                      user_character ai_characters_lst in 
+    print 
+      "**********************************************************************"
+       true;
 
     print_results "The AI bots play the roles of: " true;
     print_results ((string_of_prof_lst ai_characters_lst)) true;
@@ -140,7 +141,8 @@ let init_state (n:int) (d:difficulty) : state =
     wait_for_user();
 
     ANSITerminal.(
-      print_info "Your location is tracked on the map by your last name " false;
+      print_info "Your location is tracked on the map by your last name " 
+                  false;
       print_string [on_black; Bold; cyan] "I";
       print_string [on_black; yellow] "nitial.        ";
       print_endline "";
@@ -154,9 +156,12 @@ let init_state (n:int) (d:difficulty) : state =
       print_endline "";
       print_info "Use a secret passage " false;
       print_string [on_black; Bold; green] "s";
-      print_string [on_black; yellow] " to get to the building diagonally across the   ";
+      print_string [on_black; yellow] 
+                    " to get to the building diagonally across the   ";
       print_endline "";
-      print_info "map. Note: the map is on a coordinate system, with (0,0) at the top   " true;
+      print_info 
+      "map. Note: the map is on a coordinate system, with (0,0) at the top   " 
+      true;
       print_info "left corner." true;
       print_info "" true;
     );
@@ -169,12 +174,15 @@ let init_state (n:int) (d:difficulty) : state =
         (sprintf card_style "%-70s" ((string_of_card_lst user_hand)^"."));
       print_endline "";
       print_info "" true;
-      print_info "To play the game, follow the instructions and type into the command" true;
+      print_info 
+        "To play the game, follow the instructions and type into the command" 
+        true;
       print_info "line when prompted by " false;
       print_string [on_black] ">";
       print_info ". You may find having a sheet of paper and a   " false;
       print_endline "";
-      print_info "writing utensil handy when playing the game. Good luck!" true;
+      print_info "writing utensil handy when playing the game. Good luck!" 
+                  true;
       print_important "The game begins now!" true;
     );
     {
@@ -228,7 +236,8 @@ and step_helper (p:prof) (s:state) : state =
         then
           begin
             wait_for_user();
-            ANSITerminal.(print_string [] (sprintf [white; Bold; on_black] "%-70s"
+            ANSITerminal.(
+              print_string [] (sprintf [white; Bold; on_black] "%-70s"
               ("----------------:: Prof. "^p^"'s turn ::----------------")));
             print_info "" true;
             Ai.step ai s
@@ -241,14 +250,16 @@ and step_helper (p:prof) (s:state) : state =
         begin
           print_important "Wow! All the AI bots have lost!" true;
           print_important "YOU WIN!" true;
-          print_info "CLUE will exit automatically. Feel free to play again!" true;
+          print_info "CLUE will exit automatically. Feel free to play again!" 
+                     true;
           step {news with counter = news.counter + 1; game_complete = true}
         end
   | `User ->
       let news =
         wait_for_user();
-        ANSITerminal.(print_string [] ( sprintf [white; Bold; on_black] "%-70s"
-          ("----------------:: Prof. "^p^"'s (You!) turn ::----------------")));
+        ANSITerminal.(
+          print_string [] ( sprintf [white; Bold; on_black] "%-70s"
+          ("----------------:: Prof. "^p^"'s (You!) turn ::---------------")));
         print_info "" true;
 
         User.step s in
