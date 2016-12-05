@@ -322,6 +322,7 @@ let suggest_helper (a:ai) (s:state) : state =
     print_info " " true;
     print_info "The suggestion is:" true;
     print_case_file guess;
+    wait_for_user ();
     let (moved_or_not, map) =
       if get_current_building s.map who <> (Some where) 
       then (true, (teleport_professor s.map who where))

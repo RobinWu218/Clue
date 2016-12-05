@@ -122,13 +122,13 @@ let rec get_choice_num_ai () : int =
 let user_choose_from_two (c1:card) (c2:card) : card option =
   ANSITerminal.(
     print_info "You can reveal either:" true;
-    print_results "  Card 1)" false;
+    print_results "  Card 1) " false;
     print_string []
-      (sprintf card_style "%-61s" (string_of_card c1));
+      (sprintf card_style "%-60s" (string_of_card c1));
     print_endline "";
-    print_results "  Card 2)" false;
+    print_results "  Card 2) " false;
     print_string []
-      (sprintf card_style "%-61s" (string_of_card c2));
+      (sprintf card_style "%-60s" (string_of_card c2));
     print_endline "";
     print_insn "Valid choices are [1/2]" true);
   match get_choice_two () with
@@ -141,17 +141,17 @@ let user_choose_from_two (c1:card) (c2:card) : card option =
 let user_choose_from_three (c1:card) (c2:card) (c3:card) : card option =
   ANSITerminal.(
     print_info "You can reveal one of three cards:" true;
-    print_results "  Card 1)" false;
+    print_results "  Card 1) " false;
     print_string []
-      (sprintf card_style "%-61s" (string_of_card c1));
+      (sprintf card_style "%-60s" (string_of_card c1));
     print_endline "";
-    print_results "  Card 2)" false;
+    print_results "  Card 2) " false;
     print_string []
-      (sprintf card_style "%-61s" (string_of_card c2));
+      (sprintf card_style "%-60s" (string_of_card c2));
     print_endline "";
-    print_results "  Card 3)" false;
+    print_results "  Card 3) " false;
     print_string []
-      (sprintf card_style "%-61s" (string_of_card c3));
+      (sprintf card_style "%-60s" (string_of_card c3));
     print_endline "";
     print_insn "Valid choices are [1/2/3]" true);
   match get_choice_three () with
@@ -392,7 +392,7 @@ let user_disprove_helper (s:state) (guess:case_file) (ais:ai list)
       true;
     print_results " " true;
     None
-    
+
 (* [user_disprove s guess] is [None] if the user does not have any card
  * to disprove the suggestion [guess] and a card option if the user has the
  * card(s) and wishes to disprove [guess] with that card. *)

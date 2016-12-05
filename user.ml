@@ -289,8 +289,7 @@ let rec get_exit (b:building) (s:state) : int =
         print_insn (
           "Please choose one of the two exits of "^b^" Hall to leave.")
           true;
-        ANSITerminal.(
-          print_string [] ((string_of_exits exits)^"\n"));
+        print_exits exits;
         print_insn "Valid responses are: [1/2]" true;
       let choice = get_choice_two () in
       if is_coord_blocked s.map (List.assoc choice exits)
@@ -306,8 +305,7 @@ let rec get_exit (b:building) (s:state) : int =
         print_insn (
           "Please choose one of the four exits of "^b^" Hall to leave.")
           true;
-        ANSITerminal.(
-          print_string [] ((string_of_exits exits)^"\n"));
+        print_exits exits;
         print_insn "Valid responses are: [1/2/3/4]" true;
       let choice = get_choice_four () in
       if is_coord_blocked s.map (List.assoc choice exits)

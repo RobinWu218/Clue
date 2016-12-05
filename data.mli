@@ -138,6 +138,9 @@ val card_to_string : card -> string
  * building with their ids and coordinates. *)
 val string_of_exits : (int * coord) list -> string
 
+(* [print_exits] prints out the exits according to the game formatting *)
+val print_exits : (int * coord) list -> unit
+
 (* [string_of_prof_lst] is a comma-separated string representation of a list
  * of profs. *)
 val string_of_prof_lst : prof list -> string
@@ -145,6 +148,9 @@ val string_of_prof_lst : prof list -> string
 (* [string_of_card_lst] is a comma-separated string representation of a list
  * of cards. *)
 val string_of_card_lst : card list -> string
+
+(* [print_card_list] prints out a display of the cards according to format *)
+val print_card_list : card list -> unit
 
 (* [int_lst_to_prof_lst lst] is a prof list corresponding to int list [lst]. *)
 val int_lst_to_prof_lst : int list -> prof list

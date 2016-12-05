@@ -170,9 +170,7 @@ let init_state (n:int) (d:difficulty) : state =
 
     ANSITerminal.(
       print_info "You have the following cards (take notes please!): " true;
-      print_string []
-        (sprintf card_style "%-70s" ((string_of_card_lst user_hand)^"."));
-      print_endline "";
+      print_card_list user_hand;
       print_info "" true;
       print_info 
         "To play the game, follow the instructions and type into the command" 
@@ -236,10 +234,9 @@ and step_helper (p:prof) (s:state) : state =
         then
           begin
             wait_for_user();
-            ANSITerminal.(
-              print_string [] (sprintf [white; Bold; on_black] "%-70s"
-              ("----------------:: Prof. "^p^"'s turn ::----------------")));
-            print_endline "";
+            print_important
+              ("----------------:: Prof. "^p^"'s turn ::----------------")
+              true;
             Ai.step ai s
           end
         else s
@@ -257,11 +254,10 @@ and step_helper (p:prof) (s:state) : state =
   | `User ->
       let news =
         wait_for_user();
-        ANSITerminal.(
-          print_string [] ( sprintf [white; Bold; on_black] "%-70s"
-          ("----------------:: Prof. "^p^"'s (You!) turn ::---------------")));
-        print_endline  "";
-
+        print_important
+          ("----------------:: Prof. "^p^"'s (You!) turn ::---------------")
+          true;
+        print_map s.map;
         User.step s in
       step {news with counter = news.counter + 1}
   | `No ->

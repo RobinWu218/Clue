@@ -116,6 +116,9 @@ let print_important s e =
 let print_results s e=
   print_help results_style s e
 
+let print_card s e =
+  print_help card_style s e
+
 let print s e =
   print_help [ANSITerminal.white; ANSITerminal.on_black] s e
 
@@ -265,12 +268,20 @@ let rec string_of_exits (exits:(int * coord) list) : string =
        "  exit 3: (8, 15) lower right\n" ^
        "  exit 4: (5, 16) upper right")
   | _ -> failwith "This should not happen in string_of_exits in Data"
-(*
-  | [] -> ""
-  | (id,coord)::t -> ((Printf.sprintf "  exit %d: %s\n"
-                                      id (string_of_coord coord)) ^
-                     (string_of_exits t))
-*)
+
+(* [print_exits] prints out the exits according to the game formatting *)
+let print_exits exits =
+  match exits with 
+  | [e1; e2] ->
+    print_results "  exit 1: (13, 8) upper right" true;
+    print_results "  exit 2: (16, 7) lower left"  true;
+  | [e1;e2;e3;e4] ->
+    print_results "  exit 1: (5,  9) upper left"  true;
+    print_results "  exit 2: (8, 10) lower left"  true;
+    print_results "  exit 3: (8, 15) lower right" true;
+    print_results "  exit 4: (5, 16) upper right" true;
+  | _ -> failwith "This should not happen in string_of_exits in Data"
+
 
 (* [string_of_prof_lst] is a comma-separated string representation of a list
  * of profs. *)
@@ -293,6 +304,16 @@ let rec string_of_card_lst (lst:card list) : string =
                (string_of_card c2)
   | h::t -> (string_of_card h) ^ ", " ^
             (string_of_card_lst t)
+
+(* [print_card_list] prints out a display of the cards according to format *)
+let rec print_card_list lst =
+  match lst with
+  | []  -> ()
+  | [c] -> print_card ("  "^(string_of_card c)) true
+  | h::t -> 
+    print_card ("  "^(string_of_card h)^", ") true;
+    print_card_list t
+
 
 (* [int_lst_to_prof_lst lst] is a prof list corresponding to int list [lst]. *)
 let rec int_lst_to_prof_lst (lst:int list) : prof list =
@@ -335,7 +356,7 @@ let print_case_file (cf:case_file) : unit =
       (sprintf [white; on_black] "%s" " started the virus with ")^
       (sprintf card_style "%s" cf.with_what)^
       (sprintf [white; on_black] "%s" " in ")^
-      (sprintf card_style "%s" (cf.where^" Hall"))^"\n"
+      (sprintf card_style "%-70s" (cf.where^" Hall"))^"\n"
     in
     print_string [] s;
     print_results "" true;
@@ -344,7 +365,7 @@ let print_case_file (cf:case_file) : unit =
 (* [wait_for_user] waits for the user to hit enter to continue. *)
 let wait_for_user () =
   print_info " " true;
-  print_insn 
+  print_results
     "Press enter to continue..............................................."
     false;
   let _ = read_line () in 
