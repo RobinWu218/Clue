@@ -35,24 +35,24 @@ let init (p:prof) (h:hand) (d:difficulty) (lst:prof list) : ai =
   card_status    = status;
   }
 
-(* [get_first_possible_who possible] takes a list of possible cards and returns the
- * first prof that is in the list. *)
+(* [get_first_possible_who possible] takes a list of possible cards and returns 
+ * the first prof that is in the list. *)
 let rec get_first_possible_who possible =
   match possible with
   |[]   -> failwith "there are no possible professors"
   |h::t -> if (((int_of_card h) > (-1)) && ((int_of_card h) < 6))
     then card_to_string h else get_first_possible_who t
 
-(* [get_first_possible_who possible] takes a list of possible cards and returns the
- * first language that is in the list. *)
+(* [get_first_possible_who possible] takes a list of possible cards and returns
+ * the first language that is in the list. *)
 let rec get_first_possible_with_what possible =
   match possible with
   |[]   -> failwith "there are no possible languages"
   |h::t -> if (((int_of_card h) > 14) && ((int_of_card h) < 21))
     then card_to_string h else get_first_possible_with_what t
 
-(* [get_first_possible_where possible] takes a list of possible cards and returns the
- * first building that is in the list. *)
+(* [get_first_possible_where possible] takes a list of possible cards and 
+ * returns the first building that is in the list. *)
 let rec get_first_possible_where possible =
   match possible with
   |[]   -> failwith "there are no possible buildings"
@@ -66,8 +66,8 @@ let rec get_random_who possible =
   if List.mem (Prof (prof_of_int i)) possible then prof_of_int i 
   else get_random_who possible
 
-(* [get_random_with_what possible] takes a list of possible cards and returns the
- * a random language that is in the list. *)
+(* [get_random_with_what possible] takes a list of possible cards and returns
+ * the a random language that is in the list. *)
 let rec get_random_with_what possible =
   let i = Random.int 6 in
   if List.mem (Language (lang_of_int i)) possible then lang_of_int i 
@@ -80,7 +80,7 @@ let rec get_random_where possible =
   if List.mem (Building (building_of_int i)) possible then building_of_int i 
   else get_random_where possible
 
-(*[replace_ai_with_new new_ai ai_list] returns an updated list of ais, replacing
+(*[replace_ai_with_new new_ai ai_list] returns an updated list of ais,replacing
 the old ai with this new one.*)
 let rec replace_ai_with_new new_ai ai_list =
   match ai_list with
@@ -166,21 +166,30 @@ let accuse (a:ai) (s:state) : bool * state =
   then
     begin
       ANSITerminal.(
-      print_string [red] ("Uh oh, the AI has won! That accusation was correct.\n");
-      print_string [red ] "You have lost this game. :(\n";
-      print_string [red ] ("CLUE will exit automatically. Feel free to play again!\n");
+      print_string [red] 
+                  ("Uh oh, the AI has won! That accusation was correct.\n");
+      print_string [red ] 
+                  ("You have lost this game. :(\n");
+      print_string [red ] 
+                  ("CLUE will exit automatically. Feel free to play again!\n");
     );
     (true, {s with game_complete=true})
     end
   else
     begin
       ANSITerminal.(
-      print_string [red] ("The AI has made the wrong accusation!\n");
-      print_string [Bold] ("This AI is now out of of the game.\n");
-      print_string [red] ("Although it can still disprove, it can no longer move or win.\n");
-      print_string [red] ("As punishment, it is forever stuck in the building it accused...\n");
+      print_string [red] 
+                   ("The AI has made the wrong accusation!\n");
+      print_string [Bold] 
+                   ("This AI is now out of of the game.\n");
+      print_string [red] 
+                   ("Although it can still disprove,"^
+                    " it can no longer move or win.\n");
+      print_string [red] 
+                  ("As punishment, it is forever stuck"^
+                    " in the building it accused...\n");
     );
-    let new_map     = teleport_professor s.map a.character where in (*Gmap*)
+    let new_map     = teleport_professor s.map a.character where in 
     let new_ai      = {a with is_in_game=false} in
     let new_ai_list = replace_ai_with_new new_ai s.ais in
     let new_pg      = (accusation, a.character, None)>::s.past_guesses in
@@ -190,7 +199,7 @@ let accuse (a:ai) (s:state) : bool * state =
 (* [accuse_or_not_middle a s] decides whether to accuse or not in the middle of
  * an AI's turn
  * AI logic:
- *   - Easy:   when the number of possible cards is down to 9, the ai just takes
+ *   - Easy:   when the number of possible cards is down to 9, the ai just take
  * a random guess and guesses the first who, what, where in the possible cards
  *   - Medium: accuses when he has narrowed the possible cards down to only 3
  *   - Hard:   updates possible cards in ai based on card_status and decides
@@ -199,9 +208,13 @@ let accuse (a:ai) (s:state) : bool * state =
 let accuse_or_not_middle (a:ai) (s:state) : state =
   match a.difficulty with
   | Easy   ->
-    if (List.length a.possible_cards)<6 then let (accused, new_s) = accuse a s in new_s
-      else s
-  | Medium -> if want_to_accuse a then let (accused, new_s) = accuse a s in new_s else s
+    if (List.length a.possible_cards)<6 then 
+      let (accused, new_s) = accuse a s in new_s
+    else s
+  | Medium -> 
+    if want_to_accuse a then 
+      let (accused, new_s) = accuse a s in new_s 
+    else s
   | Hard ->
     let new_ai = update_possible_cards a in
     let ai_list = replace_ai_with_new new_ai s.ais in
@@ -262,8 +275,9 @@ and disprove_case (p:prof) (ncurrent:int) (n:int) (guess:case_file) (s:state)
       match user_disprove s guess s.ais with
       | Some card ->
           begin
-          Printf.printf "You revealed the card %s to disprove the suggestion.\n"
-                        (string_of_card card);
+          Printf.printf 
+            "You revealed the card %s to disprove the suggestion.\n"
+            (string_of_card card);
           Some (p, card)
           end
       | None -> disprove_loop ncurrent (n+1) guess s
@@ -346,7 +360,7 @@ let suggest (a:ai) (s:state) : state =
   | None -> failwith "This should not happen in suggest in ai.ml"
 
 (* [top_three lst] returns a random value from the first three elements of the
- * list. If the list is only one element long, then that element is returned. If
+ * list. If the list is only one element long, then that element is returned.If
  * it is two elements long, then an element is randomly selected.
  * Requires: lst is non-empty. *)
 let top_three (lst:'a list) : 'a =
@@ -400,9 +414,9 @@ let rec move_where_medium_helper (lst:building list)
 let move_where_medium (a:ai) (bop:building option) (s:state) : building =
   move_where_medium_helper (card_lst_to_building_lst a.possible_cards) a bop s
 
-(*[move_where_hard_helper possible close a bop s] returns a building. It decides
- * on what to return by checking for the closest building to the ai which is also
- * in the a.possible_cards. *)
+(*[move_where_hard_helper possible close a bop s] returns a building. 
+ * It decides on what to return by checking for the closest building to the ai 
+ * which is also in the a.possible_cards. *)
 let rec move_where_hard_helper (possible:building list)
                                (close:building list)
                                (a:ai) (bop:building option) (s:state)
@@ -459,7 +473,7 @@ let move (a:ai) (n:int) (bop:building option) (s:state) : state =
       else
         {s with map = new_map}
 
-(* [get_exit a b s] is the id of an exit to building [b] selected by ai [a]. *)
+(* [get_exit a b s] is the id of an exit to building [b] selected by ai [a].*)
 let rec get_exit (a:ai) (b:building) (s:state) : int =
   let exits = List.assoc b s.map.exits in
   let id =
@@ -514,7 +528,7 @@ let suggest_or_secret (a:ai) (b:building) (s:state) : state =
       | 1 -> use_secret a s
       | _ -> failwith "will never be called"
       end
-  | Hard   -> (*uses the secret passage when the target building is in possible*)
+  | Hard   -> 
       if want_to_secret a b then use_secret a s
       else suggest a s
 
@@ -576,10 +590,11 @@ let secret_or_roll_or_suggest (a:ai) (b:building) (s:state) : state =
               else suggest a s
 
 (*[in_building_involuntarily a b s] returns a state after determining what
- * action the ai should proceed with given that it was moved there involuntarily.
+ * action the ai should proceed with given that it was moved there 
+ * involuntarily.
  * The ai decides this based on whether or not the building that the ai is in
- * currently has a secret passage and whether or not the building that the ai is
- * in right now is blocked. *)
+ * currently has a secret passage and whether or not the building that the ai 
+ * is in right now is blocked. *)
 let in_building_involuntarily (a:ai) (b:building) (s:state) : state =
   let secret = has_secret_passage s.map b in
   let blocked = is_building_blocked s.map b in
@@ -600,8 +615,8 @@ let in_building_involuntarily (a:ai) (b:building) (s:state) : state =
 (*[in_building_voluntarily a b s] returns a state after determining what
  * action the ai should proceed with given that it moved there voluntarily.
  * The ai decides this based on whether or not the building that the ai is in
- * currently has a secret passage and whether or not the building that the ai is
- * in right now is blocked. *)
+ * currently has a secret passage and whether or not the building that the ai 
+ * is in right now is blocked. *)
 let in_building_voluntarily (a:ai) (b:building) (s:state) : state =
   let secret = has_secret_passage s.map b in (* Gmap *)
   let blocked = is_building_blocked s.map b in (* Gmap *)
