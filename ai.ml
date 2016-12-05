@@ -283,13 +283,14 @@ and disprove_case (p:prof) (ncurrent:int) (n:int) (guess:case_file) (s:state)
   | `No ->
       disprove_loop ncurrent (n+1) guess s
 
-(* [suggest s] allows ai [a] to make a suggestion and calls [User.disprove] and
- * [Ai.disprove] until [a] is disproved or not disproved in
- * the end. Calls [teleport_professor] to move the suggested prof's
- * corresponding ai player to the suggested building and change
+(* [suggest_helper a s] allows ai [a] to make a suggestion and calls 
+ * [User.disprove] and [Ai.disprove] until [a] is disproved or not disproved
+ * in the end. Calls [teleport_professor] to move the suggested prof's 
+ * corresponding ai player to the suggested building and change 
  * that ai's [was_moved] field to true.
- * Requires: ai [a] is currently in a building. *)
-let suggest (a:ai) (s:state) : state =
+ * Requires: ai [a] is currently in a building.
+ * Side effects: updates [card_status] of [a]. *)
+let suggest_helper (a:ai) (s:state) : state =
   print_info 
     ("Prof. "^a.character^" is making a suggestion about the current building.")
     true;
@@ -306,7 +307,7 @@ let suggest (a:ai) (s:state) : state =
            get_random_with_what a.possible_cards)
       | Hard ->
           begin
-          match Random.int 10 with
+          match Random.int 10 with 
           | i when i < 9 ->
               (get_random_who a.possible_cards,
                get_random_with_what a.possible_cards)
@@ -359,6 +360,19 @@ let suggest (a:ai) (s:state) : state =
         accuse_or_not_middle a news''
     end
   | None -> failwith "This should not happen in suggest in ai.ml"
+
+(* [suggest a s] is the updated state after ai [a] finishes its turn 
+ * suggesting. This updates [possible_cards] by calling [update_possible_cards] 
+ * for the hard ai and calls [suggest_helper] to finish the turn. *)
+let suggest (a:ai) (s:state) : state =
+  match a.difficulty with
+  | Easy | Medium -> 
+      suggest_helper a s
+  | Hard ->
+      let new_ai = update_possible_cards a in
+      let ai_list = replace_ai_with_new new_ai s.ais in
+      let new_s = {s with ais = ai_list} in
+      suggest_helper new_ai new_s
 
 (* [top_three lst] returns a random value from the first three elements of the
  * list. If the list is only one element long, then that element is returned.If
