@@ -15,13 +15,13 @@ let rec get_who () : string =
       get_who ()
     end
   else
-    match str'.[0] with
-    | 'b' -> "Bracy"
-    | 'c' -> "Clarkson"
-    | 'f' -> "Fan"
-    | 'g' -> "Gries"
-    | 'h' -> "Halpern"
-    | 'w' -> "White"
+    match str' with
+    | "bracy"    -> "Bracy"
+    | "clarkson" -> "Clarkson"
+    | "fan"      -> "Fan"
+    | "gries"    -> "Gries"
+    | "halpern"  -> "Halpern"
+    | "white"    -> "White"
     | _   ->
       print_insn "Invalid input; please try again." true;
       get_who ()
@@ -39,16 +39,16 @@ let rec get_where () : string =
       get_where ()
     end
   else
-    match str'.[0] with
-    | 'b' -> "Baker"
-    | 'c' -> "Carpenter"
-    | 'd' -> "Duffield"
-    | 'g' -> "Gates"
-    | 'k' -> "Klarman"
-    | 'o' -> "Olin"
-    | 'p' -> "Phillips"
-    | 'r' -> "Rhodes"
-    | 's' -> "Statler"
+    match str' with
+    | "bakr" | "baker"     -> "Baker"
+    | "carp" | "carpenter" -> "Carpenter"
+    | "duff" | "duffield"  -> "Duffield"
+    | "gate" | "gates"     -> "Gates"
+    | "klrn" | "klarman"   -> "Klarman"
+    | "olin"               -> "Olin"
+    | "phil" | "phillips"  -> "Phillips"
+    | "rhod" | "rhodes"    -> "Rhodes"
+    | "stat" | "statler"   -> "Statler"
     | _   ->
       print_insn "Invalid input; please try again." true;
       get_where ()
@@ -66,13 +66,13 @@ let rec get_with_what () : string =
       get_with_what ()
     end
   else
-    match str'.[0] with
-    | 'b' -> "Bash"
-    | 'c' -> "C"
-    | 'j' -> "Java"
-    | 'm' -> "MATLAB"
-    | 'o' -> "OCaml"
-    | 'p' -> "Python"
+    match str' with
+    | "bash"   -> "Bash"
+    | "c"      -> "C"
+    | "java"   -> "Java"
+    | "matlab" -> "MATLAB"
+    | "ocaml"  -> "OCaml"
+    | "python" -> "Python"
     | _   ->
       print_insn "Invalid input; please try again." true;
       get_with_what ()
