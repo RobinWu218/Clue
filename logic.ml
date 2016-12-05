@@ -113,7 +113,8 @@ let rec get_choice_num_ai () : int =
     | '3' -> 3
     | '4' -> 4
     | '5' -> 5
-    | _   -> print_insn "Please type an integer between 2 and 5 inclusive!" true;
+    | _   -> print_insn 
+             "Please type an integer between 2 and 5 inclusive!" true;
              get_choice_num_ai ()
 
 (* [user_choose_from_two c1 c2] is [Some c1] or [Some c2] as determined by
