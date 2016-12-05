@@ -45,10 +45,10 @@ let () =
     false;
   (* allow players to read the information *)
   wait_for_user ();
-  print_info
+  print_insn
     "Please enter the number of AI bots you want to play against (2-5)." true;
   let num_AI = get_choice_num_ai () in
-  print_info 
+  print_insn 
     "Please enter the level of difficulty (1 easy, 2 medium, 3 hard)." true;
   let dlevel = get_choice_three () in
     Game.main num_AI dlevel

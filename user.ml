@@ -6,7 +6,7 @@ open Logic
  * or accuse and returns the corresponding string. *)
 let rec get_who () : string =
   print_insn "Who did it? [Bracy/Clarkson/Fan/Gries/Halpern/White]" true;
-  let str = print "> " false; read_line () in
+  let str = print_string "> "; read_line () in
   let str' = String.(str |> trim |> lowercase_ascii) in
   if String.length str' = 0
   then
@@ -31,7 +31,7 @@ let rec get_who () : string =
 let rec get_where () : string =
   print_insn ("Where? [Baker/Carpenter/Duffield/Gates/Klarman/Olin/"^
              "Phillips/Rhodes/Statler]") true;
-  let str = print  "> " false; read_line () in
+  let str = print_string "> "; read_line () in
   let str' = String.(str |> trim |> lowercase_ascii) in
   if String.length str' = 0 then
     begin
@@ -57,7 +57,7 @@ let rec get_where () : string =
  * or accuse and returns the corresponding string. *)
 let rec get_with_what () : string =
   print_insn "With what language? [Bash/C/Java/MATLAB/OCaml/Python]" true;
-  let str = print  "> " false; read_line () in
+  let str = print_string "> "; read_line () in
   let str' = String.(str |> trim |> lowercase_ascii) in
   if String.length str' = 0
   then
@@ -130,7 +130,7 @@ print_important
  * not, and if so, updates the current state [s] by calling [accuse s]. *)
 let rec accuse_or_not (s:state) : state =
   print_insn "Do you want to accuse? [y/n]" true;
-  let str = print  "> " false ; read_line () in
+  let str = print_string "> "; read_line () in
   match String.(str |> trim |> lowercase_ascii) with
   | "y" -> accuse s
   | "n" -> s
@@ -239,7 +239,7 @@ let rec get_movement (n:int) : string * int =
     "Enter commands for one direction at a time. "^
     "e.g: up 2, right 4, etc.")
     true;
-  let str = print "> " false; read_line () |> String.lowercase_ascii in
+  let str = print_string "> "; read_line () |> String.lowercase_ascii in
   let lst = Str.(str |> split (regexp "[ ]+")) in
   match lst with
   | dir::xstr::[] ->

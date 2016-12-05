@@ -41,7 +41,7 @@ let roll_two_dice () : int =
 (* [get_choice_two ()] is [1] if the user selects the first choice and [2] if
  * the user selects the second choice. *)
 let rec get_choice_two () : int =
-  let str = print  "> " false; read_line () in
+  let str = print_string "> "; read_line () in
   let str' = String.(str |> trim) in
   if String.length str' = 0
   then
@@ -60,7 +60,7 @@ let rec get_choice_two () : int =
 (* [get_choice_three ()] is [1] if the user selects the first choice, [2] if
  * the user selects the second choice, and [3] if the third. *)
 let rec get_choice_three () : int =
-  let str = print  "> " false; read_line () in
+  let str = print_string "> "; read_line () in
   let str' = String.(str |> trim) in
   if String.length str' = 0
   then
@@ -79,7 +79,7 @@ let rec get_choice_three () : int =
 (* [get_choice_four ()] is [1] if the user selects the first choice, [2] if
  * the second, [3] if the third, and [4] if the fourth. *)
 let rec get_choice_four () : int =
-  let str = print  "> " false; read_line () in
+  let str = print_string "> "; read_line () in
   let str' = String.(str |> trim) in
   if String.length str' = 0
   then
@@ -99,7 +99,7 @@ let rec get_choice_four () : int =
 (* [get_choice_num_ai ()] is [2] up till [5] if the user chooses to play with
  * [2] to [5] AI's. *)
 let rec get_choice_num_ai () : int =
-  let str = print  "> " false; read_line () in
+  let str = print_string "> "; read_line () in
   let str' = String.(str |> trim) in
   if String.length str' = 0
   then
