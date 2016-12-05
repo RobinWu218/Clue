@@ -87,14 +87,16 @@ let rec character_to_ai prof ai_list =
 let updated_state_map state new_map : state =
   let s ={state with map = new_map} in s
 
-(*[helper_update_prof poss c] returns the card list of possible cards *)
+(*[helper_update_prof poss c] returns the card list of possible cards with all
+professors except c removed. *)
 let rec helper_update_prof poss c=
       match poss with
       |[]   -> [c]
       |h::t -> if int_of_card h > 5 then h::helper_update_prof t c
                else helper_update_prof t c
 
-(*if c is a building*)
+(*[helper_update_building poss c] returns the card list of possible cards with all
+buildings except c removed. *)
 let rec helper_update_building poss c=
       match poss with
       |[]   -> [c]
@@ -102,7 +104,8 @@ let rec helper_update_building poss c=
                     h::helper_update_building t c
                else helper_update_building t c
 
-(*if c is a language*)
+(*[helper_update_lang poss c] returns the card list of possible cards with all
+languages except c removed. *)
 let rec helper_update_lang poss c=
       match poss with
       |[]   -> [c]
@@ -190,7 +193,8 @@ let update_pc_helper x y a : ai =
   update_pc_helper_yes x y a pc_ref;
   {a with possible_cards = !pc_ref}
 
-(* TODO checks if any card can be removed from possible_cards or determined
+(* [update_possible_cards a] returns the updated ai that
+ * checks if any card can be removed from possible_cards or determined
  * to be in the case file and thus known. *)
 let update_possible_cards (a:ai) : ai =
   a |> update_pc_helper 0 5
@@ -617,7 +621,7 @@ let in_building_involuntarily (a:ai) (b:building) (s:state) : state =
     begin
     match secret, blocked with
     | true,  true  ->
-        suggest_or_secret a b s
+        suggest_or_secret a b s (*TODO add print statements*)
     | true,  false ->
         secret_or_roll_or_suggest a b s
     | false, true  ->
@@ -627,11 +631,7 @@ let in_building_involuntarily (a:ai) (b:building) (s:state) : state =
     end
   in assign_was_moved news a.character false
 
-(*[in_building_voluntarily a b s] returns a state after determining what
- * action the ai should proceed with given that it was moved there voluntarily.
- * The ai decides this based on whether or not the building that the ai is in
- * currently has a secret passage and whether or not the building that the ai is
- * in right now is blocked. *) (*TODO please improve*)
+(*[in_building_voluntarily a b s] *) (*TODO please improve*)
 let in_building_voluntarily (a:ai) (b:building) (s:state) : state =
   let secret = has_secret_passage s.map b in (* Gmap *)
   let blocked = is_building_blocked s.map b in (* Gmap *)
