@@ -188,6 +188,12 @@ let difficulty_of_int (n:int) : difficulty =
   | 3 -> Hard
   | _ -> failwith "This should not happen in difficulty_of_int"
 
+let int_of_difficulty d =
+  match d with
+  | Easy -> 1
+  | Medium -> 2
+  | Hard -> 3
+
 (* [prof_of_int i] is the prof corresponding to an integer from 0 to 5. *)
 let prof_of_int (i:int) : prof =
   match i with

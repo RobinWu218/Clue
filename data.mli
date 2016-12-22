@@ -133,6 +133,9 @@ val int_option_of_string : string -> int option
  * Requires: n is 1 or 2 or 3 *)
 val difficulty_of_int : int -> difficulty
 
+(* Requires: d is difficulty *)
+val int_of_difficulty : difficulty -> int
+
 (* [prof_of_int i] is the prof corresponding to an integer from 0 to 5. *)
 val prof_of_int : int -> prof
 
