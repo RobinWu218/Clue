@@ -1,5 +1,7 @@
+
 open Data
 open Gmap
+open Utils
 
 (******************************)
 (* init_state and its helpers *)
@@ -16,9 +18,9 @@ let generate_case_file () : case_file =
 (* [select_non_repeat_lst] is an int list generated randomly given the size
  * and bound and the exclueded elements*)
 let select_non_repeat_lst excluded_lst lst size bound =
-  while (List.length !lst < size) do (
+  while (length !lst < size) do (
       let r =  Random.int bound in
-      if (List.mem r !lst) || (List.mem r excluded_lst) then
+      if (mem r !lst) || (mem r excluded_lst) then
         lst:= !lst
       else
         lst:= (r::!lst)
@@ -82,10 +84,10 @@ let deal_card fact_card n =
  *           [character_lst] is a string list.*)
 let init_ai_lst n d hand_lst ai_character_lst character_lst =
   let ai_lst = ref [] in
-  while (List.length !ai_lst < n) do (
-    let nth = List.length !ai_lst in
-    let character = List.nth ai_character_lst nth in
-    let hand = List.nth hand_lst nth in
+  while (length !ai_lst < n) do (
+    let nth' = length !ai_lst in
+    let character = nth ai_character_lst nth' in
+    let hand = nth hand_lst nth' in
     let ai = Ai.init character hand d character_lst in
     ai_lst := (!ai_lst) @ [ai]
   ) done;
@@ -101,7 +103,7 @@ let rec generate_dictionary prof_lst user_char ai_lst =
   | h::t ->
     if (h = user_char) then
       (h, `User) :: generate_dictionary t user_char ai_lst
-    else if (List.mem h ai_lst) then
+    else if (mem h ai_lst) then
       (h, `AI) :: generate_dictionary t user_char ai_lst
     else
       (h, `No) :: generate_dictionary t user_char ai_lst
@@ -120,10 +122,10 @@ let init_state (n:int) (d:difficulty) : state =
                       Language fact_file.with_what] in
     let character_lst   = assign_characters [] (n+1) in
     let dealt_cards_lst = deal_card fact_cards n in
-    let user_hand   = List.hd dealt_cards_lst in
-    let ai_hand_lst = List.tl dealt_cards_lst in
-    let user_character    = List.hd character_lst in
-    let ai_characters_lst = List.tl character_lst in
+    let user_hand   = hd dealt_cards_lst in
+    let ai_hand_lst = tl dealt_cards_lst in
+    let user_character    = hd character_lst in
+    let ai_characters_lst = tl character_lst in
     let ai_lst = init_ai_lst n d ai_hand_lst ai_characters_lst character_lst in
     let map    = construct_map () in
     let dictionary = generate_dictionary
@@ -226,9 +228,9 @@ let rec step (s:state) : state =
 (* [step_helper p s] is the updated state after the player whose character is
  * prof [p] plays his/her turn. *)
 and step_helper (p:prof) (s:state) : state =
-  match List.assoc p s.dictionary with
+  match assoc p s.dictionary with
   | `AI ->
-      let ai = List.find (fun a -> a.character = p) s.ais in
+      let ai = find (fun a -> a.character = p) s.ais in
       let news =
         if ai.is_in_game
         then
