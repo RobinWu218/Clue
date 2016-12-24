@@ -1,4 +1,4 @@
-
+open Core.Std
 open Data
 open Gmap
 open Utils
@@ -6,6 +6,91 @@ open Utils
 (******************************)
 (* init_state and its helpers *)
 (******************************)
+
+(* s_ai is a S-expression type descrbing ai for save *)
+type s_ai = {
+  s_character:      string;
+  hand:           int list;
+  was_moved:      bool;
+  is_in_game:     bool;
+  possible_cards: int list;
+  card_status:    (string * ([`Y |`N |`Maybe |`Blank] array)) list;
+}
+[@@deriving sexp]
+
+(*[convert_ai_lst_to_sai_lst] converts ai lists to s_ai lists.*)
+let rec convert_ai_lst_to_sai_lst (ai_lst:ai list) = 
+  match ai_lst with 
+  | [] -> []
+  | a::t -> {s_character = a.character; hand = card_lst_to_int_lst a.hand; was_moved = a.was_moved; 
+             is_in_game = a.is_in_game; possible_cards = card_lst_to_int_lst a.possible_cards;
+              card_status = a.card_status} :: (convert_ai_lst_to_sai_lst t)
+
+(*[convert_sai_lst_to_ai_lst] converts s_ai lists to ai lists. *)
+let rec convert_sai_lst_to_ai_lst (sai_lst: s_ai list) (d:difficulty)= 
+  match sai_lst with 
+  | [] -> []
+  | a::t -> {character = a.s_character; 
+             hand = int_lst_to_card_lst a.hand;
+             difficulty = d;
+             was_moved = a.was_moved;
+             is_in_game = a.is_in_game;
+             possible_cards = int_lst_to_card_lst a.possible_cards;
+             card_status = a.card_status
+            } :: (convert_sai_lst_to_ai_lst t d)
+
+(*save is a type for the saved state*)
+type save = {
+  who: string;
+  where : string;
+  with_what: string;
+  counter: int;
+  user_char: string;
+  user_hand: int list;
+  user_was_moved: bool;
+  ais: s_ai list;
+  game_complete: bool;
+  map_values: string option array array;
+  in_building:   (string * string)list;
+  location: (string * (int*int)) list;
+  difficulty: int;
+}
+[@@deriving sexp]
+
+(*[filename_concat] concats filenames given a list of folder names*)
+let filename_concat = function
+  | [] -> ""
+  | [f] -> f
+  | f :: fs -> List.fold fs ~init:f ~f:Filename.concat
+
+(* [save] saves the current state in the saves folder.*)
+let save state = 
+  let fact = state.fact_file in 
+  let map = state.map in 
+  let map_values = map.map_values in
+  let in_building = map.in_building in 
+  let location = map.location in 
+  let user_hand = card_lst_to_int_lst state.user.hand in 
+  let ais = convert_ai_lst_to_sai_lst state.ais in 
+  let difficulty = int_of_difficulty (hd state.ais).difficulty in
+  let new_save = 
+  {
+    who = fact.who;
+    where = fact.where;
+    with_what = fact.with_what;
+    counter = state.counter;
+    user_char = state.user.character;
+    user_hand = user_hand;
+    user_was_moved = state.user.was_moved;
+    ais = ais;
+    game_complete = state.game_complete;
+    map_values = map_values;
+    in_building = in_building;
+    location = location;
+    difficulty = difficulty
+  } in 
+  let filename = filename_concat ["saves"; "continue.save"] in 
+  Sexp.save_hum filename (sexp_of_save new_save)
 
 (* [generate_case_file ()] is the case file containing the answers to the
  * questions: Who? Where? What language? *)
@@ -257,6 +342,7 @@ and step_helper (p:prof) (s:state) : state =
         print_important
           ("----------------:: Prof. "^p^"'s (You!) turn ::---------------")
           true;
+        save s;
         print_map s.map;
         User.step s in
       step {news with counter = news.counter + 1}

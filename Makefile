@@ -1,5 +1,5 @@
 play:
-	ocamlbuild -pkgs yojson,ANSITerminal,str main.byte && ./main.byte
+	ocamlbuild -use-ocamlfind -pkg core,yojson,ANSITerminal,str,ppx_sexp_conv main.byte && ./main.byte
 
 clean:
 	ocamlbuild -clean
