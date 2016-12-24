@@ -11,6 +11,9 @@ Run: make play
 For best results, run the command when the terminal window is not full screen.
 That way ANSITerminal is able to resize the terminal for the best size.
 
+Note: For dependencies issue in core library, run
+export OCAMLFIND_IGNORE_DUPS_IN = ******Directory_of_your_compiler_libs******
+A typical directory looks like: Users/robin_wu/.opam/4.03.0/lib/ocaml/compiler-libs
 
 To Clean the Directory
 Run: make clean
